@@ -256,6 +256,14 @@ html[dir="ltr"] .prayer-card {
     color: var(--green-800);
 }
 
+.prayer-method-info {
+    padding: 6px 20px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    border-top: 1px solid var(--gray-100);
+}
+
 .prayer-settings-toggle {
     padding: 0 20px 10px;
     text-align: center;

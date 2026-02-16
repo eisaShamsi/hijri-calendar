@@ -579,12 +579,22 @@ const App = (() => {
             document.getElementById('prayer-no-location').style.display = 'flex';
             document.getElementById('prayer-grid').style.display = 'none';
             document.getElementById('prayer-countdown').style.display = 'none';
+            document.getElementById('prayer-method-info').style.display = 'none';
             return;
         }
 
         document.getElementById('prayer-no-location').style.display = 'none';
         document.getElementById('prayer-grid').style.display = 'grid';
         document.getElementById('prayer-countdown').style.display = 'block';
+
+        // Show current method name
+        const methodInfo = document.getElementById('prayer-method-info');
+        const method = PT.METHODS[s.method];
+        if (method) {
+            const lang = H.getLang();
+            document.getElementById('prayer-method-name').textContent = lang === 'en' ? method.nameEn : method.nameAr;
+            methodInfo.style.display = 'block';
+        }
 
         // Check if Ramadan
         const todayH = H.todayHijri();
