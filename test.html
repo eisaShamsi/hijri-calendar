@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hijri Calendar — Verification Tests</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #111; color: #eee; }
+        .pass { color: #4ade80; }
+        .fail { color: #f87171; font-weight: bold; }
+        h2 { color: #fbbf24; margin-top: 24px; }
+        pre { margin: 2px 0; }
+    </style>
+</head>
+<body>
+<h1>Hijri Calendar — Verification Tests</h1>
+<div id="output"></div>
+
+<script src="hijri.js"></script>
+<script>
+const H = HijriCalendar;
+const out = document.getElementById('output');
+let passed = 0, failed = 0;
+
+function log(msg, isPass) {
+    const el = document.createElement('pre');
+    el.className = isPass ? 'pass' : (isPass === false ? 'fail' : '');
+    el.textContent = msg;
+    out.appendChild(el);
+}
+
+function header(title) {
+    const h = document.createElement('h2');
+    h.textContent = title;
+    out.appendChild(h);
+}
+
+function assert(condition, description) {
+    if (condition) {
+        log(`  ✓ ${description}`, true);
+        passed++;
+    } else {
+        log(`  ✗ ${description}`, false);
+        failed++;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 1. Leap Year Tests
+// ═══════════════════════════════════════════════════════════
+header('1. Leap Year Pattern (15-based)');
+const expectedLeap = [2, 5, 7, 10, 13, 15, 18, 21, 24, 26, 29];
+for (let i = 1; i <= 30; i++) {
+    const shouldBeLeap = expectedLeap.includes(i);
+    assert(H.isLeapYear(i) === shouldBeLeap,
+        `Year ${i} in cycle: ${shouldBeLeap ? 'LEAP' : 'normal'} → isLeapYear=${H.isLeapYear(i)}`);
+}
+
+// Verify the same pattern repeats for actual years
+header('1b. Leap Year for actual Hijri years');
+assert(H.isLeapYear(1447) === expectedLeap.includes(1447 % 30 || 30),
+    `Year 1447: ${H.isLeapYear(1447) ? 'LEAP' : 'normal'} (1447 mod 30 = ${1447 % 30})`);
+
+// ═══════════════════════════════════════════════════════════
+// 2. Days in Month
+// ═══════════════════════════════════════════════════════════
+header('2. Days in Month');
+assert(H.daysInMonth(1447, 1) === 30, 'Muharram = 30 days');
+assert(H.daysInMonth(1447, 2) === 29, 'Safar = 29 days');
+assert(H.daysInMonth(1447, 9) === 30, 'Ramadan = 30 days');
+assert(H.daysInMonth(1447, 10) === 29, 'Shawwal = 29 days');
+// Year 1447 mod 30 = 17, check if leap
+const is1447Leap = H.isLeapYear(1447);
+assert(H.daysInMonth(1447, 12) === (is1447Leap ? 30 : 29),
+    `Dhul-Hijjah 1447 = ${H.daysInMonth(1447, 12)} days (${is1447Leap ? 'leap' : 'normal'})`);
+
+// Year 2 is leap → Dhul-Hijjah should be 30
+assert(H.daysInMonth(2, 12) === 30, 'Dhul-Hijjah year 2 (leap) = 30 days');
+assert(H.daysInMonth(1, 12) === 29, 'Dhul-Hijjah year 1 (normal) = 29 days');
+
+// ═══════════════════════════════════════════════════════════
+// 3. Days in Year
+// ═══════════════════════════════════════════════════════════
+header('3. Days in Year');
+assert(H.daysInYear(1) === 354, 'Year 1 = 354 days');
+assert(H.daysInYear(2) === 355, 'Year 2 = 355 days (leap)');
+assert(H.daysInYear(3) === 354, 'Year 3 = 354 days');
+
+// 30-year cycle total
+let totalIn30 = 0;
+for (let i = 1; i <= 30; i++) totalIn30 += H.daysInYear(i);
+assert(totalIn30 === 10631, `30-year cycle total = ${totalIn30} (expected 10631)`);
+
+// ═══════════════════════════════════════════════════════════
+// 4. Epoch Verification
+// ═══════════════════════════════════════════════════════════
+header('4. Epoch (1 Muharram 1 AH)');
+const epochJDN = H.hijriToJDN(1, 1, 1);
+assert(epochJDN === 1948440, `1 Muharram 1 AH → JDN ${epochJDN} (expected 1948440)`);
+
+// Verify epoch corresponds to July 16, 622 CE Julian
+// In Gregorian (proleptic): July 19, 622 CE
+const epochGreg = H.jdnToGregorian(epochJDN);
+log(`  Epoch in Gregorian: ${epochGreg.year}-${epochGreg.month}-${epochGreg.day}`);
+assert(epochGreg.year === 622 && epochGreg.month === 7 && epochGreg.day === 19,
+    `Epoch = July 19, 622 CE (proleptic Gregorian)`);
+
+// Day of week: should be Friday
+const epochDOW = H.dayOfWeek(epochJDN);
+assert(epochDOW === 6, `Epoch day of week = ${H.DAY_NAMES[epochDOW]} (expected الجمعة/Friday, index 6)`);
+
+// ═══════════════════════════════════════════════════════════
+// 5. Known Dates from the Book
+// ═══════════════════════════════════════════════════════════
+header('5. Known Dates from التوفيقات الإلهامية');
+
+// 1 Ramadan 1446 = March 1, 2025
+const ram1446 = H.hijriToGregorian(1446, 9, 1);
+assert(ram1446.year === 2025 && ram1446.month === 3 && ram1446.day === 1,
+    `1 Ramadan 1446 → ${ram1446.year}-${ram1446.month}-${ram1446.day} (expected 2025-3-1)`);
+
+// 1 Ramadan 1447 = February 18, 2026 (Wednesday)
+const ram1447 = H.hijriToGregorian(1447, 9, 1);
+const ram1447JDN = H.hijriToJDN(1447, 9, 1);
+const ram1447DOW = H.dayOfWeek(ram1447JDN);
+assert(ram1447.year === 2026 && ram1447.month === 2 && ram1447.day === 18,
+    `1 Ramadan 1447 → ${ram1447.year}-${ram1447.month}-${ram1447.day} (expected 2026-2-18)`);
+assert(ram1447DOW === 4,
+    `1 Ramadan 1447 day = ${H.DAY_NAMES[ram1447DOW]} (expected الأربعاء/Wednesday, index 4)`);
+
+// 1 Shawwal 1447 = March 20, 2026 (Friday)
+const shaw1447 = H.hijriToGregorian(1447, 10, 1);
+const shaw1447JDN = H.hijriToJDN(1447, 10, 1);
+const shaw1447DOW = H.dayOfWeek(shaw1447JDN);
+assert(shaw1447.year === 2026 && shaw1447.month === 3 && shaw1447.day === 20,
+    `1 Shawwal 1447 → ${shaw1447.year}-${shaw1447.month}-${shaw1447.day} (expected 2026-3-20)`);
+assert(shaw1447DOW === 6,
+    `1 Shawwal 1447 day = ${H.DAY_NAMES[shaw1447DOW]} (expected الجمعة/Friday, index 6)`);
+
+// ═══════════════════════════════════════════════════════════
+// 6. Roundtrip Conversions
+// ═══════════════════════════════════════════════════════════
+header('6. Roundtrip Conversions (Hijri → JDN → Hijri)');
+
+const testDates = [
+    [1, 1, 1], [1, 6, 15], [1, 12, 29],
+    [2, 12, 30], // leap year
+    [100, 1, 1], [500, 6, 15], [1000, 12, 29],
+    [1400, 1, 1], [1446, 9, 1], [1447, 10, 1], [1500, 12, 29]
+];
+
+testDates.forEach(([y, m, d]) => {
+    const jdn = H.hijriToJDN(y, m, d);
+    const back = H.jdnToHijri(jdn);
+    assert(back.year === y && back.month === m && back.day === d,
+        `Roundtrip ${y}-${m}-${d} → JDN ${jdn} → ${back.year}-${back.month}-${back.day}`);
+});
+
+header('6b. Roundtrip (Gregorian → Hijri → Gregorian)');
+const gregDates = [
+    [2025, 3, 1], [2026, 2, 18], [2026, 3, 20],
+    [2000, 1, 1], [1990, 6, 15], [622, 7, 19]
+];
+
+gregDates.forEach(([y, m, d]) => {
+    const hijri = H.gregorianToHijri(y, m, d);
+    const back = H.hijriToGregorian(hijri.year, hijri.month, hijri.day);
+    assert(back.year === y && back.month === m && back.day === d,
+        `Roundtrip ${y}-${m}-${d} → H:${hijri.year}-${hijri.month}-${hijri.day} → ${back.year}-${back.month}-${back.day}`);
+});
+
+// ═══════════════════════════════════════════════════════════
+// 7. Today's Date
+// ═══════════════════════════════════════════════════════════
+header('7. Today\'s Date');
+const today = H.todayHijri();
+const todayGreg = new Date();
+log(`  Today (Gregorian): ${todayGreg.getFullYear()}-${todayGreg.getMonth()+1}-${todayGreg.getDate()}`);
+log(`  Today (Hijri): ${today.year}-${today.month}-${today.day}`);
+log(`  Month: ${H.MONTH_NAMES[today.month-1]}`);
+
+// ═══════════════════════════════════════════════════════════
+// Summary
+// ═══════════════════════════════════════════════════════════
+header('Summary');
+log(`  Total: ${passed + failed} tests — ${passed} passed, ${failed} failed`);
+if (failed === 0) {
+    log('  ALL TESTS PASSED ✓', true);
+} else {
+    log(`  ${failed} TESTS FAILED ✗`, false);
+}
+</script>
+</body>
+</html>

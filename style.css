@@ -1,0 +1,873 @@
+/* ═══════════════════════════════════════════════════════════
+   التقويم الهجري — التوفيقات الإلهامية
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap');
+
+/* ─── المتغيرات ──────────────────────────────────────────── */
+:root {
+    --green-900: #0d3b2e;
+    --green-800: #14553f;
+    --green-700: #1a6b4f;
+    --green-600: #1f8060;
+    --green-500: #27a678;
+    --green-400: #4cc494;
+    --green-100: #d4f0e3;
+    --green-50:  #eef9f3;
+
+    --gold-600: #b8860b;
+    --gold-500: #d4a017;
+    --gold-400: #e6b830;
+    --gold-300: #f0cd5e;
+    --gold-200: #f5dfa0;
+    --gold-100: #fdf3d7;
+
+    --cream:     #fefcf5;
+    --white:     #ffffff;
+    --gray-50:   #f9fafb;
+    --gray-100:  #f3f4f6;
+    --gray-200:  #e5e7eb;
+    --gray-300:  #d1d5db;
+    --gray-400:  #9ca3af;
+    --gray-500:  #6b7280;
+    --gray-600:  #4b5563;
+    --gray-700:  #374151;
+    --gray-800:  #1f2937;
+    --gray-900:  #111827;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    --font-arabic: 'Cairo', 'Amiri', 'Segoe UI', Tahoma, sans-serif;
+    --font-display: 'Amiri', 'Cairo', serif;
+}
+
+/* ─── الأساس ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-arabic);
+    background: var(--cream);
+    color: var(--gray-800);
+    direction: rtl;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* ─── زخرفة الخلفية ──────────────────────────────────────── */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 320px;
+    background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 100%);
+    z-index: -1;
+}
+
+/* ─── الحاوية الرئيسية ───────────────────────────────────── */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+/* ─── الرأس ──────────────────────────────────────────────── */
+.header {
+    text-align: center;
+    padding: 32px 16px 40px;
+    color: var(--white);
+}
+
+.header-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.header h1 {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ─── بطاقة اليوم ────────────────────────────────────────── */
+.today-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-right: 4px solid var(--gold-500);
+}
+
+.today-card .date-icon {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--green-700), var(--green-500));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.today-card .date-text {
+    flex: 1;
+}
+
+.today-card .date-text .hijri-date {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--green-800);
+    margin-bottom: 2px;
+}
+
+.today-card .date-text .greg-date {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+/* ─── بطاقة التقويم ──────────────────────────────────────── */
+.calendar-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+/* ─── شريط التنقل ────────────────────────────────────────── */
+.nav-bar {
+    background: linear-gradient(135deg, var(--green-800), var(--green-700));
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nav-bar .nav-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+}
+
+.nav-bar .nav-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+}
+
+.nav-bar .month-info {
+    text-align: center;
+    flex: 1;
+}
+
+.nav-bar .month-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.nav-bar .gregorian-range {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+}
+
+.leap-badge {
+    display: none;
+    background: var(--gold-500);
+    color: var(--green-900);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-xl);
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.today-nav-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    font-family: var(--font-arabic);
+    font-size: 0.78rem;
+    transition: all 0.2s;
+}
+
+.today-nav-btn:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* ─── رؤوس الأيام ───────────────────────────────────────── */
+.day-headers {
+    display: grid;
+    grid-template-columns: 42px repeat(7, 1fr);
+    background: var(--green-50);
+    border-bottom: 1px solid var(--green-100);
+}
+
+.day-header {
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--green-700);
+}
+
+.day-header.week-header {
+    font-size: 0.65rem;
+    color: var(--gray-400);
+    font-weight: 600;
+}
+
+.day-header.day-header-weekend {
+    color: var(--green-600);
+    background: rgba(39, 166, 120, 0.08);
+}
+
+/* ─── شبكة التقويم ───────────────────────────────────────── */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: 42px repeat(7, 1fr);
+    gap: 1px;
+    background: var(--gray-100);
+    padding: 1px;
+}
+
+/* ─── خلية رقم الأسبوع ─────────────────────────────────── */
+.week-number {
+    background: var(--gray-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    min-height: 62px;
+    font-family: var(--font-display);
+}
+
+.calendar-cell {
+    background: var(--white);
+    padding: 8px 6px;
+    min-height: 62px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.calendar-cell:hover {
+    background: var(--green-50);
+    z-index: 1;
+}
+
+.calendar-cell .hijri-day {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1;
+}
+
+.calendar-cell .greg-day {
+    font-size: 0.68rem;
+    color: #0e7490;
+    line-height: 1;
+}
+
+/* نهاية الأسبوع (الجمعة والسبت) */
+.calendar-cell.weekend-col {
+    background: rgba(39, 166, 120, 0.04);
+}
+
+
+/* شهر آخر */
+.calendar-cell.other-month {
+    background: var(--gray-50);
+}
+
+.calendar-cell.other-month .hijri-day {
+    color: var(--gray-300);
+}
+
+.calendar-cell.other-month .greg-day {
+    color: var(--gray-300);
+}
+
+/* اليوم الحالي */
+.calendar-cell.today {
+    background: linear-gradient(135deg, var(--green-600), var(--green-500));
+    border-radius: var(--radius-sm);
+}
+
+.calendar-cell.today .hijri-day {
+    color: var(--white);
+    font-size: 1.3rem;
+}
+
+.calendar-cell.today .greg-day {
+    color: rgba(200,240,255,0.8);
+}
+
+.calendar-cell.today:hover {
+    background: linear-gradient(135deg, var(--green-700), var(--green-600));
+}
+
+/* يوم محدد */
+.calendar-cell.selected {
+    outline: 2px solid var(--gold-500);
+    outline-offset: -2px;
+    border-radius: var(--radius-sm);
+}
+
+/* ─── شريط المعلومات ─────────────────────────────────────── */
+.info-bar {
+    padding: 12px 20px;
+    background: var(--cream);
+    border-top: 1px solid var(--gray-200);
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ─── شارة النمط ─────────────────────────────────────────── */
+.mode-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-xl);
+    flex-shrink: 0;
+}
+
+.mode-badge.mode-astro {
+    background: var(--green-100);
+    color: var(--green-700);
+}
+
+.mode-badge.mode-tab {
+    background: var(--gold-100);
+    color: var(--gold-600);
+}
+
+/* ─── شريط الأدوات ───────────────────────────────────────── */
+.toolbar-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+}
+
+.toolbar-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.tool-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.tool-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gray-500);
+}
+
+.mode-select {
+    font-family: var(--font-arabic);
+    font-size: 0.82rem;
+    padding: 7px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--gray-50);
+    color: var(--gray-800);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    direction: rtl;
+}
+
+.mode-select:focus {
+    outline: none;
+    border-color: var(--green-500);
+}
+
+/* ─── أدوات التصحيح ──────────────────────────────────────── */
+.corr-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.corr-btn {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-family: var(--font-arabic);
+}
+
+.corr-btn:hover {
+    background: var(--green-50);
+    border-color: var(--green-400);
+    color: var(--green-700);
+}
+
+.corr-reset-btn,
+.corr-clear-btn {
+    width: auto;
+    padding: 0 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.corr-clear-btn {
+    background: transparent;
+    border-color: transparent;
+    color: var(--gray-400);
+    font-size: 0.68rem;
+}
+
+.corr-clear-btn:hover {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.corr-value {
+    min-width: 32px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gray-400);
+}
+
+.corr-value.corr-active {
+    color: var(--gold-600);
+}
+
+/* ─── قائمة التصحيحات ────────────────────────────────────── */
+.corrections-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-100);
+    flex-wrap: wrap;
+}
+
+.corrections-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    flex-shrink: 0;
+}
+
+.corr-tag {
+    display: inline-block;
+    background: var(--gold-100);
+    color: var(--gold-600);
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-xl);
+    margin: 1px;
+}
+
+.corr-empty {
+    font-size: 0.7rem;
+    color: var(--gray-400);
+}
+
+/* ─── بطاقة الانتقال إلى تاريخ ─────────────────────────── */
+.goto-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.goto-header {
+    background: var(--green-50);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--green-100);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--green-800);
+}
+
+.goto-body {
+    padding: 14px 20px;
+}
+
+.goto-toggle {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.goto-radio {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    cursor: pointer;
+}
+
+.goto-radio input[type="radio"] {
+    accent-color: var(--green-600);
+}
+
+/* ─── تصدير iCal ─────────────────────────────────────────── */
+.export-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.export-range {
+    flex: 1;
+    min-width: 160px;
+}
+
+.export-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--green-700);
+    margin-bottom: 6px;
+}
+
+.export-fields {
+    display: flex;
+    gap: 8px;
+}
+
+.export-btn {
+    align-self: flex-end;
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 70px;
+}
+
+.input-group label {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+}
+
+.input-group input {
+    font-family: var(--font-arabic);
+    font-size: 0.9rem;
+    padding: 8px 10px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    transition: border-color 0.2s;
+    width: 100%;
+    direction: ltr;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--green-500);
+    background: var(--white);
+}
+
+.convert-btn {
+    background: linear-gradient(135deg, var(--green-700), var(--green-500));
+    color: var(--white);
+    border: none;
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-arabic);
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+    align-self: flex-end;
+    margin-top: 3px;
+}
+
+.convert-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 107, 79, 0.3);
+}
+
+.conversion-result {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--gold-100);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    color: var(--gray-700);
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.conversion-result:empty {
+    display: none;
+}
+
+.result-label {
+    font-weight: 700;
+    color: var(--green-700);
+    margin-left: 6px;
+}
+
+/* ─── بطاقة المعلومات ────────────────────────────────────── */
+.about-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 24px;
+    border-right: 3px solid var(--gold-500);
+}
+
+.about-card h3 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--green-800);
+    margin-bottom: 8px;
+}
+
+.about-card p {
+    font-size: 0.82rem;
+    color: var(--gray-600);
+    line-height: 1.8;
+    margin-bottom: 8px;
+}
+
+.about-card .formula {
+    display: inline-block;
+    background: var(--gray-100);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    color: var(--green-700);
+    direction: ltr;
+}
+
+/* ─── التذييل ────────────────────────────────────────────── */
+.site-footer {
+    text-align: center;
+    padding: 24px 16px 16px;
+    margin-top: 12px;
+    font-size: 0.82rem;
+    color: var(--gray-500);
+    font-weight: 600;
+    line-height: 1.8;
+}
+
+.footer-version {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--gray-400);
+}
+
+.footer-tool {
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--gray-400);
+}
+
+/* ─── دعم LTR (الإنجليزية) ────────────────────────────────── */
+html[dir="ltr"] body {
+    direction: ltr;
+}
+
+html[dir="ltr"] .today-card {
+    border-right: none;
+    border-left: 4px solid var(--gold-500);
+}
+
+html[dir="ltr"] .about-card {
+    border-right: none;
+    border-left: 3px solid var(--gold-500);
+}
+
+html[dir="ltr"] .mode-select {
+    direction: ltr;
+}
+
+html[dir="ltr"] .leap-badge {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+html[dir="ltr"] .result-label {
+    margin-left: 0;
+    margin-right: 6px;
+}
+
+/* ─── الاستجابة ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .container {
+        padding: 16px 10px 32px;
+    }
+
+    .header h1 {
+        font-size: 1.6rem;
+    }
+
+    .nav-bar .month-title {
+        font-size: 1.2rem;
+    }
+
+    .day-headers {
+        grid-template-columns: 32px repeat(7, 1fr);
+    }
+
+    .calendar-grid {
+        grid-template-columns: 32px repeat(7, 1fr);
+    }
+
+    .week-number {
+        font-size: 0.6rem;
+        min-height: 50px;
+    }
+
+    .calendar-cell {
+        min-height: 50px;
+        padding: 6px 3px;
+    }
+
+    .calendar-cell .hijri-day {
+        font-size: 1rem;
+    }
+
+    .calendar-cell .greg-day {
+        font-size: 0.6rem;
+    }
+
+    .today-card {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .today-card .date-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+
+    .input-row {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 380px) {
+    .day-headers {
+        grid-template-columns: 26px repeat(7, 1fr);
+    }
+
+    .calendar-grid {
+        grid-template-columns: 26px repeat(7, 1fr);
+    }
+
+    .day-header {
+        font-size: 0.65rem;
+        padding: 8px 2px;
+    }
+
+    .day-header.week-header {
+        font-size: 0.55rem;
+    }
+
+    .week-number {
+        font-size: 0.55rem;
+    }
+
+    .calendar-cell .hijri-day {
+        font-size: 0.9rem;
+    }
+}

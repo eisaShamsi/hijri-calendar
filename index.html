@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقويم الهجري</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ═══ الرأس ═══ -->
+    <header class="header">
+        <span class="header-icon">&#x263D;</span>
+        <h1 id="app-title">التقويم الهجري</h1>
+    </header>
+
+    <!-- ═══ بطاقة اليوم ═══ -->
+    <div class="today-card">
+        <div class="date-icon">&#x263D;</div>
+        <div class="date-text">
+            <div class="hijri-date" id="today-hijri"></div>
+            <div class="greg-date" id="today-gregorian"></div>
+        </div>
+        <span class="mode-badge mode-astro" id="mode-badge">فلكي</span>
+    </div>
+
+    <!-- ═══ شريط الأدوات ═══ -->
+    <div class="toolbar-card">
+        <div class="toolbar-row">
+            <!-- اختيار النمط -->
+            <div class="tool-group">
+                <label class="tool-label" id="lbl-mode"></label>
+                <select id="mode-select" class="mode-select">
+                    <option value="astronomical" id="opt-astro"></option>
+                    <option value="tabular" id="opt-tab"></option>
+                </select>
+            </div>
+
+            <!-- بداية الأسبوع -->
+            <div class="tool-group">
+                <label class="tool-label" id="lbl-weekstart"></label>
+                <select id="weekstart-select" class="mode-select">
+                    <option value="0" id="opt-sat"></option>
+                    <option value="1" id="opt-sun"></option>
+                    <option value="2" id="opt-mon"></option>
+                </select>
+            </div>
+
+            <!-- اللغة -->
+            <div class="tool-group">
+                <label class="tool-label" id="lbl-lang"></label>
+                <select id="lang-select" class="mode-select">
+                    <option value="ar" id="opt-lang-ar"></option>
+                    <option value="en" id="opt-lang-en"></option>
+                </select>
+            </div>
+
+            <!-- التصحيح اليدوي -->
+            <div class="tool-group">
+                <label class="tool-label" id="lbl-corr"></label>
+                <div class="corr-controls">
+                    <button class="corr-btn" id="corr-minus">−</button>
+                    <span class="corr-value" id="corr-value">٠</span>
+                    <button class="corr-btn" id="corr-plus">+</button>
+                    <button class="corr-btn corr-reset-btn" id="corr-reset"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة التصحيحات -->
+        <div class="corrections-row">
+            <span class="corrections-label" id="lbl-corrections"></span>
+            <span id="corrections-list"></span>
+            <button class="corr-btn corr-clear-btn" id="corr-clear-all"></button>
+        </div>
+    </div>
+
+    <!-- ═══ الانتقال إلى تاريخ ═══ -->
+    <div class="goto-card">
+        <div class="goto-header" id="goto-title"></div>
+        <div class="goto-body">
+            <div class="goto-toggle">
+                <label class="goto-radio">
+                    <input type="radio" name="goto-type" value="hijri" checked>
+                    <span id="goto-hijri-label"></span>
+                </label>
+                <label class="goto-radio">
+                    <input type="radio" name="goto-type" value="gregorian">
+                    <span id="goto-greg-label"></span>
+                </label>
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label id="goto-lbl-day"></label>
+                    <input type="number" id="goto-day" min="1" max="30">
+                </div>
+                <div class="input-group">
+                    <label id="goto-lbl-month"></label>
+                    <input type="number" id="goto-month" min="1" max="12">
+                </div>
+                <div class="input-group">
+                    <label id="goto-lbl-year"></label>
+                    <input type="number" id="goto-year">
+                </div>
+                <button class="convert-btn" id="goto-btn"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ بطاقة التقويم ═══ -->
+    <div class="calendar-card">
+
+        <!-- شريط التنقل -->
+        <div class="nav-bar">
+            <button class="nav-btn" id="next-month">&#x276E;</button>
+            <div class="month-info">
+                <div>
+                    <span class="month-title" id="month-title"></span>
+                    <span class="leap-badge" id="leap-badge"></span>
+                </div>
+                <div class="gregorian-range" id="gregorian-range"></div>
+            </div>
+            <button class="nav-btn" id="prev-month">&#x276F;</button>
+            <button class="today-nav-btn" id="today-btn"></button>
+        </div>
+
+        <!-- رؤوس الأيام -->
+        <div class="day-headers" id="day-headers"></div>
+
+        <!-- شبكة التقويم -->
+        <div class="calendar-grid" id="calendar-grid"></div>
+
+        <!-- شريط المعلومات -->
+        <div class="info-bar" id="selected-info"></div>
+
+    </div>
+
+    <!-- ═══ تصدير iCal ═══ -->
+    <div class="goto-card">
+        <div class="goto-header" id="export-title"></div>
+        <div class="goto-body">
+            <div class="goto-toggle">
+                <label class="goto-radio">
+                    <input type="radio" name="export-type" value="hijri" checked>
+                    <span id="export-hijri-label"></span>
+                </label>
+                <label class="goto-radio">
+                    <input type="radio" name="export-type" value="gregorian">
+                    <span id="export-greg-label"></span>
+                </label>
+            </div>
+            <div class="export-row">
+                <div class="export-range">
+                    <span class="export-label" id="export-from-label"></span>
+                    <div class="export-fields">
+                        <div class="input-group">
+                            <label id="export-from-month-lbl"></label>
+                            <input type="number" id="export-from-month" min="1" max="12" value="1">
+                        </div>
+                        <div class="input-group">
+                            <label id="export-from-year-lbl"></label>
+                            <input type="number" id="export-from-year" value="1447">
+                        </div>
+                    </div>
+                </div>
+                <div class="export-range">
+                    <span class="export-label" id="export-to-label"></span>
+                    <div class="export-fields">
+                        <div class="input-group">
+                            <label id="export-to-month-lbl"></label>
+                            <input type="number" id="export-to-month" min="1" max="12" value="12">
+                        </div>
+                        <div class="input-group">
+                            <label id="export-to-year-lbl"></label>
+                            <input type="number" id="export-to-year" value="1447">
+                        </div>
+                    </div>
+                </div>
+                <button class="convert-btn export-btn" id="export-btn"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ عن المنهج ═══ -->
+    <div class="about-card" id="about-card">
+        <h3 id="about-title"></h3>
+        <p id="about-p1"></p>
+        <p id="about-p2"></p>
+        <p id="about-p3"></p>
+    </div>
+
+    <!-- ═══ التذييل ═══ -->
+    <footer class="site-footer">
+        <div id="footer-credit"></div>
+        <div class="footer-version" id="footer-version"></div>
+        <div class="footer-tool" id="footer-tool"></div>
+    </footer>
+
+</div>
+
+<script src="hijri.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
