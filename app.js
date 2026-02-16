@@ -5,8 +5,10 @@
 
 const App = (() => {
     const H = HijriCalendar;
+    const PT = typeof PrayerTimes !== 'undefined' ? PrayerTimes : null;
 
     let currentYear, currentMonth;
+    let _prayerTimer = null;
 
     // ─── تهيئة ──────────────────────────────────────────────
     function init() {
@@ -21,10 +23,12 @@ const App = (() => {
         setupCorrectionControls();
         setupGoToDate();
         setupExport();
+        if (PT) setupPrayerTimes();
         applyLabels();
         renderCalendar();
         renderTodayInfo();
         updateModeUI();
+        if (PT) renderPrayerTimes();
     }
 
     // ─── تحديث جميع النصوص (اللغة) ─────────────────────────
@@ -92,6 +96,31 @@ const App = (() => {
         document.getElementById('footer-credit').textContent = H.t('footer');
         document.getElementById('footer-version').textContent = H.t('version');
         document.getElementById('footer-tool').textContent = H.t('credit');
+
+        // مواقيت الصلاة
+        if (PT) {
+            document.getElementById('prayer-title').textContent = H.t('prayerTitle');
+            document.getElementById('prayer-no-loc-text').textContent = H.t('prayerNoLocation');
+            document.getElementById('prayer-detect-main-text').textContent = H.t('prayerDetect');
+            document.getElementById('p-fajr-lbl').textContent = H.t('prayerFajr');
+            document.getElementById('p-sunrise-lbl').textContent = H.t('prayerSunrise');
+            document.getElementById('p-dhuhr-lbl').textContent = H.t('prayerDhuhr');
+            document.getElementById('p-asr-lbl').textContent = H.t('prayerAsr');
+            document.getElementById('p-maghrib-lbl').textContent = H.t('prayerMaghrib');
+            document.getElementById('p-isha-lbl').textContent = H.t('prayerIsha');
+            document.getElementById('prayer-next-label').textContent = H.t('prayerNext');
+            document.getElementById('prayer-next-in').textContent = H.t('prayerIn');
+            document.getElementById('prayer-settings-lbl').textContent = H.t('prayerSettings');
+            document.getElementById('lbl-prayer-method').textContent = H.t('prayerMethod');
+            document.getElementById('lbl-prayer-asr').textContent = H.t('prayerAsr_');
+            document.getElementById('opt-shafii').textContent = H.t('prayerShafii');
+            document.getElementById('opt-hanafi').textContent = H.t('prayerHanafi');
+            document.getElementById('lbl-prayer-lat').textContent = H.t('prayerLat');
+            document.getElementById('lbl-prayer-lng').textContent = H.t('prayerLng');
+            document.getElementById('lbl-prayer-tz').textContent = H.t('prayerTz');
+            document.getElementById('lbl-prayer-highlat').textContent = H.t('prayerHighLat');
+            document.getElementById('lbl-prayer-elevation').textContent = H.t('prayerElevation');
+        }
     }
 
     function refreshUI() {
@@ -460,6 +489,173 @@ const App = (() => {
             `${H.dayName(day.dayOfWeek)}، ${hijriFromJDN.day} ${H.monthName(hijriFromJDN.month-1)} ${hijriFromJDN.year} ${H.t('hSuffix')}` +
             ` — ` +
             `${greg.day} ${H.gregMonthName(greg.month-1)} ${greg.year}${H.t('gSuffix')}`;
+    }
+
+    // ─── مواقيت الصلاة ──────────────────────────────────────
+    function setupPrayerTimes() {
+        // Populate method dropdown
+        const methodSelect = document.getElementById('prayer-method-select');
+        const lang = H.getLang();
+        Object.values(PT.METHODS).forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = lang === 'en' ? m.nameEn : m.nameAr;
+            methodSelect.appendChild(opt);
+        });
+
+        // Populate high-lat dropdown
+        const highLatSelect = document.getElementById('prayer-highlat-select');
+        Object.values(PT.HIGH_LAT).forEach(h => {
+            const opt = document.createElement('option');
+            opt.value = h.id;
+            opt.textContent = lang === 'en' ? h.nameEn : h.nameAr;
+            highLatSelect.appendChild(opt);
+        });
+
+        // Load saved settings into UI
+        const s = PT.getSettings();
+        methodSelect.value = s.method;
+        document.getElementById('prayer-asr-select').value = s.asrFactor;
+        highLatSelect.value = s.highLat;
+        if (s.lat) document.getElementById('prayer-lat').value = s.lat;
+        if (s.lng) document.getElementById('prayer-lng').value = s.lng;
+        if (s.tz) document.getElementById('prayer-tz').value = s.tz;
+        if (s.elevation) document.getElementById('prayer-elevation').value = s.elevation;
+
+        // Settings toggle
+        document.getElementById('prayer-settings-toggle').addEventListener('click', () => {
+            const panel = document.getElementById('prayer-settings');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Save on change
+        const saveAndRender = () => {
+            PT.setSettings({
+                method: methodSelect.value,
+                asrFactor: parseInt(document.getElementById('prayer-asr-select').value),
+                highLat: highLatSelect.value,
+                lat: parseFloat(document.getElementById('prayer-lat').value) || 0,
+                lng: parseFloat(document.getElementById('prayer-lng').value) || 0,
+                tz: parseFloat(document.getElementById('prayer-tz').value) || 0,
+                elevation: parseFloat(document.getElementById('prayer-elevation').value) || 0,
+            });
+            renderPrayerTimes();
+        };
+
+        methodSelect.addEventListener('change', saveAndRender);
+        document.getElementById('prayer-asr-select').addEventListener('change', saveAndRender);
+        highLatSelect.addEventListener('change', saveAndRender);
+        document.getElementById('prayer-lat').addEventListener('change', saveAndRender);
+        document.getElementById('prayer-lng').addEventListener('change', saveAndRender);
+        document.getElementById('prayer-tz').addEventListener('change', saveAndRender);
+        document.getElementById('prayer-elevation').addEventListener('change', saveAndRender);
+
+        // Detect location buttons
+        const detectLocation = () => {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = Math.round(pos.coords.latitude * 100) / 100;
+                const lng = Math.round(pos.coords.longitude * 100) / 100;
+                const tz = -new Date().getTimezoneOffset() / 60;
+                document.getElementById('prayer-lat').value = lat;
+                document.getElementById('prayer-lng').value = lng;
+                document.getElementById('prayer-tz').value = tz;
+                if (pos.coords.altitude) {
+                    document.getElementById('prayer-elevation').value = Math.round(pos.coords.altitude);
+                }
+                saveAndRender();
+            });
+        };
+        document.getElementById('prayer-detect').addEventListener('click', detectLocation);
+        document.getElementById('prayer-detect-main').addEventListener('click', detectLocation);
+    }
+
+    function renderPrayerTimes() {
+        if (!PT) return;
+        const s = PT.getSettings();
+
+        // Check if location is set
+        if (!s.lat && !s.lng) {
+            document.getElementById('prayer-no-location').style.display = 'flex';
+            document.getElementById('prayer-grid').style.display = 'none';
+            document.getElementById('prayer-countdown').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('prayer-no-location').style.display = 'none';
+        document.getElementById('prayer-grid').style.display = 'grid';
+        document.getElementById('prayer-countdown').style.display = 'block';
+
+        // Check if Ramadan
+        const todayH = H.todayHijri();
+        const isRamadan = todayH.month === 9;
+
+        const times = PT.getForToday(isRamadan);
+
+        document.getElementById('p-fajr').textContent = times.fajr;
+        document.getElementById('p-sunrise').textContent = times.sunrise;
+        document.getElementById('p-dhuhr').textContent = times.dhuhr;
+        document.getElementById('p-asr').textContent = times.asr;
+        document.getElementById('p-maghrib').textContent = times.maghrib;
+        document.getElementById('p-isha').textContent = times.isha;
+
+        // Highlight next prayer + countdown
+        _updatePrayerCountdown(times);
+
+        // Refresh every 30 seconds
+        if (_prayerTimer) clearInterval(_prayerTimer);
+        _prayerTimer = setInterval(() => _updatePrayerCountdown(times), 30000);
+    }
+
+    function _updatePrayerCountdown(times) {
+        const now = new Date();
+        const nowHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+
+        const prayerKeys = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const prayerLabels = {
+            fajr: H.t('prayerFajr'), sunrise: H.t('prayerSunrise'),
+            dhuhr: H.t('prayerDhuhr'), asr: H.t('prayerAsr'),
+            maghrib: H.t('prayerMaghrib'), isha: H.t('prayerIsha')
+        };
+
+        // Remove previous highlights
+        document.querySelectorAll('.prayer-item.prayer-next').forEach(el => el.classList.remove('prayer-next'));
+
+        let nextPrayer = null;
+        let nextTime = null;
+
+        for (const key of prayerKeys) {
+            const raw = times._raw[key];
+            if (raw !== null && raw > nowHours) {
+                nextPrayer = key;
+                nextTime = raw;
+                break;
+            }
+        }
+
+        if (!nextPrayer) {
+            // All prayers passed — next is Fajr tomorrow
+            nextPrayer = 'fajr';
+            nextTime = times._raw.fajr !== null ? times._raw.fajr + 24 : null;
+        }
+
+        // Highlight
+        const items = document.querySelectorAll('.prayer-item');
+        const idx = prayerKeys.indexOf(nextPrayer);
+        if (idx >= 0 && items[idx]) items[idx].classList.add('prayer-next');
+
+        // Countdown
+        const countdownEl = document.getElementById('prayer-countdown');
+        if (nextTime !== null) {
+            const diff = nextTime - nowHours;
+            const h = Math.floor(diff);
+            const m = Math.floor((diff - h) * 60);
+            document.getElementById('prayer-next-name').textContent = prayerLabels[nextPrayer];
+            document.getElementById('prayer-next-time').textContent = `${h}:${String(m).padStart(2, '0')}`;
+            countdownEl.style.display = 'block';
+        } else {
+            countdownEl.style.display = 'none';
+        }
     }
 
     return { init };

@@ -26,6 +26,97 @@
         <span class="mode-badge mode-astro" id="mode-badge">فلكي</span>
     </div>
 
+    <!-- ═══ مواقيت الصلاة ═══ -->
+    <div class="prayer-card" id="prayer-card">
+        <div class="prayer-header">
+            <span class="prayer-icon">&#x1F54C;</span>
+            <span id="prayer-title">مواقيت الصلاة</span>
+        </div>
+        <div class="prayer-no-location" id="prayer-no-location">
+            <span id="prayer-no-loc-text">حدد موقعك لعرض مواقيت الصلاة</span>
+            <button class="convert-btn prayer-detect-btn" id="prayer-detect-main">
+                <span id="prayer-detect-main-text">تحديد الموقع</span>
+            </button>
+        </div>
+        <div class="prayer-grid" id="prayer-grid" style="display:none">
+            <div class="prayer-item">
+                <span class="prayer-name" id="p-fajr-lbl">الفجر</span>
+                <span class="prayer-time" id="p-fajr">--:--</span>
+            </div>
+            <div class="prayer-item">
+                <span class="prayer-name" id="p-dhuhr-lbl">الظهر</span>
+                <span class="prayer-time" id="p-dhuhr">--:--</span>
+            </div>
+            <div class="prayer-item">
+                <span class="prayer-name" id="p-sunrise-lbl">الشروق</span>
+                <span class="prayer-time" id="p-sunrise">--:--</span>
+            </div>
+            <div class="prayer-item">
+                <span class="prayer-name" id="p-asr-lbl">العصر</span>
+                <span class="prayer-time" id="p-asr">--:--</span>
+            </div>
+            <div class="prayer-item">
+                <span class="prayer-name" id="p-maghrib-lbl">المغرب</span>
+                <span class="prayer-time" id="p-maghrib">--:--</span>
+            </div>
+            <div class="prayer-item">
+                <span class="prayer-name" id="p-isha-lbl">العشاء</span>
+                <span class="prayer-time" id="p-isha">--:--</span>
+            </div>
+        </div>
+        <div class="prayer-countdown" id="prayer-countdown" style="display:none">
+            <span id="prayer-next-label">التالي</span>:
+            <strong id="prayer-next-name"></strong>
+            <span id="prayer-next-in">بعد</span>
+            <span id="prayer-next-time"></span>
+        </div>
+        <div class="prayer-settings-toggle">
+            <button class="prayer-settings-btn" id="prayer-settings-toggle">
+                &#x2699; <span id="prayer-settings-lbl">إعدادات مواقيت الصلاة</span>
+            </button>
+        </div>
+        <div class="prayer-settings" id="prayer-settings" style="display:none">
+            <div class="prayer-settings-row">
+                <div class="tool-group">
+                    <label class="tool-label" id="lbl-prayer-method">طريقة الحساب</label>
+                    <select id="prayer-method-select" class="mode-select"></select>
+                </div>
+                <div class="tool-group">
+                    <label class="tool-label" id="lbl-prayer-asr">العصر</label>
+                    <select id="prayer-asr-select" class="mode-select">
+                        <option value="1" id="opt-shafii"></option>
+                        <option value="2" id="opt-hanafi"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="prayer-settings-row">
+                <div class="input-group">
+                    <label id="lbl-prayer-lat">خط العرض</label>
+                    <input type="number" id="prayer-lat" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label id="lbl-prayer-lng">خط الطول</label>
+                    <input type="number" id="prayer-lng" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label id="lbl-prayer-tz">المنطقة الزمنية</label>
+                    <input type="number" id="prayer-tz" step="0.5">
+                </div>
+                <button class="convert-btn prayer-detect-btn" id="prayer-detect">&#x1F4CD;</button>
+            </div>
+            <div class="prayer-settings-row">
+                <div class="tool-group">
+                    <label class="tool-label" id="lbl-prayer-highlat">خطوط العرض العالية</label>
+                    <select id="prayer-highlat-select" class="mode-select"></select>
+                </div>
+                <div class="input-group">
+                    <label id="lbl-prayer-elevation">الارتفاع (م)</label>
+                    <input type="number" id="prayer-elevation" step="1" value="0">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══ شريط الأدوات ═══ -->
     <div class="toolbar-card">
         <div class="toolbar-row">
@@ -201,6 +292,7 @@
 </div>
 
 <script src="hijri.js"></script>
+<script src="prayer-times.js"></script>
 <script src="app.js"></script>
 
 </body>

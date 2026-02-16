@@ -86,6 +86,20 @@ const HijriCalendar = (() => {
             exportFrom: 'من', exportTo: 'إلى',
             exportBtn: 'تصدير .ics',
             exportMonth: 'الشهر', exportYear: 'السنة',
+            // مواقيت الصلاة
+            prayerTitle: 'مواقيت الصلاة',
+            prayerFajr: 'الفجر', prayerSunrise: 'الشروق', prayerDhuhr: 'الظهر',
+            prayerAsr: 'العصر', prayerMaghrib: 'المغرب', prayerIsha: 'العشاء',
+            prayerNext: 'التالي',
+            prayerIn: 'بعد',
+            prayerMethod: 'طريقة الحساب', prayerAsr_: 'العصر',
+            prayerShafii: 'شافعي / مالكي / حنبلي', prayerHanafi: 'حنفي',
+            prayerLat: 'خط العرض', prayerLng: 'خط الطول', prayerTz: 'المنطقة الزمنية',
+            prayerHighLat: 'خطوط العرض العالية',
+            prayerDetect: 'تحديد الموقع',
+            prayerSettings: 'إعدادات مواقيت الصلاة',
+            prayerElevation: 'الارتفاع (م)',
+            prayerNoLocation: 'حدد موقعك لعرض مواقيت الصلاة',
         },
         en: {
             title: 'Hijri Calendar',
@@ -114,6 +128,20 @@ const HijriCalendar = (() => {
             exportFrom: 'From', exportTo: 'To',
             exportBtn: 'Export .ics',
             exportMonth: 'Month', exportYear: 'Year',
+            // Prayer Times
+            prayerTitle: 'Prayer Times',
+            prayerFajr: 'Fajr', prayerSunrise: 'Sunrise', prayerDhuhr: 'Dhuhr',
+            prayerAsr: 'Asr', prayerMaghrib: 'Maghrib', prayerIsha: 'Isha',
+            prayerNext: 'Next',
+            prayerIn: 'in',
+            prayerMethod: 'Calculation Method', prayerAsr_: 'Asr',
+            prayerShafii: "Shafi'i / Maliki / Hanbali", prayerHanafi: 'Hanafi',
+            prayerLat: 'Latitude', prayerLng: 'Longitude', prayerTz: 'Timezone',
+            prayerHighLat: 'High Latitude',
+            prayerDetect: 'Detect Location',
+            prayerSettings: 'Prayer Times Settings',
+            prayerElevation: 'Elevation (m)',
+            prayerNoLocation: 'Set your location to display prayer times',
         }
     };
 

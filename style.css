@@ -154,6 +154,154 @@ body::before {
     color: var(--gray-500);
 }
 
+/* ─── بطاقة مواقيت الصلاة ────────────────────────────────── */
+.prayer-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-right: 4px solid var(--green-500);
+}
+
+html[dir="ltr"] .prayer-card {
+    border-right: none;
+    border-left: 4px solid var(--green-500);
+}
+
+.prayer-header {
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    padding: 14px 20px;
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.prayer-icon {
+    font-size: 1.3rem;
+}
+
+.prayer-no-location {
+    padding: 24px 20px;
+    text-align: center;
+    color: var(--gray-500);
+    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.prayer-detect-btn {
+    font-size: 0.78rem;
+    padding: 7px 18px;
+}
+
+.prayer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--gray-100);
+    padding: 1px;
+}
+
+.prayer-item {
+    background: var(--white);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prayer-item.prayer-next {
+    background: var(--green-50);
+}
+
+.prayer-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
+.prayer-item.prayer-next .prayer-name {
+    color: var(--green-700);
+}
+
+.prayer-time {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--green-800);
+    direction: ltr;
+}
+
+.prayer-item.prayer-next .prayer-time {
+    color: var(--green-600);
+}
+
+.prayer-countdown {
+    padding: 10px 20px;
+    background: var(--green-50);
+    border-top: 1px solid var(--green-100);
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--green-700);
+}
+
+.prayer-countdown strong {
+    color: var(--green-800);
+}
+
+.prayer-settings-toggle {
+    padding: 0 20px 10px;
+    text-align: center;
+}
+
+.prayer-settings-btn {
+    background: transparent;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    font-family: var(--font-arabic);
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    transition: color 0.2s;
+}
+
+.prayer-settings-btn:hover {
+    color: var(--green-600);
+}
+
+.prayer-settings {
+    padding: 14px 20px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.prayer-settings-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.prayer-settings-row:last-child {
+    margin-bottom: 0;
+}
+
+.prayer-settings-row .tool-group {
+    min-width: 140px;
+}
+
+.prayer-settings-row .input-group {
+    min-width: 80px;
+    flex: 1;
+}
+
 /* ─── بطاقة التقويم ──────────────────────────────────────── */
 .calendar-card {
     background: var(--white);
