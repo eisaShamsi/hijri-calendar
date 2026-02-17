@@ -20,6 +20,9 @@ const App = (() => {
         currentYear = today.year;
         currentMonth = today.month;
 
+        // Restore session state (viewed month/year and selected date)
+        _restoreSession();
+
         setupTheme();
         setupNavigation();
         setupModeSelector();
@@ -36,6 +39,32 @@ const App = (() => {
         updateModeUI();
         if (PT) renderPrayerTimes();
         registerServiceWorker();
+    }
+
+    // ─── استئناف الجلسة (Session Resume) ──────────────────────
+    function _saveSession() {
+        try {
+            sessionStorage.setItem('hijri-view', JSON.stringify({
+                year: currentYear,
+                month: currentMonth,
+                selected: _selectedDate
+            }));
+        } catch (e) {}
+    }
+
+    function _restoreSession() {
+        try {
+            const raw = sessionStorage.getItem('hijri-view');
+            if (!raw) return;
+            const s = JSON.parse(raw);
+            if (s.year && s.month) {
+                currentYear = s.year;
+                currentMonth = s.month;
+            }
+            if (s.selected) {
+                _selectedDate = s.selected;
+            }
+        } catch (e) {}
     }
 
     // ─── الوضع الداكن ──────────────────────────────────────────
@@ -172,12 +201,14 @@ const App = (() => {
         document.getElementById('prev-month').addEventListener('click', () => {
             currentMonth--;
             if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+            _saveSession();
             renderCalendar();
         });
 
         document.getElementById('next-month').addEventListener('click', () => {
             currentMonth++;
             if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+            _saveSession();
             renderCalendar();
         });
 
@@ -186,6 +217,7 @@ const App = (() => {
             currentYear = today.year;
             currentMonth = today.month;
             _selectedDate = null;
+            _saveSession();
             renderCalendar();
             renderTodayInfo();
             if (PT) renderPrayerTimes();
@@ -196,10 +228,12 @@ const App = (() => {
             if (e.key === 'ArrowRight') {
                 currentMonth--;
                 if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+                _saveSession();
                 renderCalendar();
             } else if (e.key === 'ArrowLeft') {
                 currentMonth++;
                 if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+                _saveSession();
                 renderCalendar();
             }
         });
@@ -273,6 +307,7 @@ const App = (() => {
                 currentMonth = hijri.month;
             }
 
+            _saveSession();
             renderCalendar();
         });
     }
@@ -549,6 +584,7 @@ const App = (() => {
             const now = new Date();
             const isToday = greg.year === now.getFullYear() && greg.month === (now.getMonth() + 1) && greg.day === now.getDate();
             _selectedDate = isToday ? null : { year: greg.year, month: greg.month, day: greg.day };
+            _saveSession();
             renderPrayerTimes();
         }
     }
@@ -736,6 +772,7 @@ const App = (() => {
                 dateIndicator.style.display = 'flex';
                 document.getElementById('prayer-date-reset').addEventListener('click', () => {
                     _selectedDate = null;
+                    _saveSession();
                     document.querySelectorAll('.calendar-cell.selected').forEach(el => el.classList.remove('selected'));
                     renderPrayerTimes();
                 });
