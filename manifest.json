@@ -1,0 +1,27 @@
+{
+    "name": "التقويم الهجري — Hijri Calendar",
+    "short_name": "هجري",
+    "description": "تقويم هجري فلكي مع مواقيت الصلاة واتجاه القبلة",
+    "start_url": ".",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#14553f",
+    "background_color": "#fefcf5",
+    "lang": "ar",
+    "dir": "rtl",
+    "categories": ["utilities", "lifestyle"],
+    "icons": [
+        {
+            "src": "icon-192.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

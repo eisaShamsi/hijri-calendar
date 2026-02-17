@@ -9,6 +9,9 @@ const App = (() => {
 
     let currentYear, currentMonth;
     let _prayerTimer = null;
+    let _notifyTimers = [];
+    let _deferredInstallPrompt = null;
+    let _selectedDate = null; // { year, month, day } gregorian — null means today
 
     // ─── تهيئة ──────────────────────────────────────────────
     function init() {
@@ -16,6 +19,7 @@ const App = (() => {
         currentYear = today.year;
         currentMonth = today.month;
 
+        setupTheme();
         setupNavigation();
         setupModeSelector();
         setupWeekStartSelector();
@@ -24,11 +28,37 @@ const App = (() => {
         setupGoToDate();
         setupExport();
         if (PT) setupPrayerTimes();
+        if (PT) setupNotifications();
         applyLabels();
         renderCalendar();
         renderTodayInfo();
         updateModeUI();
         if (PT) renderPrayerTimes();
+        registerServiceWorker();
+    }
+
+    // ─── الوضع الداكن ──────────────────────────────────────────
+    function setupTheme() {
+        // Load saved theme or detect system preference
+        let theme = 'light';
+        try { theme = localStorage.getItem('hijri-theme') || ''; } catch (e) {}
+        if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+
+        const btn = document.getElementById('theme-toggle');
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        btn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            btn.textContent = next === 'dark' ? '☀️' : '🌙';
+            try { localStorage.setItem('hijri-theme', next); } catch (e) {}
+            // Update meta theme-color
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = next === 'dark' ? '#064e3b' : '#14553f';
+        });
     }
 
     // ─── تحديث جميع النصوص (اللغة) ─────────────────────────
@@ -91,11 +121,15 @@ const App = (() => {
         document.getElementById('about-p1').innerHTML = H.t('aboutP1');
         document.getElementById('about-p2').innerHTML = H.t('aboutP2');
         document.getElementById('about-p3').innerHTML = H.t('aboutP3');
+        document.getElementById('about-p4').innerHTML = H.t('aboutP4');
 
         // التذييل
         document.getElementById('footer-credit').textContent = H.t('footer');
         document.getElementById('footer-version').textContent = H.t('version');
         document.getElementById('footer-tool').textContent = H.t('credit');
+
+        // الوضع الداكن
+        document.getElementById('lbl-theme').textContent = H.t('themeLabel');
 
         // مواقيت الصلاة
         if (PT) {
@@ -120,6 +154,7 @@ const App = (() => {
             document.getElementById('lbl-prayer-tz').textContent = H.t('prayerTz');
             document.getElementById('lbl-prayer-highlat').textContent = H.t('prayerHighLat');
             document.getElementById('lbl-prayer-elevation').textContent = H.t('prayerElevation');
+            document.getElementById('timetable-lbl').textContent = H.t('monthlyTimetable');
         }
     }
 
@@ -149,8 +184,10 @@ const App = (() => {
             const today = H.todayHijri();
             currentYear = today.year;
             currentMonth = today.month;
+            _selectedDate = null;
             renderCalendar();
             renderTodayInfo();
+            if (PT) renderPrayerTimes();
         });
 
         document.addEventListener('keydown', (e) => {
@@ -398,7 +435,7 @@ const App = (() => {
         document.getElementById('gregorian-range').textContent = data.gregorianRange;
 
         const leapBadge = document.getElementById('leap-badge');
-        leapBadge.style.display = data.isLeapYear ? 'inline-block' : 'none';
+        leapBadge.style.display = 'none';
 
         // رؤوس الأيام الديناميكية
         const headersEl = document.getElementById('day-headers');
@@ -442,8 +479,20 @@ const App = (() => {
             gregNum.textContent = day.gregorian.day;
             cell.appendChild(gregNum);
 
-            const gregDate = `${day.gregorian.day}/${day.gregorian.month}/${day.gregorian.year}`;
-            cell.title = `${H.dayName(day.dayOfWeek)} — ${gregDate}`;
+            // Islamic events
+            const hijriFromDay = H.jdnToHijri(day.jdn);
+            const event = H.getEvent(hijriFromDay.month, hijriFromDay.day);
+            if (event && !day.isOtherMonth) {
+                const dot = document.createElement('span');
+                dot.className = 'event-dot event-' + event.type;
+                cell.appendChild(dot);
+                cell.classList.add('has-event');
+            }
+
+            const gregDate = `${day.gregorian.year}/${day.gregorian.month}/${day.gregorian.day}`;
+            let titleText = `${H.dayName(day.dayOfWeek)} — ${gregDate}`;
+            if (event) titleText += `\n${event.name}`;
+            cell.title = titleText;
 
             if ((idx % 7) === 5 || (idx % 7) === 6) cell.classList.add('weekend-col');
 
@@ -462,8 +511,12 @@ const App = (() => {
         const jdn = H.todayJDN();
         const dow = H.dayOfWeek(jdn);
 
-        document.getElementById('today-hijri').textContent =
-            `${H.dayName(dow)}، ${today.day} ${H.monthName(today.month-1)} ${today.year} ${H.t('hSuffix')}`;
+        let hijriText = `${H.dayName(dow)}، ${today.day} ${H.monthName(today.month-1)} ${today.year} ${H.t('hSuffix')}`;
+        const event = H.getEvent(today.month, today.day);
+        if (event) {
+            hijriText += ` — ${event.name}`;
+        }
+        document.getElementById('today-hijri').textContent = hijriText;
 
         document.getElementById('today-gregorian').textContent =
             `${now.getDate()} ${H.gregMonthName(now.getMonth())} ${now.getFullYear()}${H.t('gSuffix')}`;
@@ -474,6 +527,15 @@ const App = (() => {
         updateInfoBar(day);
         document.querySelectorAll('.calendar-cell.selected').forEach(el => el.classList.remove('selected'));
         e.currentTarget.classList.add('selected');
+
+        // Update prayer times for the selected date
+        if (PT && day) {
+            const greg = day.gregorian;
+            const now = new Date();
+            const isToday = greg.year === now.getFullYear() && greg.month === (now.getMonth() + 1) && greg.day === now.getDate();
+            _selectedDate = isToday ? null : { year: greg.year, month: greg.month, day: greg.day };
+            renderPrayerTimes();
+        }
     }
 
     function updateInfoBar(day) {
@@ -485,10 +547,16 @@ const App = (() => {
 
         const greg = day.gregorian;
         const hijriFromJDN = H.jdnToHijri(day.jdn);
-        infoBar.innerHTML =
+        let html =
             `${H.dayName(day.dayOfWeek)}، ${hijriFromJDN.day} ${H.monthName(hijriFromJDN.month-1)} ${hijriFromJDN.year} ${H.t('hSuffix')}` +
             ` — ` +
             `${greg.day} ${H.gregMonthName(greg.month-1)} ${greg.year}${H.t('gSuffix')}`;
+
+        const event = H.getEvent(hijriFromJDN.month, hijriFromJDN.day);
+        if (event) {
+            html += ` <span class="info-event info-event-${event.type}">★ ${event.name}</span>`;
+        }
+        infoBar.innerHTML = html;
     }
 
     // ─── مواقيت الصلاة ──────────────────────────────────────
@@ -568,6 +636,20 @@ const App = (() => {
         };
         document.getElementById('prayer-detect').addEventListener('click', detectLocation);
         document.getElementById('prayer-detect-main').addEventListener('click', detectLocation);
+
+        // Timetable toggle
+        const ttToggle = document.getElementById('timetable-toggle');
+        if (ttToggle) {
+            ttToggle.addEventListener('click', () => {
+                const container = document.getElementById('timetable-container');
+                if (container.style.display === 'none') {
+                    container.style.display = 'block';
+                    renderMonthlyTimetable();
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+        }
     }
 
     function renderPrayerTimes() {
@@ -585,7 +667,6 @@ const App = (() => {
 
         document.getElementById('prayer-no-location').style.display = 'none';
         document.getElementById('prayer-grid').style.display = 'grid';
-        document.getElementById('prayer-countdown').style.display = 'block';
 
         // Show current method name
         const methodInfo = document.getElementById('prayer-method-info');
@@ -596,11 +677,18 @@ const App = (() => {
             methodInfo.style.display = 'block';
         }
 
-        // Check if Ramadan
-        const todayH = H.todayHijri();
-        const isRamadan = todayH.month === 9;
-
-        const times = PT.getForToday(isRamadan);
+        // Determine date for prayer times
+        let times;
+        const isSelectedDate = _selectedDate !== null;
+        if (isSelectedDate) {
+            const hijri = H.gregorianToHijri(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+            const isRamadan = hijri.month === 9;
+            times = PT.getForDate(_selectedDate, isRamadan);
+        } else {
+            const todayH = H.todayHijri();
+            const isRamadan = todayH.month === 9;
+            times = PT.getForToday(isRamadan);
+        }
 
         document.getElementById('p-fajr').textContent = times.fajr;
         document.getElementById('p-sunrise').textContent = times.sunrise;
@@ -609,12 +697,39 @@ const App = (() => {
         document.getElementById('p-maghrib').textContent = times.maghrib;
         document.getElementById('p-isha').textContent = times.isha;
 
-        // Highlight next prayer + countdown
-        _updatePrayerCountdown(times);
-
-        // Refresh every 30 seconds
-        if (_prayerTimer) clearInterval(_prayerTimer);
-        _prayerTimer = setInterval(() => _updatePrayerCountdown(times), 30000);
+        // Date indicator for selected date
+        const dateIndicator = document.getElementById('prayer-date-indicator');
+        const countdownEl = document.getElementById('prayer-countdown');
+        if (isSelectedDate) {
+            // Show date indicator, hide countdown
+            if (dateIndicator) {
+                const d = _selectedDate;
+                const hijri = H.gregorianToHijri(d.year, d.month, d.day);
+                const jdn = H.gregorianToJDN(d.year, d.month, d.day);
+                const dow = H.dayOfWeek(jdn);
+                dateIndicator.innerHTML =
+                    `<span class="prayer-date-text">${H.dayName(dow)}، ${hijri.day} ${H.monthName(hijri.month-1)} ${hijri.year} ${H.t('hSuffix')}` +
+                    ` — ${d.year}/${d.month}/${d.day}</span>` +
+                    `<button class="prayer-date-reset" id="prayer-date-reset">✕</button>`;
+                dateIndicator.style.display = 'flex';
+                document.getElementById('prayer-date-reset').addEventListener('click', () => {
+                    _selectedDate = null;
+                    document.querySelectorAll('.calendar-cell.selected').forEach(el => el.classList.remove('selected'));
+                    renderPrayerTimes();
+                });
+            }
+            countdownEl.style.display = 'none';
+            // Remove next-prayer highlights
+            document.querySelectorAll('.prayer-item.prayer-next').forEach(el => el.classList.remove('prayer-next'));
+            if (_prayerTimer) { clearInterval(_prayerTimer); _prayerTimer = null; }
+        } else {
+            // Today — show countdown, hide date indicator
+            if (dateIndicator) dateIndicator.style.display = 'none';
+            countdownEl.style.display = 'block';
+            _updatePrayerCountdown(times);
+            if (_prayerTimer) clearInterval(_prayerTimer);
+            _prayerTimer = setInterval(() => _updatePrayerCountdown(times), 30000);
+        }
     }
 
     function _updatePrayerCountdown(times) {
@@ -666,6 +781,201 @@ const App = (() => {
         } else {
             countdownEl.style.display = 'none';
         }
+    }
+
+    // ─── الجدول الشهري ───────────────────────────────────────
+    function setupMonthlyTimetable() {
+        // Already called from prayer settings setup
+    }
+
+    function renderMonthlyTimetable() {
+        if (!PT) return;
+        const container = document.getElementById('timetable-body');
+        if (!container) return;
+        const s = PT.getSettings();
+        if (!s.lat && !s.lng) { container.innerHTML = ''; return; }
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const todayDate = now.getDate();
+        const todayH = H.todayHijri();
+        const isRamadan = todayH.month === 9;
+
+        let html = '<table class="timetable"><thead><tr>';
+        html += `<th>${H.t('timetableDay')}</th><th>${H.t('timetableHijriDate')}</th><th>${H.t('timetableDate')}</th>`;
+        html += `<th>${H.t('prayerFajr')}</th><th>${H.t('prayerSunrise')}</th>`;
+        html += `<th>${H.t('prayerDhuhr')}</th><th>${H.t('prayerAsr')}</th>`;
+        html += `<th>${H.t('prayerMaghrib')}</th><th>${H.t('prayerIsha')}</th>`;
+        html += '</tr></thead><tbody>';
+
+        const rows = [];
+        for (let d = 1; d <= daysInMonth; d++) {
+            const date = { year, month: month + 1, day: d };
+            const times = PT.calculate(date, s.lat, s.lng, s.tz, s.method, s.asrFactor, s.highLat, s.elevation, isRamadan);
+            const hijri = H.gregorianToHijri(year, month + 1, d);
+            const isToday = d === todayDate;
+            const dayName = H.dayName(H.dayOfWeek(H.gregorianToJDN(year, month + 1, d)));
+            const hijriDate = `${hijri.month}/${hijri.day}`;
+            const gregDate = `${month + 1}/${d}`;
+
+            html += `<tr class="${isToday ? 'timetable-today' : ''}">`;
+            html += `<td>${dayName}</td>`;
+            html += `<td class="tt-time">${hijriDate}</td>`;
+            html += `<td class="tt-time">${gregDate}</td>`;
+            html += `<td class="tt-time">${times.fajr}</td><td class="tt-time">${times.sunrise}</td>`;
+            html += `<td class="tt-time">${times.dhuhr}</td><td class="tt-time">${times.asr}</td>`;
+            html += `<td class="tt-time">${times.maghrib}</td><td class="tt-time">${times.isha}</td>`;
+            html += '</tr>';
+
+            rows.push({ day: d, dayName, hijriDate, date: gregDate, ...times });
+        }
+        html += '</tbody></table>';
+        container.innerHTML = html;
+
+        // CSV download button
+        const csvBtn = document.getElementById('timetable-csv');
+        if (csvBtn) {
+            csvBtn.onclick = () => {
+                let csv = `${H.t('timetableDay')},${H.t('timetableHijriDate')},${H.t('timetableDate')},${H.t('prayerFajr')},${H.t('prayerSunrise')},${H.t('prayerDhuhr')},${H.t('prayerAsr')},${H.t('prayerMaghrib')},${H.t('prayerIsha')}\n`;
+                rows.forEach(r => {
+                    csv += `${r.dayName},${r.hijriDate},${r.date},${r.fajr},${r.sunrise},${r.dhuhr},${r.asr},${r.maghrib},${r.isha}\n`;
+                });
+                downloadFile('prayer-timetable.csv', csv, 'text/csv;charset=utf-8');
+            };
+        }
+    }
+
+    // ─── الإشعارات ──────────────────────────────────────────
+    function setupNotifications() {
+        const toggle = document.getElementById('notify-toggle');
+        const beforeSelect = document.getElementById('notify-before');
+        if (!toggle) return;
+
+        let enabled = false;
+        let beforeMin = 5;
+        try {
+            enabled = localStorage.getItem('prayer-notify') === 'true';
+            beforeMin = parseInt(localStorage.getItem('prayer-notify-before')) || 5;
+        } catch (e) {}
+
+        toggle.checked = enabled;
+        if (beforeSelect) beforeSelect.value = beforeMin;
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked && 'Notification' in window && Notification.permission !== 'granted') {
+                Notification.requestPermission().then(perm => {
+                    if (perm !== 'granted') { toggle.checked = false; return; }
+                    _saveNotifySettings(true, beforeMin);
+                    scheduleNotifications();
+                });
+            } else {
+                _saveNotifySettings(toggle.checked, beforeMin);
+                if (toggle.checked) scheduleNotifications();
+                else clearNotificationTimers();
+            }
+        });
+
+        if (beforeSelect) {
+            beforeSelect.addEventListener('change', () => {
+                beforeMin = parseInt(beforeSelect.value) || 5;
+                _saveNotifySettings(toggle.checked, beforeMin);
+                if (toggle.checked) scheduleNotifications();
+            });
+        }
+
+        _updateNotifyStatus();
+        if (enabled && 'Notification' in window && Notification.permission === 'granted') {
+            scheduleNotifications();
+        }
+    }
+
+    function _saveNotifySettings(enabled, before) {
+        try {
+            localStorage.setItem('prayer-notify', enabled);
+            localStorage.setItem('prayer-notify-before', before);
+        } catch (e) {}
+    }
+
+    function _updateNotifyStatus() {
+        const statusEl = document.getElementById('notify-status');
+        if (!statusEl) return;
+        if (!('Notification' in window)) {
+            statusEl.textContent = '—';
+            return;
+        }
+        const perm = Notification.permission;
+        statusEl.textContent = H.t(perm === 'granted' ? 'notifyGranted' : perm === 'denied' ? 'notifyDenied' : 'notifyDefault');
+        statusEl.className = 'notify-status notify-' + perm;
+    }
+
+    function clearNotificationTimers() {
+        _notifyTimers.forEach(t => clearTimeout(t));
+        _notifyTimers = [];
+    }
+
+    function scheduleNotifications() {
+        clearNotificationTimers();
+        if (!PT || !('Notification' in window) || Notification.permission !== 'granted') return;
+
+        const s = PT.getSettings();
+        if (!s.lat && !s.lng) return;
+
+        let beforeMin = 5;
+        try { beforeMin = parseInt(localStorage.getItem('prayer-notify-before')) || 5; } catch (e) {}
+
+        const todayH = H.todayHijri();
+        const times = PT.getForToday(todayH.month === 9);
+        const now = new Date();
+        const nowMs = now.getTime();
+
+        const prayerKeys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const prayerLabels = {
+            fajr: H.t('prayerFajr'), dhuhr: H.t('prayerDhuhr'),
+            asr: H.t('prayerAsr'), maghrib: H.t('prayerMaghrib'), isha: H.t('prayerIsha')
+        };
+
+        for (const key of prayerKeys) {
+            const raw = times._raw[key];
+            if (raw === null) continue;
+            const prayerDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                Math.floor(raw), Math.round((raw % 1) * 60));
+            const notifyAt = prayerDate.getTime() - beforeMin * 60000;
+            const delay = notifyAt - nowMs;
+            if (delay > 0) {
+                const timer = setTimeout(() => {
+                    new Notification(H.t('prayerTitle'), {
+                        body: `${prayerLabels[key]} — ${times[key]}`,
+                        icon: 'icon-192.svg',
+                        tag: 'prayer-' + key
+                    });
+                }, delay);
+                _notifyTimers.push(timer);
+            }
+        }
+    }
+
+    // ─── PWA ─────────────────────────────────────────────────
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').catch(() => {});
+        }
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            _deferredInstallPrompt = e;
+            const installBtn = document.getElementById('install-btn');
+            if (installBtn) {
+                installBtn.style.display = 'inline-block';
+                installBtn.addEventListener('click', () => {
+                    if (_deferredInstallPrompt) {
+                        _deferredInstallPrompt.prompt();
+                        _deferredInstallPrompt = null;
+                        installBtn.style.display = 'none';
+                    }
+                });
+            }
+        });
     }
 
     return { init };

@@ -48,6 +48,127 @@
     --font-display: 'Amiri', 'Cairo', serif;
 }
 
+/* ─── الوضع الداكن ────────────────────────────────────────── */
+[data-theme="dark"] {
+    --green-900: #a7f3d0;
+    --green-800: #6ee7b7;
+    --green-700: #34d399;
+    --green-600: #10b981;
+    --green-500: #059669;
+    --green-400: #047857;
+    --green-100: #064e3b;
+    --green-50:  #022c22;
+
+    --gold-600: #fbbf24;
+    --gold-500: #f59e0b;
+    --gold-400: #d97706;
+    --gold-300: #b45309;
+    --gold-200: #92400e;
+    --gold-100: #78350f;
+
+    --cream:     #0f172a;
+    --white:     #1e293b;
+    --gray-50:   #1e293b;
+    --gray-100:  #334155;
+    --gray-200:  #475569;
+    --gray-300:  #64748b;
+    --gray-400:  #94a3b8;
+    --gray-500:  #cbd5e1;
+    --gray-600:  #e2e8f0;
+    --gray-700:  #f1f5f9;
+    --gray-800:  #f8fafc;
+    --gray-900:  #ffffff;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+[data-theme="dark"] body::before {
+    background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
+}
+
+[data-theme="dark"] .calendar-cell.today {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+[data-theme="dark"] .calendar-cell.today:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+}
+
+[data-theme="dark"] .calendar-cell .greg-day {
+    color: #67e8f9;
+}
+
+[data-theme="dark"] .calendar-cell.other-month .greg-day {
+    color: var(--gray-300);
+}
+
+[data-theme="dark"] .nav-bar {
+    background: linear-gradient(135deg, #064e3b, #047857);
+}
+
+[data-theme="dark"] .prayer-header {
+    background: linear-gradient(135deg, #064e3b, #047857);
+}
+
+[data-theme="dark"] .convert-btn {
+    background: linear-gradient(135deg, #047857, #059669);
+}
+
+[data-theme="dark"] .today-card .date-icon {
+    background: linear-gradient(135deg, #047857, #059669);
+}
+
+[data-theme="dark"] .calendar-cell.weekend-col {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .mode-select {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .input-group input {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .header-icon,
+[data-theme="dark"] .header h1 {
+    color: #c0c0c0;
+}
+
+/* ─── زر الوضع الداكن ──────────────────────────────────────── */
+.theme-toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle-btn {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--green-50);
+    border-color: var(--green-400);
+    color: var(--green-700);
+}
+
 /* ─── الأساس ─────────────────────────────────────────────── */
 *,
 *::before,
@@ -203,7 +324,7 @@ html[dir="ltr"] .prayer-card {
 
 .prayer-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 1px;
     background: var(--gray-100);
     padding: 1px;
@@ -211,10 +332,11 @@ html[dir="ltr"] .prayer-card {
 
 .prayer-item {
     background: var(--white);
-    padding: 12px 18px;
+    padding: 10px 6px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    gap: 4px;
 }
 
 .prayer-item.prayer-next {
@@ -222,7 +344,7 @@ html[dir="ltr"] .prayer-card {
 }
 
 .prayer-name {
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--gray-600);
 }
@@ -233,7 +355,7 @@ html[dir="ltr"] .prayer-card {
 
 .prayer-time {
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--green-800);
     direction: ltr;
@@ -241,6 +363,44 @@ html[dir="ltr"] .prayer-card {
 
 .prayer-item.prayer-next .prayer-time {
     color: var(--green-600);
+}
+
+.prayer-date-indicator {
+    padding: 8px 16px;
+    background: var(--gold-100);
+    border-top: 1px solid var(--gold-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--gold-600);
+    font-weight: 600;
+}
+
+.prayer-date-text {
+    font-family: var(--font-display);
+}
+
+.prayer-date-reset {
+    background: none;
+    border: 1px solid var(--gold-300);
+    color: var(--gold-500);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.prayer-date-reset:hover {
+    background: var(--gold-200);
+    color: var(--gold-600);
 }
 
 .prayer-countdown {
@@ -945,6 +1105,133 @@ html[dir="ltr"] .result-label {
     margin-right: 6px;
 }
 
+/* ─── نقاط المناسبات الإسلامية ────────────────────────────── */
+.event-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.event-holiday { background: #ef4444; }
+.event-observance { background: var(--gold-500); }
+.event-special { background: #8b5cf6; }
+
+.calendar-cell.today .event-dot {
+    bottom: 2px;
+}
+
+.info-event {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: var(--radius-xl);
+    margin-right: 4px;
+}
+
+.info-event-holiday { color: #ef4444; }
+.info-event-observance { color: var(--gold-600); }
+.info-event-special { color: #8b5cf6; }
+
+/* ─── الجدول الشهري ──────────────────────────────────────── */
+.prayer-timetable-toggle {
+    padding: 0 20px 10px;
+    text-align: center;
+}
+
+.timetable-container {
+    padding: 0 10px 14px;
+    overflow-x: auto;
+}
+
+.timetable-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 4px 10px 8px;
+}
+
+.timetable-csv-btn {
+    font-size: 0.72rem;
+    padding: 4px 12px;
+}
+
+.timetable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.timetable th {
+    background: var(--green-50);
+    color: var(--green-700);
+    padding: 6px 4px;
+    font-weight: 700;
+    border: 1px solid var(--gray-200);
+    white-space: nowrap;
+}
+
+.timetable td {
+    padding: 5px 4px;
+    border: 1px solid var(--gray-100);
+    white-space: nowrap;
+    font-family: var(--font-display);
+}
+
+.timetable td.tt-time {
+    direction: ltr;
+    unicode-bidi: embed;
+}
+
+.timetable tr.timetable-today {
+    background: var(--green-50);
+    font-weight: 700;
+}
+
+.timetable tr.timetable-today td {
+    color: var(--green-700);
+}
+
+/* ─── الإشعارات ──────────────────────────────────────────── */
+.notify-row {
+    border-top: 1px solid var(--gray-100);
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+.notify-row .tool-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.notify-row input[type="checkbox"] {
+    accent-color: var(--green-600);
+    width: 16px;
+    height: 16px;
+}
+
+.notify-status {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-xl);
+}
+
+.notify-granted { background: var(--green-100); color: var(--green-700); }
+.notify-denied { background: #fef2f2; color: #dc2626; }
+.notify-default { background: var(--gray-100); color: var(--gray-500); }
+
+/* ─── زر التثبيت ─────────────────────────────────────────── */
+.install-btn {
+    margin-top: 12px;
+    font-size: 0.78rem;
+}
+
 /* ─── الاستجابة ──────────────────────────────────────────── */
 @media (max-width: 600px) {
     .container {
@@ -998,6 +1285,22 @@ html[dir="ltr"] .result-label {
 
     .input-row {
         gap: 6px;
+    }
+
+    .prayer-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .prayer-item {
+        padding: 8px 4px;
+    }
+
+    .prayer-name {
+        font-size: 0.68rem;
+    }
+
+    .prayer-time {
+        font-size: 0.9rem;
     }
 }
 

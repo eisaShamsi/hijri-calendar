@@ -75,12 +75,13 @@ const HijriCalendar = (() => {
             prevMonth: 'الشهر السابق', nextMonth: 'الشهر التالي',
             plusDay: 'إضافة يوم', minusDay: 'إنقاص يوم', resetMonth: 'إعادة تعيين هذا الشهر',
             invalidDate: 'أدخل تاريخاً صحيحاً',
-            aboutTitle: 'المنهج الحسابي',
+            aboutTitle: 'المنهج الحسابي ومواقيت الصلاة',
             aboutP1: 'يعتمد هذا التقويم على منهجين: <strong>الفلكي</strong> (الافتراضي) يحسب لحظة الاقتران الفلكي للقمر بدقة عالية باستخدام خوارزمية Jean Meeus، ثم يحدد بداية الشهر بناءً على أول يوم بعد الاقتران. <strong>الحسابي</strong> يستخدم نظام الدورة الثلاثينية من كتاب «التوفيقات الإلهامية».',
-            aboutP2: 'السنوات الكبيسة في الدورة: <strong>٢، ٥، ٧، ١٠، ١٣، ١٥، ١٨، ٢١، ٢٤، ٢٦، ٢٩</strong>',
+            aboutP2: 'السنوات الكبيسة في الدورة: <strong>2، 5، 7، 10، 13، 15، 18، 21، 24، 26، 29</strong>',
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
+            aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'إعداد عيسى بن راشد الشامسي — دولة الإمارات العربية المتحدة',
-            version: 'الإصدار ١٫٠',
+            version: 'الإصدار 1.5',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             exportTitle: 'تصدير إلى أجندة (iCal)',
             exportFrom: 'من', exportTo: 'إلى',
@@ -100,6 +101,17 @@ const HijriCalendar = (() => {
             prayerSettings: 'إعدادات مواقيت الصلاة',
             prayerElevation: 'الارتفاع (م)',
             prayerNoLocation: 'حدد موقعك لعرض مواقيت الصلاة',
+            // الوضع الداكن
+            themeLabel: 'المظهر', themeDark: '🌙', themeLight: '☀️',
+            // المناسبات الإسلامية
+            eventsLabel: 'المناسبات',
+            // جدول الصلاة الشهري
+            monthlyTimetable: 'الجدول الشهري', downloadCSV: 'تحميل CSV', timetableDay: 'اليوم', timetableHijriDate: 'التاريخ الهجري', timetableDate: 'التاريخ',
+            // PWA
+            installApp: 'تثبيت التطبيق',
+            // الإشعارات
+            notifyEnable: 'تفعيل الإشعارات', notifyBefore: 'قبل الصلاة بـ', notifyMinutes: 'دقائق',
+            notifyGranted: 'الإشعارات مفعلة', notifyDenied: 'الإشعارات مرفوضة', notifyDefault: 'اضغط لتفعيل الإشعارات',
         },
         en: {
             title: 'Hijri Calendar',
@@ -117,12 +129,13 @@ const HijriCalendar = (() => {
             prevMonth: 'Previous Month', nextMonth: 'Next Month',
             plusDay: 'Add a day', minusDay: 'Subtract a day', resetMonth: 'Reset this month',
             invalidDate: 'Enter a valid date',
-            aboutTitle: 'Methodology',
+            aboutTitle: 'Methodology & Prayer Times',
             aboutP1: 'This calendar uses two methods: <strong>Astronomical</strong> (default) computes lunar conjunction precisely using Jean Meeus algorithms, then determines the month start. <strong>Tabular</strong> uses the 30-year cycle from the book "al-Tawfiqat al-Ilhamiyyah".',
             aboutP2: 'Leap years in the cycle: <strong>2, 5, 7, 10, 13, 15, 18, 21, 24, 26, 29</strong>',
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
+            aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'By Eisa bin Rashid Al Shamsi — United Arab Emirates',
-            version: 'Version 1.0',
+            version: 'Version 1.5',
             credit: 'Designed with Claude Code (Opus 4.6)',
             exportTitle: 'Export to Calendar (iCal)',
             exportFrom: 'From', exportTo: 'To',
@@ -142,6 +155,17 @@ const HijriCalendar = (() => {
             prayerSettings: 'Prayer Times Settings',
             prayerElevation: 'Elevation (m)',
             prayerNoLocation: 'Set your location to display prayer times',
+            // Dark mode
+            themeLabel: 'Theme', themeDark: '🌙', themeLight: '☀️',
+            // Islamic events
+            eventsLabel: 'Events',
+            // Monthly timetable
+            monthlyTimetable: 'Monthly Timetable', downloadCSV: 'Download CSV', timetableDay: 'Day', timetableHijriDate: 'Hijri Date', timetableDate: 'Date',
+            // PWA
+            installApp: 'Install App',
+            // Notifications
+            notifyEnable: 'Enable Notifications', notifyBefore: 'Before prayer by', notifyMinutes: 'minutes',
+            notifyGranted: 'Notifications enabled', notifyDenied: 'Notifications denied', notifyDefault: 'Click to enable notifications',
         }
     };
 
@@ -160,6 +184,34 @@ const HijriCalendar = (() => {
     function monthName(i) { return currentLang === 'en' ? MONTH_NAMES_EN[i] : MONTH_NAMES[i]; }
     function dayName(i) { return currentLang === 'en' ? DAY_NAMES_EN[i] : DAY_NAMES[i]; }
     function gregMonthName(i) { return currentLang === 'en' ? GREGORIAN_MONTH_NAMES_EN[i] : GREGORIAN_MONTH_NAMES[i]; }
+
+    // ─── المناسبات الإسلامية ─────────────────────────────────
+    const ISLAMIC_EVENTS = {
+        '1-1':   { nameAr: 'رأس السنة الهجرية', nameEn: 'Islamic New Year', type: 'holiday' },
+        '1-10':  { nameAr: 'يوم عاشوراء', nameEn: 'Day of Ashura', type: 'observance' },
+        '3-12':  { nameAr: 'المولد النبوي', nameEn: 'Mawlid al-Nabi', type: 'holiday' },
+        '7-27':  { nameAr: 'الإسراء والمعراج', nameEn: "Isra' & Mi'raj", type: 'special' },
+        '8-15':  { nameAr: 'ليلة النصف من شعبان', nameEn: "Laylat al-Bara'ah", type: 'special' },
+        '9-1':   { nameAr: 'أول رمضان', nameEn: 'First of Ramadan', type: 'holiday' },
+        '9-17':  { nameAr: 'غزوة بدر', nameEn: 'Battle of Badr', type: 'observance' },
+        '9-27':  { nameAr: 'ليلة القدر (تقديرية)', nameEn: 'Laylat al-Qadr (est.)', type: 'special' },
+        '10-1':  { nameAr: 'عيد الفطر', nameEn: 'Eid al-Fitr', type: 'holiday' },
+        '10-2':  { nameAr: 'ثاني أيام عيد الفطر', nameEn: 'Eid al-Fitr (Day 2)', type: 'holiday' },
+        '10-3':  { nameAr: 'ثالث أيام عيد الفطر', nameEn: 'Eid al-Fitr (Day 3)', type: 'holiday' },
+        '12-8':  { nameAr: 'يوم التروية', nameEn: 'Day of Tarwiyah', type: 'observance' },
+        '12-9':  { nameAr: 'يوم عرفة', nameEn: 'Day of Arafah', type: 'special' },
+        '12-10': { nameAr: 'عيد الأضحى', nameEn: 'Eid al-Adha', type: 'holiday' },
+        '12-11': { nameAr: 'ثاني أيام عيد الأضحى', nameEn: 'Eid al-Adha (Day 2)', type: 'holiday' },
+        '12-12': { nameAr: 'ثالث أيام عيد الأضحى', nameEn: 'Eid al-Adha (Day 3)', type: 'holiday' },
+        '12-13': { nameAr: 'رابع أيام عيد الأضحى', nameEn: 'Eid al-Adha (Day 4)', type: 'holiday' },
+    };
+
+    function getEvent(month, day) {
+        const key = `${month}-${day}`;
+        const ev = ISLAMIC_EVENTS[key];
+        if (!ev) return null;
+        return { ...ev, name: currentLang === 'en' ? ev.nameEn : ev.nameAr };
+    }
 
     // تصحيحات المستخدم: { "1447-9": +1, "1447-10": -1 }
     // المفتاح = "سنة-شهر"، القيمة = عدد أيام الإزاحة
@@ -767,6 +819,9 @@ const HijriCalendar = (() => {
         hijriToGregorian, gregorianToHijri,
         dayOfWeek, todayHijri, todayJDN,
         getMonthData,
+
+        // المناسبات
+        ISLAMIC_EVENTS, getEvent,
 
         // مساعدات
         toArabicNumerals,

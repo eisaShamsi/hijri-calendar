@@ -20,7 +20,7 @@ const PrayerTimes = (() => {
         isna:       { id: 'isna',       fajr: 15.0, isha: 15.0, ishaType: 'angle', maghribAngle: null, nameAr: 'الجمعية الإسلامية لأمريكا الشمالية', nameEn: 'Islamic Society of North America (ISNA)' },
         tehran:     { id: 'tehran',     fajr: 17.7, isha: 14.0, ishaType: 'angle', maghribAngle: 4.5,  midnightMode: 'shia', nameAr: 'جامعة طهران – معهد الجيوفيزياء', nameEn: 'Inst. of Geophysics, Univ. of Tehran' },
         qom:        { id: 'qom',        fajr: 16.0, isha: 14.0, ishaType: 'angle', maghribAngle: 4.0,  midnightMode: 'shia', nameAr: 'شيعة اثنا عشرية – مؤسسة لواء، قم', nameEn: 'Shia Ithna-Ashari, Leva Inst., Qom' },
-        uae:        { id: 'uae',        fajr: 18.2, isha: 18.2, ishaType: 'angle', maghribAngle: null, nameAr: 'الهيئة العامة للشؤون الإسلامية – الإمارات', nameEn: 'UAE - GAIAE' },
+        uae:        { id: 'uae',        fajr: 18.2, isha: 18.2, ishaType: 'angle', maghribAngle: null, ihtiyat: { fajr: 0, sunrise: -2, dhuhr: 1.25, asr: 0.5, maghrib: 1.5, isha: -1 }, nameAr: 'الهيئة العامة للشؤون الإسلامية – الإمارات', nameEn: 'UAE - GAIAE' },
         kuwait:     { id: 'kuwait',     fajr: 18.0, isha: 17.5, ishaType: 'angle', maghribAngle: null, nameAr: 'وزارة الأوقاف – الكويت', nameEn: 'Kuwait' },
         qatar:      { id: 'qatar',      fajr: 18.0, isha: 17.5, ishaType: 'angle', maghribAngle: null, nameAr: 'وزارة الأوقاف – قطر', nameEn: 'Qatar' },
         turkey:     { id: 'turkey',     fajr: 18.0, isha: 17.0, ishaType: 'angle', maghribAngle: null, nameAr: 'رئاسة الشؤون الدينية – تركيا', nameEn: 'Turkey - Diyanet' },
@@ -161,8 +161,9 @@ const PrayerTimes = (() => {
             isha = haIsha !== null ? dhuhr + haIsha : null;
         }
 
-        // Dhuhr safety margin (+1 min)
-        const dhuhrFinal = dhuhr + 1 / 60;
+        // Dhuhr safety margin (+1 min) + method ihtiyat
+        const dhuhrIht = (method.ihtiyat && method.ihtiyat.dhuhr) ? method.ihtiyat.dhuhr : 0;
+        const dhuhrFinal = dhuhr + (1 + dhuhrIht) / 60;
 
         // Maghrib offset (Morocco +5min)
         if (method.maghribOffset && maghrib !== null) {
@@ -171,6 +172,16 @@ const PrayerTimes = (() => {
 
         // Imsak (10 min before Fajr)
         let imsak = fajr !== null ? fajr - 10 / 60 : null;
+
+        // ─── تطبيق الاحتياط (ihtiyat) ──────────────────────────
+        const iht = method.ihtiyat;
+        if (iht) {
+            if (iht.fajr    && fajr    !== null) fajr    += iht.fajr / 60;
+            if (iht.sunrise && sunrise !== null) sunrise += iht.sunrise / 60;
+            if (iht.asr     && asr     !== null) asr     += iht.asr / 60;
+            if (iht.maghrib && maghrib !== null) maghrib += iht.maghrib / 60;
+            if (iht.isha    && isha    !== null) isha    += iht.isha / 60;
+        }
 
         // ─── تعديلات خطوط العرض العالية ────────────────────
         if (highLatId !== 'none' && sunrise !== null && sunset !== null) {

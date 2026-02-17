@@ -13,5 +13,10 @@ Desktop.ini
 # Claude Code
 .claude/
 
+# Dev / research notes
+plan.md
+RESEARCH-*.md
+nul
+
 # Original import folder
 Main-claude-hijri-calendar-design-mfbdl/

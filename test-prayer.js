@@ -7,10 +7,11 @@
  * اتساقها الفلكي (±0-2 دقيقة مقارنة بالمرجع).
  *
  * Cross-reference with Al-Awail (al-awail.com):
- *   Cairo:  6/6 exact match (0 min diff)
- *   Makkah: 6/6 exact match (0 min diff)
- *   Amman:  6/6 within ±2 min (elevation-dependent)
- *   Seeq:   4/6 within ±2 min (algorithm variance)
+ *   Sharjah: 6/6 exact match vs Assalatu Noor app (official UAE times)
+ *   Cairo:   6/6 exact match (0 min diff)
+ *   Makkah:  6/6 exact match (0 min diff)
+ *   Amman:   6/6 within ±2 min (elevation-dependent)
+ *   Seeq:    4/6 within ±2 min (algorithm variance)
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -64,6 +65,13 @@ const testCases = [
         lat: 30.04, lng: 31.24, tz: 2,
         elevation: 0,
         expected: { fajr:'05:07', sunrise:'06:34', dhuhr:'12:10', asr:'15:20', maghrib:'17:44', isha:'19:02' }
+    },
+    {
+        city: 'Sharjah, UAE',
+        method: 'uae',
+        lat: 25.3622222, lng: 55.3911111, tz: 4,
+        elevation: 50,
+        expected: { fajr:'05:34', sunrise:'06:49', dhuhr:'12:35', asr:'15:48', maghrib:'18:15', isha:'19:30' }
     },
 ];
 
