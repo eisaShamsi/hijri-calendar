@@ -6,6 +6,7 @@
 const App = (() => {
     const H = HijriCalendar;
     const PT = typeof PrayerTimes !== 'undefined' ? PrayerTimes : null;
+    const isNative = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
     let currentYear, currentMonth;
     let _prayerTimer = null;
@@ -358,7 +359,21 @@ const App = (() => {
     function pad2(n) { return n < 10 ? '0' + n : '' + n; }
     function pad4(n) { let s = '' + n; while (s.length < 4) s = '0' + s; return s; }
 
-    function downloadFile(filename, content, mimeType) {
+    async function downloadFile(filename, content, mimeType) {
+        if (isNative()) {
+            try {
+                const { Filesystem, Directory, Encoding } = window.Capacitor.Plugins;
+                const { Share } = window.Capacitor.Plugins;
+                const result = await Filesystem.writeFile({
+                    path: filename,
+                    data: content,
+                    directory: Directory.Cache,
+                    encoding: Encoding.UTF8
+                });
+                await Share.share({ title: filename, url: result.uri });
+            } catch (e) { console.warn('Native share failed', e); }
+            return;
+        }
         const blob = new Blob([content], { type: mimeType });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -619,20 +634,27 @@ const App = (() => {
         document.getElementById('prayer-elevation').addEventListener('change', saveAndRender);
 
         // Detect location buttons
-        const detectLocation = () => {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(pos => {
-                const lat = Math.round(pos.coords.latitude * 100) / 100;
-                const lng = Math.round(pos.coords.longitude * 100) / 100;
-                const tz = -new Date().getTimezoneOffset() / 60;
-                document.getElementById('prayer-lat').value = lat;
-                document.getElementById('prayer-lng').value = lng;
-                document.getElementById('prayer-tz').value = tz;
-                if (pos.coords.altitude) {
-                    document.getElementById('prayer-elevation').value = Math.round(pos.coords.altitude);
+        const detectLocation = async () => {
+            const fillLocation = (lat, lng, altitude) => {
+                document.getElementById('prayer-lat').value = Math.round(lat * 100) / 100;
+                document.getElementById('prayer-lng').value = Math.round(lng * 100) / 100;
+                document.getElementById('prayer-tz').value = -new Date().getTimezoneOffset() / 60;
+                if (altitude) {
+                    document.getElementById('prayer-elevation').value = Math.round(altitude);
                 }
                 saveAndRender();
-            });
+            };
+            if (isNative()) {
+                try {
+                    const { Geolocation } = window.Capacitor.Plugins;
+                    const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+                    fillLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+                } catch (e) { console.warn('Native geolocation failed', e); }
+            } else if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    fillLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+                });
+            }
         };
         document.getElementById('prayer-detect').addEventListener('click', detectLocation);
         document.getElementById('prayer-detect-main').addEventListener('click', detectLocation);
@@ -863,17 +885,15 @@ const App = (() => {
         toggle.checked = enabled;
         if (beforeSelect) beforeSelect.value = beforeMin;
 
-        toggle.addEventListener('change', () => {
-            if (toggle.checked && 'Notification' in window && Notification.permission !== 'granted') {
-                Notification.requestPermission().then(perm => {
-                    if (perm !== 'granted') { toggle.checked = false; return; }
-                    _saveNotifySettings(true, beforeMin);
-                    scheduleNotifications();
-                });
+        toggle.addEventListener('change', async () => {
+            if (toggle.checked) {
+                const granted = await _requestNotifyPermission();
+                if (!granted) { toggle.checked = false; return; }
+                _saveNotifySettings(true, beforeMin);
+                scheduleNotifications();
             } else {
-                _saveNotifySettings(toggle.checked, beforeMin);
-                if (toggle.checked) scheduleNotifications();
-                else clearNotificationTimers();
+                _saveNotifySettings(false, beforeMin);
+                clearNotificationTimers();
             }
         });
 
@@ -886,9 +906,27 @@ const App = (() => {
         }
 
         _updateNotifyStatus();
-        if (enabled && 'Notification' in window && Notification.permission === 'granted') {
-            scheduleNotifications();
+        if (enabled) {
+            _requestNotifyPermission().then(granted => {
+                if (granted) scheduleNotifications();
+            });
         }
+    }
+
+    async function _requestNotifyPermission() {
+        if (isNative()) {
+            try {
+                const { LocalNotifications } = window.Capacitor.Plugins;
+                const result = await LocalNotifications.requestPermissions();
+                return result.display === 'granted';
+            } catch (e) { return false; }
+        }
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') return true;
+            const perm = await Notification.requestPermission();
+            return perm === 'granted';
+        }
+        return false;
     }
 
     function _saveNotifySettings(enabled, before) {
@@ -901,6 +939,11 @@ const App = (() => {
     function _updateNotifyStatus() {
         const statusEl = document.getElementById('notify-status');
         if (!statusEl) return;
+        if (isNative()) {
+            statusEl.textContent = H.t('notifyGranted');
+            statusEl.className = 'notify-status notify-granted';
+            return;
+        }
         if (!('Notification' in window)) {
             statusEl.textContent = '—';
             return;
@@ -910,14 +953,23 @@ const App = (() => {
         statusEl.className = 'notify-status notify-' + perm;
     }
 
-    function clearNotificationTimers() {
+    async function clearNotificationTimers() {
         _notifyTimers.forEach(t => clearTimeout(t));
         _notifyTimers = [];
+        if (isNative()) {
+            try {
+                const { LocalNotifications } = window.Capacitor.Plugins;
+                const pending = await LocalNotifications.getPending();
+                if (pending.notifications.length) {
+                    await LocalNotifications.cancel(pending);
+                }
+            } catch (e) {}
+        }
     }
 
-    function scheduleNotifications() {
-        clearNotificationTimers();
-        if (!PT || !('Notification' in window) || Notification.permission !== 'granted') return;
+    async function scheduleNotifications() {
+        await clearNotificationTimers();
+        if (!PT) return;
 
         const s = PT.getSettings();
         if (!s.lat && !s.lng) return;
@@ -936,6 +988,34 @@ const App = (() => {
             asr: H.t('prayerAsr'), maghrib: H.t('prayerMaghrib'), isha: H.t('prayerIsha')
         };
 
+        if (isNative()) {
+            const { LocalNotifications } = window.Capacitor.Plugins;
+            const notifications = [];
+            let id = 1;
+            for (const key of prayerKeys) {
+                const raw = times._raw[key];
+                if (raw === null) continue;
+                const prayerDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                    Math.floor(raw), Math.round((raw % 1) * 60));
+                const notifyAt = new Date(prayerDate.getTime() - beforeMin * 60000);
+                if (notifyAt.getTime() > nowMs) {
+                    notifications.push({
+                        id: id++,
+                        title: H.t('prayerTitle'),
+                        body: `${prayerLabels[key]} — ${times[key]}`,
+                        schedule: { at: notifyAt },
+                        sound: 'default'
+                    });
+                }
+            }
+            if (notifications.length) {
+                try { await LocalNotifications.schedule({ notifications }); } catch (e) {}
+            }
+            return;
+        }
+
+        // Web fallback
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
         for (const key of prayerKeys) {
             const raw = times._raw[key];
             if (raw === null) continue;
@@ -958,6 +1038,7 @@ const App = (() => {
 
     // ─── PWA ─────────────────────────────────────────────────
     function registerServiceWorker() {
+        if (isNative()) return; // Native app — no SW needed
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js').catch(() => {});
         }

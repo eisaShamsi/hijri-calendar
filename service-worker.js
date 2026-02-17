@@ -14,6 +14,12 @@ const CORE_ASSETS = [
     './manifest.json',
     './icon-192.svg',
     './icon-512.svg',
+    './fonts/amiri-400-arabic.woff2',
+    './fonts/amiri-400-latin.woff2',
+    './fonts/amiri-700-arabic.woff2',
+    './fonts/amiri-700-latin.woff2',
+    './fonts/cairo-arabic.woff2',
+    './fonts/cairo-latin.woff2',
 ];
 
 // Install — precache core assets

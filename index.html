@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#14553f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,13 +18,13 @@
 
     <!-- ═══ الرأس ═══ -->
     <header class="header">
-        <span class="header-icon">&#x263D;</span>
+        <span class="header-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor"><defs><mask id="hm"><rect width="100" height="100" fill="white"/><circle cx="62" cy="45" r="38" fill="black"/></mask></defs><circle cx="50" cy="50" r="45" mask="url(#hm)"/></svg></span>
         <h1 id="app-title">التقويم الهجري</h1>
     </header>
 
     <!-- ═══ بطاقة اليوم ═══ -->
     <div class="today-card">
-        <div class="date-icon">&#x263D;</div>
+        <div class="date-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor"><defs><mask id="dm"><rect width="100" height="100" fill="white"/><circle cx="62" cy="45" r="38" fill="black"/></mask></defs><circle cx="50" cy="50" r="45" mask="url(#dm)"/></svg></div>
         <div class="date-text">
             <div class="hijri-date" id="today-hijri"></div>
             <div class="greg-date" id="today-gregorian"></div>
@@ -343,6 +343,7 @@
 
 </div>
 
+<script src="capacitor.js"></script>
 <script src="hijri.js"></script>
 <script src="prayer-times.js"></script>
 <script src="app.js"></script>

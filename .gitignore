@@ -18,5 +18,14 @@ plan.md
 RESEARCH-*.md
 nul
 
+# Capacitor build output
+www/
+
+# Release builds
+Hijri Calendar v*/
+
+# Build scripts
+generate-icons.js
+
 # Original import folder
 Main-claude-hijri-calendar-design-mfbdl/

@@ -1,0 +1,15 @@
+{
+  "appId": "com.eisa.hijri",
+  "appName": "التقويم الهجري",
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#14553f"
+    },
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#14553f",
+      "showSpinner": false
+    }
+  }
+}

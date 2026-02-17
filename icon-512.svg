@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <rect width="512" height="512" rx="80" fill="#14553f"/>
-  <g transform="translate(256,240)">
-    <!-- Crescent Moon -->
-    <circle cx="0" cy="-20" r="120" fill="#f5dfa0"/>
-    <circle cx="48" cy="-48" r="95" fill="#14553f"/>
+  <g transform="translate(256,220)">
+    <!-- Classic Crescent Moon -->
+    <circle cx="0" cy="0" r="120" fill="#f5dfa0"/>
+    <circle cx="32" cy="-13" r="101" fill="#14553f"/>
     <!-- Star -->
     <polygon points="80,-80 88,-58 110,-58 93,-45 99,-22 80,-35 61,-22 67,-45 50,-58 72,-58" fill="#f5dfa0"/>
   </g>
