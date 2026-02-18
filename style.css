@@ -573,6 +573,23 @@ html[dir="ltr"] .prayer-card {
     margin-right: -3px;
 }
 
+/* LTR: reorder buttons so prev (<) is on left and next (>) is on right */
+html[dir="ltr"] .nav-bar .nav-next {
+    order: 3;
+}
+
+html[dir="ltr"] .nav-bar .month-info {
+    order: 2;
+}
+
+html[dir="ltr"] .nav-bar .nav-prev {
+    order: 1;
+}
+
+html[dir="ltr"] .nav-bar .today-nav-btn {
+    order: 0;
+}
+
 .nav-bar .nav-btn:hover {
     background: rgba(255,255,255,0.25);
     transform: scale(1.05);
