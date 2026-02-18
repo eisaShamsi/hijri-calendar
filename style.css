@@ -563,17 +563,18 @@ html[dir="ltr"] .prayer-card {
     border-right: 2.5px solid var(--white);
 }
 
+/* RTL default: next is on right → arrow points left; prev is on left → arrow points right */
 .nav-bar .nav-next::after {
-    transform: rotate(45deg);
-    margin-left: -3px;
-}
-
-.nav-bar .nav-prev::after {
     transform: rotate(-135deg);
     margin-right: -3px;
 }
 
-/* LTR: reorder buttons so prev (<) is on left and next (>) is on right */
+.nav-bar .nav-prev::after {
+    transform: rotate(45deg);
+    margin-left: -3px;
+}
+
+/* LTR: reorder so prev is on left, next on right; flip arrow directions */
 html[dir="ltr"] .nav-bar .nav-next {
     order: 3;
 }
@@ -588,6 +589,18 @@ html[dir="ltr"] .nav-bar .nav-prev {
 
 html[dir="ltr"] .nav-bar .today-nav-btn {
     order: 0;
+}
+
+html[dir="ltr"] .nav-bar .nav-next::after {
+    transform: rotate(45deg);
+    margin-right: 0;
+    margin-left: -3px;
+}
+
+html[dir="ltr"] .nav-bar .nav-prev::after {
+    transform: rotate(-135deg);
+    margin-left: 0;
+    margin-right: -3px;
 }
 
 .nav-bar .nav-btn:hover {
