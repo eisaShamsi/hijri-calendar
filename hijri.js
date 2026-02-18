@@ -90,9 +90,13 @@ const HijriCalendar = (() => {
             durrLabel: 'الدّر',
             suhailLabel: 'سهيل',
             moonPhaseLabel: 'طور القمر',
-            moonAgeLabel: 'عمر القمر',
             moonAgeDays: 'يوم',
             moonIllumination: 'الإضاءة',
+            moonNextPhase: 'القادم',
+            moonDaysLeft: 'بعد',
+            tideLabel: 'المد والجزر',
+            tideHigh: 'مد عالي',
+            tideLow: 'جزر',
             exportTitle: 'تصدير إلى أجندة (iCal)',
             exportFrom: 'من', exportTo: 'إلى',
             exportBtn: 'تصدير .ics',
@@ -154,9 +158,13 @@ const HijriCalendar = (() => {
             durrLabel: 'Darr',
             suhailLabel: 'Suhail',
             moonPhaseLabel: 'Moon Phase',
-            moonAgeLabel: 'Moon Age',
             moonAgeDays: 'days',
             moonIllumination: 'Illumination',
+            moonNextPhase: 'Next',
+            moonDaysLeft: 'in',
+            tideLabel: 'Tides',
+            tideHigh: 'High',
+            tideLow: 'Low',
             exportTitle: 'Export to Calendar (iCal)',
             exportFrom: 'From', exportTo: 'To',
             exportBtn: 'Export .ics',
@@ -449,12 +457,34 @@ const HijriCalendar = (() => {
         ar: ['محاق', 'هلال أول', 'تربيع أول', 'أحدب متزايد', 'بدر', 'أحدب متناقص', 'تربيع أخير', 'هلال أخير'],
         en: ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent']
     };
-    const MOON_EMOJIS = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+    // رموز أصلية بلون القمر الطبيعي (أبيض/رمادي)
+    const MOON_SYMBOLS = ['●', '◗', '◑', '◕', '○', '◔', '◐', '◖'];
+
+    // حدود الأطوار الأربعة الرئيسية (كنسبة من الدورة القمرية)
+    // محاق=0, تربيع أول=0.25, بدر=0.5, تربيع أخير=0.75
+    const MAJOR_PHASE_FRACTIONS = [0, 0.25, 0.5, 0.75];
+    const MAJOR_PHASE_INDICES = [0, 2, 4, 6]; // indices in MOON_PHASES
+
+    // أنواع المد والجزر
+    const TIDE_TYPES = {
+        ar: {
+            spring: 'مد عالٍ (مد ربيعي)',
+            neap: 'مد منخفض (مد محاقي)',
+            rising: 'مد متزايد',
+            falling: 'مد متناقص'
+        },
+        en: {
+            spring: 'Spring Tide (High)',
+            neap: 'Neap Tide (Low)',
+            rising: 'Rising Tide',
+            falling: 'Falling Tide'
+        }
+    };
 
     /**
      * حساب طور القمر لتاريخ ميلادي
      * يستخدم خوارزمية Jean Meeus للمحاق ثم يحسب عمر القمر
-     * المُخرج: { phase: 0-7, name, emoji, age, illumination }
+     * المُخرج: { phase, name, symbol, age, illumination, nextPhase, tide }
      */
     function getMoonPhase(gYear, gMonth, gDay) {
         // تحويل التاريخ إلى JDE
@@ -462,7 +492,6 @@ const HijriCalendar = (() => {
         const jde = jdn + 0.5; // منتصف اليوم تقريباً
 
         // تقدير k (رقم الاقتران) لهذا التاريخ
-        // k = 0 عند يناير 2000
         const decYear = gYear + (gMonth - 1) / 12 + (gDay - 1) / 365.25;
         const kApprox = (decYear - 2000.0) * 12.3685;
         const k0 = Math.floor(kApprox);
@@ -471,7 +500,6 @@ const HijriCalendar = (() => {
         let bestK = k0;
         let bestJDE = Astronomical.newMoonJDE(k0);
 
-        // تحقق من عدة اقترانات قريبة
         for (let dk = -2; dk <= 2; dk++) {
             const testK = k0 + dk;
             const testJDE = Astronomical.newMoonJDE(testK);
@@ -481,7 +509,6 @@ const HijriCalendar = (() => {
             }
         }
 
-        // إذا لم نجد محاقاً قبل التاريخ، ابحث أبعد
         if (bestJDE > jde) {
             for (let dk = -5; dk <= 0; dk++) {
                 const testK = k0 + dk;
@@ -496,35 +523,117 @@ const HijriCalendar = (() => {
 
         // عمر القمر بالأيام منذ آخر محاق
         const moonAge = jde - bestJDE;
-
-        // الدورة القمرية ≈ 29.53 يوم
         const synodicMonth = 29.530588861;
 
-        // نسبة الإضاءة (تقريب مبسط بالجيب)
+        // نسبة الإضاءة
         const phaseAngle = (moonAge / synodicMonth) * 2 * Math.PI;
         const illumination = Math.round((1 - Math.cos(phaseAngle)) / 2 * 100);
 
         // تحديد الطور (8 أطوار)
         const phaseFraction = moonAge / synodicMonth;
         let phaseIdx;
-        if (phaseFraction < 0.0625)       phaseIdx = 0; // محاق
-        else if (phaseFraction < 0.1875)  phaseIdx = 1; // هلال أول
-        else if (phaseFraction < 0.3125)  phaseIdx = 2; // تربيع أول
-        else if (phaseFraction < 0.4375)  phaseIdx = 3; // أحدب متزايد
-        else if (phaseFraction < 0.5625)  phaseIdx = 4; // بدر
-        else if (phaseFraction < 0.6875)  phaseIdx = 5; // أحدب متناقص
-        else if (phaseFraction < 0.8125)  phaseIdx = 6; // تربيع أخير
-        else if (phaseFraction < 0.9375)  phaseIdx = 7; // هلال أخير
-        else                               phaseIdx = 0; // محاق (دورة جديدة)
+        if (phaseFraction < 0.0625)       phaseIdx = 0;
+        else if (phaseFraction < 0.1875)  phaseIdx = 1;
+        else if (phaseFraction < 0.3125)  phaseIdx = 2;
+        else if (phaseFraction < 0.4375)  phaseIdx = 3;
+        else if (phaseFraction < 0.5625)  phaseIdx = 4;
+        else if (phaseFraction < 0.6875)  phaseIdx = 5;
+        else if (phaseFraction < 0.8125)  phaseIdx = 6;
+        else if (phaseFraction < 0.9375)  phaseIdx = 7;
+        else                               phaseIdx = 0;
+
+        // ── الطور القادم والأيام المتبقية ──
+        // الأطوار الأربعة الرئيسية: محاق(0), تربيع أول(0.25), بدر(0.5), تربيع أخير(0.75)
+        let nextMajorIdx = -1;
+        let daysToNext = Infinity;
+        for (let i = 0; i < MAJOR_PHASE_FRACTIONS.length; i++) {
+            let targetFrac = MAJOR_PHASE_FRACTIONS[i];
+            let diff = targetFrac - phaseFraction;
+            if (diff <= 0.01) diff += 1.0; // الطور التالي في الدورة القادمة
+            const days = diff * synodicMonth;
+            if (days < daysToNext) {
+                daysToNext = days;
+                nextMajorIdx = i;
+            }
+        }
+        const nextPhaseIdx = MAJOR_PHASE_INDICES[nextMajorIdx];
+        const nextPhaseName = MOON_PHASES[currentLang][nextPhaseIdx];
+        const nextPhaseSymbol = MOON_SYMBOLS[nextPhaseIdx];
+        daysToNext = Math.round(daysToNext * 10) / 10;
+
+        // ── المد والجزر ──
+        // المد الربيعي (أعلى): عند المحاق والبدر (±2 يوم)
+        // المد المحاقي (أدنى): عند التربيعين (±2 يوم)
+        // بينهما: متزايد أو متناقص
+        const lang = currentLang;
+        let tideType, tideStrength;
+        const distToNew = Math.min(phaseFraction, 1 - phaseFraction) * synodicMonth;
+        const distToFull = Math.abs(phaseFraction - 0.5) * synodicMonth;
+        const distToQ1 = Math.abs(phaseFraction - 0.25) * synodicMonth;
+        const distToQ3 = Math.abs(phaseFraction - 0.75) * synodicMonth;
+        const distToQuarter = Math.min(distToQ1, distToQ3);
+        const distToSpring = Math.min(distToNew, distToFull);
+
+        if (distToSpring <= 2) {
+            tideType = TIDE_TYPES[lang].spring;
+            tideStrength = 100;
+        } else if (distToQuarter <= 2) {
+            tideType = TIDE_TYPES[lang].neap;
+            tideStrength = 30;
+        } else if (phaseFraction < 0.25 || (phaseFraction > 0.5 && phaseFraction < 0.75)) {
+            // بين محاق→تربيع أول أو بدر→تربيع أخير = متناقص
+            tideType = TIDE_TYPES[lang].falling;
+            tideStrength = 65;
+        } else {
+            // بين تربيع أول→بدر أو تربيع أخير→محاق = متزايد
+            tideType = TIDE_TYPES[lang].rising;
+            tideStrength = 65;
+        }
+
+        // تقدير أوقات المد العالي (تقريب عام: المد يتأخر ~50 دقيقة يومياً)
+        // المد العالي يحدث تقريباً عند عبور القمر خط الزوال وبعده بـ12.4 ساعة
+        const lunarDayOffset = (moonAge % 1) * 24 * 60; // دقائق من بداية اليوم القمري
+        const baseHighTide1 = Math.round(moonAge * 50.47) % (12 * 60 + 25); // دقائق
+        const highTide1Hr = Math.floor(baseHighTide1 / 60) % 24;
+        const highTide1Min = baseHighTide1 % 60;
+        const highTide2Hr = (highTide1Hr + 12) % 24;
+        const highTide2Min = (highTide1Min + 25) % 60;
+
+        const formatTime = (h, m) => {
+            const hh = String(h).padStart(2, '0');
+            const mm = String(m).padStart(2, '0');
+            return `${hh}:${mm}`;
+        };
+
+        const tideTime1 = formatTime(highTide1Hr, highTide1Min);
+        const tideTime2 = formatTime(highTide2Hr, highTide2Min);
+        // المد المنخفض بين العاليين (~6h12m بعد كل مد عالي)
+        const lowTide1Hr = (highTide1Hr + 6) % 24;
+        const lowTide1Min = (highTide1Min + 12) % 60;
+        const lowTide2Hr = (highTide2Hr + 6) % 24;
+        const lowTide2Min = (highTide2Min + 12) % 60;
+        const tideTimeLow1 = formatTime(lowTide1Hr, lowTide1Min);
+        const tideTimeLow2 = formatTime(lowTide2Hr, lowTide2Min);
 
         return {
             phase: phaseIdx,
             name: MOON_PHASES[currentLang][phaseIdx],
             nameAr: MOON_PHASES.ar[phaseIdx],
             nameEn: MOON_PHASES.en[phaseIdx],
-            emoji: MOON_EMOJIS[phaseIdx],
+            symbol: MOON_SYMBOLS[phaseIdx],
             age: Math.round(moonAge * 10) / 10,
-            illumination: illumination
+            illumination: illumination,
+            nextPhase: {
+                name: nextPhaseName,
+                symbol: nextPhaseSymbol,
+                daysRemaining: daysToNext
+            },
+            tide: {
+                type: tideType,
+                strength: tideStrength,
+                high: [tideTime1, tideTime2],
+                low: [tideTimeLow1, tideTimeLow2]
+            }
         };
     }
 

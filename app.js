@@ -573,7 +573,7 @@ const App = (() => {
         if (zodiac) parts.push(`${zodiac.symbol} ${zodiac.name}`);
         if (season) parts.push(`${H.t('seasonLabel')}: ${season.name}`);
         if (durr) parts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
-        if (moon) parts.push(`${moon.emoji} ${moon.name}`);
+        if (moon) parts.push(`${moon.symbol} ${moon.name}`);
 
         el.textContent = parts.join(' • ');
     }
@@ -613,14 +613,36 @@ const App = (() => {
         // طور القمر
         const moon = H.getMoonPhase(gYear, gMonth, gDay);
         if (moon) {
-            setVal('moon-emoji', moon.emoji);
+            setVal('moon-symbol', moon.symbol);
             setVal('moon-name', moon.name);
-            const lang = H.getLang();
             const ageText = `${moon.age} ${H.t('moonAgeDays')}`;
             const illumText = `${H.t('moonIllumination')}: ${moon.illumination}%`;
             setVal('moon-details', `${ageText} — ${illumText}`);
             const bar = document.getElementById('moon-bar');
             if (bar) bar.style.width = moon.illumination + '%';
+
+            // الطور القادم
+            setVal('moon-next-label', H.t('moonNextPhase'));
+            const np = moon.nextPhase;
+            setVal('moon-next-value', `${np.symbol} ${np.name} — ${H.t('moonDaysLeft')} ${np.daysRemaining} ${H.t('moonAgeDays')}`);
+
+            // المد والجزر
+            const tide = moon.tide;
+            setVal('tide-type', tide.type);
+            setVal('tide-high-lbl', H.t('tideHigh'));
+            setVal('tide-low-lbl', H.t('tideLow'));
+            setVal('tide-high-1', tide.high[0]);
+            setVal('tide-high-2', tide.high[1]);
+            setVal('tide-low-1', tide.low[0]);
+            setVal('tide-low-2', tide.low[1]);
+
+            // شريط قوة المد
+            const tideBar = document.getElementById('tide-section');
+            if (tideBar) {
+                tideBar.className = 'tide-section';
+                if (tide.strength >= 90) tideBar.classList.add('tide-spring');
+                else if (tide.strength <= 40) tideBar.classList.add('tide-neap');
+            }
         }
 
         // تحديث العناوين حسب اللغة
@@ -681,7 +703,7 @@ const App = (() => {
         if (zodiac) anwaParts.push(`${zodiac.symbol} ${zodiac.name}`);
         if (season) anwaParts.push(season.name);
         if (durr) anwaParts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
-        if (moon) anwaParts.push(`${moon.emoji} ${moon.name}`);
+        if (moon) anwaParts.push(`${moon.symbol} ${moon.name}`);
 
         if (anwaParts.length) {
             html += `<div class="info-anwa">${anwaParts.join(' • ')}</div>`;

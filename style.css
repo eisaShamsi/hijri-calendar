@@ -1424,16 +1424,25 @@ html[dir="ltr"] .anwa-card {
     background: var(--white);
 }
 
-.moon-phase-visual {
+.moon-phase-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 12px;
 }
 
-.moon-emoji {
-    font-size: 2.4rem;
+.moon-current {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.moon-symbol {
+    font-size: 2.2rem;
     line-height: 1;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    color: var(--gray-700);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .moon-info {
@@ -1455,6 +1464,28 @@ html[dir="ltr"] .anwa-card {
     color: var(--gray-500);
 }
 
+.moon-next {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    text-align: end;
+    flex-shrink: 0;
+}
+
+.moon-next-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+}
+
+.moon-next-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
 .moon-bar-container {
     margin-top: 10px;
     height: 6px;
@@ -1470,8 +1501,72 @@ html[dir="ltr"] .anwa-card {
     transition: width 0.5s ease;
 }
 
-[data-theme="dark"] .moon-phase-section {
-    background: var(--white);
+/* ─── المد والجزر ──────────────────────────────────────────── */
+.tide-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--gray-100);
+}
+
+.tide-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tide-icon {
+    font-size: 1.1rem;
+}
+
+.tide-type {
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--gray-700);
+}
+
+.tide-section.tide-spring .tide-type {
+    color: #0369a1;
+}
+
+.tide-section.tide-neap .tide-type {
+    color: var(--gray-400);
+}
+
+.tide-times {
+    display: flex;
+    gap: 24px;
+}
+
+.tide-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tide-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    min-width: 48px;
+}
+
+.tide-time {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    direction: ltr;
+    background: var(--gray-50);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+/* ─── الوضع الداكن — القمر والمد ──────────────────────────── */
+[data-theme="dark"] .moon-symbol {
+    color: var(--gray-300);
+    text-shadow: 0 1px 3px rgba(255,255,255,0.15);
 }
 
 [data-theme="dark"] .moon-name {
@@ -1482,12 +1577,33 @@ html[dir="ltr"] .anwa-card {
     color: var(--gray-400);
 }
 
+[data-theme="dark"] .moon-next-value {
+    color: var(--gray-400);
+}
+
 [data-theme="dark"] .moon-bar-container {
     background: rgba(255,255,255,0.1);
 }
 
 [data-theme="dark"] .moon-bar {
     background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+[data-theme="dark"] .tide-section {
+    border-top-color: rgba(255,255,255,0.08);
+}
+
+[data-theme="dark"] .tide-type {
+    color: var(--gray-500);
+}
+
+[data-theme="dark"] .tide-section.tide-spring .tide-type {
+    color: #38bdf8;
+}
+
+[data-theme="dark"] .tide-time {
+    background: rgba(255,255,255,0.06);
+    color: var(--gray-500);
 }
 
 /* ─── وصف حالة الطقس ────────────────────────────────────── */
