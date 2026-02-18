@@ -1366,7 +1366,7 @@ html[dir="ltr"] .anwa-card {
 }
 
 .anwa-header {
-    background: linear-gradient(135deg, var(--gold-600), var(--gold-400));
+    background: linear-gradient(135deg, #b8860b, #d4a017, #e6b830);
     padding: 14px 20px;
     color: var(--white);
     font-family: var(--font-display);
@@ -1378,7 +1378,7 @@ html[dir="ltr"] .anwa-card {
 }
 
 [data-theme="dark"] .anwa-header {
-    background: linear-gradient(135deg, #92400e, #b45309);
+    background: linear-gradient(135deg, #92400e, #b45309, #d97706);
 }
 
 .anwa-icon {
@@ -1415,6 +1415,26 @@ html[dir="ltr"] .anwa-card {
     font-weight: 700;
     color: var(--gold-600);
     line-height: 1.3;
+}
+
+/* ─── وصف حالة الطقس ────────────────────────────────────── */
+.anwa-weather {
+    padding: 14px 20px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--gray-600);
+    border-top: 1px solid var(--gray-100);
+    background: var(--gold-100);
+}
+
+.anwa-weather:empty {
+    display: none;
+}
+
+[data-theme="dark"] .anwa-weather {
+    background: rgba(180, 83, 9, 0.1);
+    color: var(--gray-300);
+    border-top-color: rgba(255,255,255,0.05);
 }
 
 /* ─── سطر الأنواء في شريط المعلومات ─────────────────────── */

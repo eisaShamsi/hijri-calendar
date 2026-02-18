@@ -605,6 +605,9 @@ const App = (() => {
         setVal('anwa-suhail', durr ? durr.suhailDay : '—');
         setVal('anwa-mia', durr ? durr.mia : '—');
 
+        // وصف حالة الطقس
+        setVal('anwa-weather', tale3 ? tale3.weather : '');
+
         // تحديث العناوين حسب اللغة
         setVal('anwa-card-title', H.t('anwaTitle'));
         setVal('anwa-tale3-lbl', H.t('tale3Label'));
