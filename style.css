@@ -551,6 +551,26 @@ html[dir="ltr"] .prayer-card {
     justify-content: center;
     font-size: 1.1rem;
     transition: all 0.2s;
+    position: relative;
+}
+
+.nav-bar .nav-btn::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-top: 2.5px solid var(--white);
+    border-right: 2.5px solid var(--white);
+}
+
+.nav-bar .nav-next::after {
+    transform: rotate(45deg);
+    margin-left: -3px;
+}
+
+.nav-bar .nav-prev::after {
+    transform: rotate(-135deg);
+    margin-right: -3px;
 }
 
 .nav-bar .nav-btn:hover {
