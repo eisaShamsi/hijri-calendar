@@ -83,6 +83,12 @@ const HijriCalendar = (() => {
             footer: 'إعداد عيسى بن راشد الشامسي — دولة الإمارات العربية المتحدة',
             version: 'الإصدار 1.6',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            anwaTitle: 'الأنواء والمواسم',
+            tale3Label: 'الطالع',
+            zodiacLabel: 'البرج',
+            seasonLabel: 'الموسم',
+            durrLabel: 'الدّر',
+            suhailLabel: 'سهيل',
             exportTitle: 'تصدير إلى أجندة (iCal)',
             exportFrom: 'من', exportTo: 'إلى',
             exportBtn: 'تصدير .ics',
@@ -137,6 +143,12 @@ const HijriCalendar = (() => {
             footer: 'By Eisa bin Rashid Al Shamsi — United Arab Emirates',
             version: 'Version 1.6',
             credit: 'Designed with Claude Code (Opus 4.6)',
+            anwaTitle: 'Seasons & Stars',
+            tale3Label: 'Star',
+            zodiacLabel: 'Zodiac',
+            seasonLabel: 'Season',
+            durrLabel: 'Darr',
+            suhailLabel: 'Suhail',
             exportTitle: 'Export to Calendar (iCal)',
             exportFrom: 'From', exportTo: 'To',
             exportBtn: 'Export .ics',
@@ -211,6 +223,160 @@ const HijriCalendar = (() => {
         const ev = ISLAMIC_EVENTS[key];
         if (!ev) return null;
         return { ...ev, name: currentLang === 'en' ? ev.nameEn : ev.nameAr };
+    }
+
+    // ─── الطوالع (منازل القمر) — 28 منزلة ─────────────────────
+    // كل منزلة 13 يوماً، تبدأ الدورة من 11 أغسطس
+    // التواريخ: [شهر_بداية, يوم_بداية, شهر_نهاية, يوم_نهاية]
+    const TAWALIE = [
+        { ar: 'النثرة (الكليبين)', en: 'Al-Nathra (Kulaibin)', from: [8,11], to: [8,23] },
+        { ar: 'الطرف', en: 'Al-Tarf', from: [8,24], to: [9,5] },
+        { ar: 'الجبهة', en: 'Al-Jabha', from: [9,6], to: [9,19] },
+        { ar: 'الزبرة', en: 'Al-Zubra', from: [9,20], to: [10,2] },
+        { ar: 'الصرفة', en: 'Al-Sarfa', from: [10,3], to: [10,15] },
+        { ar: 'العوى', en: "Al-Awa", from: [10,16], to: [10,28] },
+        { ar: 'السماك', en: 'Al-Simak', from: [10,29], to: [11,10] },
+        { ar: 'الغفر', en: 'Al-Ghafr', from: [11,11], to: [11,23] },
+        { ar: 'الزبانا', en: 'Al-Zubana', from: [11,24], to: [12,6] },
+        { ar: 'الإكليل', en: 'Al-Iklil', from: [12,7], to: [12,19] },
+        { ar: 'القلب', en: 'Al-Qalb', from: [12,20], to: [1,1] },
+        { ar: 'الشولة', en: 'Al-Shawla', from: [1,2], to: [1,14] },
+        { ar: 'النعائم', en: "Al-Na'a'im", from: [1,15], to: [1,27] },
+        { ar: 'البلدة', en: 'Al-Balda', from: [1,28], to: [2,9] },
+        { ar: 'سعد الذابح', en: "Sa'd al-Dhabih", from: [2,10], to: [2,22] },
+        { ar: 'سعد بلع', en: "Sa'd Bula'", from: [2,23], to: [3,7] },
+        { ar: 'سعد السعود', en: "Sa'd al-Su'ud", from: [3,8], to: [3,20] },
+        { ar: 'سعد الأخبية', en: "Sa'd al-Akhbiya", from: [3,21], to: [4,2] },
+        { ar: 'المقدم', en: 'Al-Muqaddam', from: [4,3], to: [4,15] },
+        { ar: 'المؤخر', en: "Al-Mu'akkhar", from: [4,16], to: [4,28] },
+        { ar: 'الرشاء', en: 'Al-Risha', from: [4,29], to: [5,11] },
+        { ar: 'الشرطين', en: 'Al-Sharatain', from: [5,12], to: [5,24] },
+        { ar: 'البطين', en: 'Al-Butain', from: [5,25], to: [6,6] },
+        { ar: 'الثريا', en: 'Al-Thuraya', from: [6,7], to: [6,19] },
+        { ar: 'الدبران', en: 'Al-Dabaran', from: [6,20], to: [7,2] },
+        { ar: 'الهقعة (الجوزاء الأولى)', en: 'Al-Haq\'a (Jawza I)', from: [7,3], to: [7,15] },
+        { ar: 'الهنعة (الجوزاء الثانية)', en: 'Al-Han\'a (Jawza II)', from: [7,16], to: [7,28] },
+        { ar: 'المرزم (الذراع)', en: 'Al-Mirzam', from: [7,29], to: [8,10] },
+    ];
+
+    // ─── الأبراج الشمسية — 12 برجاً ─────────────────────────
+    const ZODIAC = [
+        { ar: 'الأسد', en: 'Leo', symbol: '♌', from: [7,23], to: [8,22] },
+        { ar: 'السنبلة', en: 'Virgo', symbol: '♍', from: [8,23], to: [9,22] },
+        { ar: 'الميزان', en: 'Libra', symbol: '♎', from: [9,23], to: [10,22] },
+        { ar: 'العقرب', en: 'Scorpio', symbol: '♏', from: [10,23], to: [11,21] },
+        { ar: 'القوس', en: 'Sagittarius', symbol: '♐', from: [11,22], to: [12,21] },
+        { ar: 'الجدي', en: 'Capricorn', symbol: '♑', from: [12,22], to: [1,19] },
+        { ar: 'الدلو', en: 'Aquarius', symbol: '♒', from: [1,20], to: [2,18] },
+        { ar: 'الحوت', en: 'Pisces', symbol: '♓', from: [2,19], to: [3,20] },
+        { ar: 'الحمل', en: 'Aries', symbol: '♈', from: [3,21], to: [4,19] },
+        { ar: 'الثور', en: 'Taurus', symbol: '♉', from: [4,20], to: [5,20] },
+        { ar: 'الجوزاء', en: 'Gemini', symbol: '♊', from: [5,21], to: [6,20] },
+        { ar: 'السرطان', en: 'Cancer', symbol: '♋', from: [6,21], to: [7,22] },
+    ];
+
+    // ─── المواسم العربية ──────────────────────────────────────
+    const SEASONS = [
+        { ar: 'الكليبين', en: 'Al-Kulaibin', from: [8,11], to: [8,23] },
+        { ar: 'الصفري', en: 'Al-Safari', from: [8,24], to: [10,15] },
+        { ar: 'الوسم', en: 'Al-Wasm', from: [10,16], to: [12,6] },
+        { ar: 'مربعانية الشتاء', en: 'Winter Murabba\'aniya', from: [12,7], to: [1,14] },
+        { ar: 'برد البطين (الشبط)', en: 'Bard al-Butain (Shabat)', from: [1,15], to: [2,9] },
+        { ar: 'العقارب', en: "Al-Aqarib", from: [2,10], to: [3,20] },
+        { ar: 'الحميمين', en: 'Al-Humaimain', from: [3,21], to: [4,15] },
+        { ar: 'الذراعين', en: 'Al-Dhira\'ain', from: [4,16], to: [5,11] },
+        { ar: 'كنة الثريا', en: 'Kannat al-Thuraya', from: [4,28], to: [6,6] },
+        { ar: 'الثريا', en: 'Al-Thuraya', from: [6,7], to: [6,19] },
+        { ar: 'التويبع', en: 'Al-Tuwaiba\'', from: [6,20], to: [7,2] },
+        { ar: 'الجوزاء الأولى (الهقعة)', en: 'Jawza I (Al-Haq\'a)', from: [7,3], to: [7,15] },
+        { ar: 'الجوزاء الثانية (الهنعة)', en: 'Jawza II (Al-Han\'a)', from: [7,16], to: [7,28] },
+        { ar: 'المرزم', en: 'Al-Mirzam', from: [7,29], to: [8,10] },
+    ];
+
+    // ─── الدرور — 36 درّاً ───────────────────────────────────
+    // يبدأ الحساب من 15 أغسطس (طلوع سهيل)
+    // 4 مئات: الصفري (100 يوم)، الشتاء (100 يوم)، الصيف (100 يوم)، القيظ (65 يوم)
+    const DUROR_LABELS = {
+        ar: ['در العشر','در العشرين','در الثلاثين','در الأربعين','در الخمسين',
+             'در الستين','در السبعين','در الثمانين','در التسعين','در المائة'],
+        en: ['Darr 10','Darr 20','Darr 30','Darr 40','Darr 50',
+             'Darr 60','Darr 70','Darr 80','Darr 90','Darr 100']
+    };
+    const DUROR_MIA = {
+        ar: ['المائة الأولى (الصفري)','المائة الثانية (الشتاء)','المائة الثالثة (الصيف)','المائة الرابعة (القيظ)'],
+        en: ['1st Hundred (Safari)','2nd Hundred (Winter)','3rd Hundred (Summer)','4th Hundred (Qaiz)']
+    };
+
+    /** حساب يوم سهيل من التاريخ الميلادي (15 أغسطس = يوم 1) */
+    function _suhailDay(gMonth, gDay, gYear) {
+        // 15 أغسطس = بداية الحساب
+        const start = new Date(gYear, 7, 15); // Aug 15
+        let target = new Date(gYear, gMonth - 1, gDay);
+        // إذا كان التاريخ قبل 15 أغسطس، نحسب من السنة السابقة
+        if (target < start) {
+            start.setFullYear(gYear - 1);
+        }
+        const diff = Math.floor((target - start) / 86400000);
+        return diff + 1; // يوم 1 = 15 أغسطس
+    }
+
+    /** الحصول على الدر الحالي ورقم سهيل */
+    function getDurr(gMonth, gDay, gYear) {
+        const sDay = _suhailDay(gMonth, gDay, gYear);
+        // تحديد المائة والدر
+        let mia, durrIdx;
+        if (sDay <= 100) {
+            mia = 0; durrIdx = Math.ceil(sDay / 10) - 1;
+        } else if (sDay <= 200) {
+            mia = 1; durrIdx = Math.ceil((sDay - 100) / 10) - 1;
+        } else if (sDay <= 300) {
+            mia = 2; durrIdx = Math.ceil((sDay - 200) / 10) - 1;
+        } else {
+            mia = 3; durrIdx = Math.min(Math.ceil((sDay - 300) / 10) - 1, 5);
+        }
+        if (durrIdx < 0) durrIdx = 0;
+        if (durrIdx > 9) durrIdx = 9;
+        const lang = currentLang;
+        return {
+            suhailDay: sDay,
+            mia: DUROR_MIA[lang][mia],
+            durr: DUROR_LABELS[lang][durrIdx],
+            durrNum: (durrIdx + 1) * 10
+        };
+    }
+
+    /** مطابقة تاريخ ميلادي مع نطاق (شهر، يوم) مع دعم العبور بين السنوات */
+    function _matchRange(gMonth, gDay, from, to) {
+        const d = gMonth * 100 + gDay;
+        const f = from[0] * 100 + from[1];
+        const t = to[0] * 100 + to[1];
+        if (f <= t) return d >= f && d <= t;
+        // نطاق يعبر نهاية السنة (مثل ديسمبر → يناير)
+        return d >= f || d <= t;
+    }
+
+    function getTale3(gMonth, gDay) {
+        for (const t of TAWALIE) {
+            if (_matchRange(gMonth, gDay, t.from, t.to))
+                return { name: currentLang === 'en' ? t.en : t.ar, nameAr: t.ar, nameEn: t.en };
+        }
+        return null;
+    }
+
+    function getZodiac(gMonth, gDay) {
+        for (const z of ZODIAC) {
+            if (_matchRange(gMonth, gDay, z.from, z.to))
+                return { name: currentLang === 'en' ? z.en : z.ar, nameAr: z.ar, nameEn: z.en, symbol: z.symbol };
+        }
+        return null;
+    }
+
+    function getSeason(gMonth, gDay) {
+        for (const s of SEASONS) {
+            if (_matchRange(gMonth, gDay, s.from, s.to))
+                return { name: currentLang === 'en' ? s.en : s.ar, nameAr: s.ar, nameEn: s.en };
+        }
+        return null;
     }
 
     // تصحيحات المستخدم: { "1447-9": +1, "1447-10": -1 }
@@ -822,6 +988,9 @@ const HijriCalendar = (() => {
 
         // المناسبات
         ISLAMIC_EVENTS, getEvent,
+
+        // الأنواء والمواسم والأبراج والدرور
+        getTale3, getZodiac, getSeason, getDurr,
 
         // مساعدات
         toArabicNumerals,

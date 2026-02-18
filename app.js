@@ -33,6 +33,7 @@ const App = (() => {
         applyLabels();
         renderCalendar();
         renderTodayInfo();
+        renderAnwaCard();
         updateModeUI();
         if (PT) renderPrayerTimes();
         registerServiceWorker();
@@ -163,6 +164,7 @@ const App = (() => {
         applyLabels();
         renderCalendar();
         renderTodayInfo();
+        renderAnwaCard();
         updateModeUI();
         updateCorrectionDisplay();
     }
@@ -504,6 +506,20 @@ const App = (() => {
                 cell.classList.add('has-event');
             }
 
+            // مؤشر بداية طالع/موسم جديد
+            if (!day.isOtherMonth) {
+                const gd = day.gregorian;
+                const tale3 = H.getTale3(gd.month, gd.day);
+                const prevGreg = H.jdnToGregorian(day.jdn - 1);
+                const prevTale3 = H.getTale3(prevGreg.month, prevGreg.day);
+                if (tale3 && (!prevTale3 || tale3.nameAr !== prevTale3.nameAr)) {
+                    const starDot = document.createElement('span');
+                    starDot.className = 'anwa-dot anwa-dot-tale3';
+                    starDot.title = tale3.name;
+                    cell.appendChild(starDot);
+                }
+            }
+
             const gregDate = `${day.gregorian.year}/${day.gregorian.month}/${day.gregorian.day}`;
             let titleText = `${H.dayName(day.dayOfWeek)} — ${gregDate}`;
             if (event) titleText += `\n${event.name}`;
@@ -535,6 +551,60 @@ const App = (() => {
 
         document.getElementById('today-gregorian').textContent =
             `${now.getDate()} ${H.gregMonthName(now.getMonth())} ${now.getFullYear()}${H.t('gSuffix')}`;
+
+        // الأنواء والمواسم
+        _renderAnwaLine(now.getMonth() + 1, now.getDate(), now.getFullYear(), 'today-anwa');
+    }
+
+    /** عرض سطر الأنواء (الطالع • البرج • الموسم • الدر) */
+    function _renderAnwaLine(gMonth, gDay, gYear, elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        const tale3 = H.getTale3(gMonth, gDay);
+        const zodiac = H.getZodiac(gMonth, gDay);
+        const season = H.getSeason(gMonth, gDay);
+        const durr = H.getDurr(gMonth, gDay, gYear);
+
+        const parts = [];
+        if (tale3) parts.push(`${H.t('tale3Label')}: ${tale3.name}`);
+        if (zodiac) parts.push(`${zodiac.symbol} ${zodiac.name}`);
+        if (season) parts.push(`${H.t('seasonLabel')}: ${season.name}`);
+        if (durr) parts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
+
+        el.textContent = parts.join(' • ');
+    }
+
+    /** عرض بطاقة الأنواء المفصلة */
+    function renderAnwaCard() {
+        const now = new Date();
+        const gMonth = now.getMonth() + 1;
+        const gDay = now.getDate();
+        const gYear = now.getFullYear();
+
+        const tale3 = H.getTale3(gMonth, gDay);
+        const zodiac = H.getZodiac(gMonth, gDay);
+        const season = H.getSeason(gMonth, gDay);
+        const durr = H.getDurr(gMonth, gDay, gYear);
+
+        // تعبئة القيم
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+        setVal('anwa-tale3', tale3 ? tale3.name : '—');
+        setVal('anwa-zodiac', zodiac ? `${zodiac.symbol} ${zodiac.name}` : '—');
+        setVal('anwa-season', season ? season.name : '—');
+        setVal('anwa-durr', durr ? durr.durr : '—');
+        setVal('anwa-suhail', durr ? durr.suhailDay : '—');
+        setVal('anwa-mia', durr ? durr.mia : '—');
+
+        // تحديث العناوين حسب اللغة
+        setVal('anwa-card-title', H.t('anwaTitle'));
+        setVal('anwa-tale3-lbl', H.t('tale3Label'));
+        setVal('anwa-zodiac-lbl', H.t('zodiacLabel'));
+        setVal('anwa-season-lbl', H.t('seasonLabel'));
+        setVal('anwa-durr-lbl', H.t('durrLabel'));
+        setVal('anwa-suhail-lbl', H.t('suhailLabel'));
+        setVal('anwa-mia-lbl', H.getLang() === 'en' ? 'Hundred' : 'المائة');
     }
 
     // ─── اختيار يوم ─────────────────────────────────────────
@@ -571,6 +641,23 @@ const App = (() => {
         if (event) {
             html += ` <span class="info-event info-event-${event.type}">★ ${event.name}</span>`;
         }
+
+        // الأنواء والمواسم
+        const tale3 = H.getTale3(greg.month, greg.day);
+        const zodiac = H.getZodiac(greg.month, greg.day);
+        const season = H.getSeason(greg.month, greg.day);
+        const durr = H.getDurr(greg.month, greg.day, greg.year);
+
+        const anwaParts = [];
+        if (tale3) anwaParts.push(tale3.name);
+        if (zodiac) anwaParts.push(`${zodiac.symbol} ${zodiac.name}`);
+        if (season) anwaParts.push(season.name);
+        if (durr) anwaParts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
+
+        if (anwaParts.length) {
+            html += `<div class="info-anwa">${anwaParts.join(' • ')}</div>`;
+        }
+
         infoBar.innerHTML = html;
     }
 

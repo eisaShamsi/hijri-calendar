@@ -3,7 +3,7 @@
  * Cache-first strategy for offline support
  */
 
-const CACHE_NAME = 'hijri-calendar-v1.7';
+const CACHE_NAME = 'hijri-calendar-v1.8';
 const CORE_ASSETS = [
     './',
     './index.html',

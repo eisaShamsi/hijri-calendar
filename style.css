@@ -1342,6 +1342,107 @@ html[dir="ltr"] .result-label {
 .notify-denied { background: #fef2f2; color: #dc2626; }
 .notify-default { background: var(--gray-100); color: var(--gray-500); }
 
+/* ─── سطر الأنواء في بطاقة اليوم ─────────────────────────── */
+.today-card .date-text .anwa-date {
+    font-size: 0.75rem;
+    color: var(--gold-600);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* ─── بطاقة الأنواء والمواسم ─────────────────────────────── */
+.anwa-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-right: 4px solid var(--gold-500);
+}
+
+html[dir="ltr"] .anwa-card {
+    border-right: none;
+    border-left: 4px solid var(--gold-500);
+}
+
+.anwa-header {
+    background: linear-gradient(135deg, var(--gold-600), var(--gold-400));
+    padding: 14px 20px;
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+[data-theme="dark"] .anwa-header {
+    background: linear-gradient(135deg, #92400e, #b45309);
+}
+
+.anwa-icon {
+    font-size: 1.3rem;
+}
+
+.anwa-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--gray-100);
+    padding: 1px;
+}
+
+.anwa-item {
+    background: var(--white);
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.anwa-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gray-500);
+}
+
+.anwa-value {
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--gold-600);
+    line-height: 1.3;
+}
+
+/* ─── سطر الأنواء في شريط المعلومات ─────────────────────── */
+.info-anwa {
+    font-size: 0.75rem;
+    color: var(--gold-600);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* ─── نقطة بداية طالع جديد ──────────────────────────────── */
+.anwa-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+}
+
+.anwa-dot-tale3 {
+    background: var(--gold-500);
+}
+
+.calendar-cell.today .anwa-dot {
+    background: var(--gold-300);
+}
+
 /* ─── زر التثبيت ─────────────────────────────────────────── */
 .install-btn {
     margin-top: 12px;
@@ -1417,6 +1518,18 @@ html[dir="ltr"] .result-label {
 
     .prayer-time {
         font-size: 0.9rem;
+    }
+
+    .anwa-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .anwa-item {
+        padding: 10px 8px;
+    }
+
+    .anwa-value {
+        font-size: 0.82rem;
     }
 }
 
