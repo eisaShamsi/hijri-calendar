@@ -190,6 +190,7 @@ const App = (() => {
             _selectedDate = null;
             renderCalendar();
             renderTodayInfo();
+            renderAnwaCard();
             if (PT) renderPrayerTimes();
         });
 
@@ -575,12 +576,19 @@ const App = (() => {
         el.textContent = parts.join(' • ');
     }
 
-    /** عرض بطاقة الأنواء المفصلة */
-    function renderAnwaCard() {
-        const now = new Date();
-        const gMonth = now.getMonth() + 1;
-        const gDay = now.getDate();
-        const gYear = now.getFullYear();
+    /** عرض بطاقة الأنواء المفصلة — تقبل تاريخ ميلادي اختياري */
+    function renderAnwaCard(gregDate) {
+        let gMonth, gDay, gYear;
+        if (gregDate) {
+            gMonth = gregDate.month;
+            gDay = gregDate.day;
+            gYear = gregDate.year;
+        } else {
+            const now = new Date();
+            gMonth = now.getMonth() + 1;
+            gDay = now.getDate();
+            gYear = now.getFullYear();
+        }
 
         const tale3 = H.getTale3(gMonth, gDay);
         const zodiac = H.getZodiac(gMonth, gDay);
@@ -613,13 +621,14 @@ const App = (() => {
         document.querySelectorAll('.calendar-cell.selected').forEach(el => el.classList.remove('selected'));
         e.currentTarget.classList.add('selected');
 
-        // Update prayer times for the selected date
-        if (PT && day) {
+        // Update prayer times and Anwa card for the selected date
+        if (day) {
             const greg = day.gregorian;
             const now = new Date();
             const isToday = greg.year === now.getFullYear() && greg.month === (now.getMonth() + 1) && greg.day === now.getDate();
             _selectedDate = isToday ? null : { year: greg.year, month: greg.month, day: greg.day };
-            renderPrayerTimes();
+            if (PT) renderPrayerTimes();
+            renderAnwaCard(isToday ? null : greg);
         }
     }
 
