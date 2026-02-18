@@ -557,7 +557,7 @@ const App = (() => {
         _renderAnwaLine(now.getMonth() + 1, now.getDate(), now.getFullYear(), 'today-anwa');
     }
 
-    /** عرض سطر الأنواء (الطالع • البرج • الموسم • الدر) */
+    /** عرض سطر الأنواء (الطالع • البرج • الموسم • الدر • القمر) */
     function _renderAnwaLine(gMonth, gDay, gYear, elementId) {
         const el = document.getElementById(elementId);
         if (!el) return;
@@ -566,12 +566,14 @@ const App = (() => {
         const zodiac = H.getZodiac(gMonth, gDay);
         const season = H.getSeason(gMonth, gDay);
         const durr = H.getDurr(gMonth, gDay, gYear);
+        const moon = H.getMoonPhase(gYear, gMonth, gDay);
 
         const parts = [];
         if (tale3) parts.push(`${H.t('tale3Label')}: ${tale3.name}`);
         if (zodiac) parts.push(`${zodiac.symbol} ${zodiac.name}`);
         if (season) parts.push(`${H.t('seasonLabel')}: ${season.name}`);
         if (durr) parts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
+        if (moon) parts.push(`${moon.emoji} ${moon.name}`);
 
         el.textContent = parts.join(' • ');
     }
@@ -607,6 +609,19 @@ const App = (() => {
 
         // وصف حالة الطقس
         setVal('anwa-weather', tale3 ? tale3.weather : '');
+
+        // طور القمر
+        const moon = H.getMoonPhase(gYear, gMonth, gDay);
+        if (moon) {
+            setVal('moon-emoji', moon.emoji);
+            setVal('moon-name', moon.name);
+            const lang = H.getLang();
+            const ageText = `${moon.age} ${H.t('moonAgeDays')}`;
+            const illumText = `${H.t('moonIllumination')}: ${moon.illumination}%`;
+            setVal('moon-details', `${ageText} — ${illumText}`);
+            const bar = document.getElementById('moon-bar');
+            if (bar) bar.style.width = moon.illumination + '%';
+        }
 
         // تحديث العناوين حسب اللغة
         setVal('anwa-card-title', H.t('anwaTitle'));
@@ -659,12 +674,14 @@ const App = (() => {
         const zodiac = H.getZodiac(greg.month, greg.day);
         const season = H.getSeason(greg.month, greg.day);
         const durr = H.getDurr(greg.month, greg.day, greg.year);
+        const moon = H.getMoonPhase(greg.year, greg.month, greg.day);
 
         const anwaParts = [];
         if (tale3) anwaParts.push(tale3.name);
         if (zodiac) anwaParts.push(`${zodiac.symbol} ${zodiac.name}`);
         if (season) anwaParts.push(season.name);
         if (durr) anwaParts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
+        if (moon) anwaParts.push(`${moon.emoji} ${moon.name}`);
 
         if (anwaParts.length) {
             html += `<div class="info-anwa">${anwaParts.join(' • ')}</div>`;

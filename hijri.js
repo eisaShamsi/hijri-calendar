@@ -89,6 +89,10 @@ const HijriCalendar = (() => {
             seasonLabel: 'الموسم',
             durrLabel: 'الدّر',
             suhailLabel: 'سهيل',
+            moonPhaseLabel: 'طور القمر',
+            moonAgeLabel: 'عمر القمر',
+            moonAgeDays: 'يوم',
+            moonIllumination: 'الإضاءة',
             exportTitle: 'تصدير إلى أجندة (iCal)',
             exportFrom: 'من', exportTo: 'إلى',
             exportBtn: 'تصدير .ics',
@@ -149,6 +153,10 @@ const HijriCalendar = (() => {
             seasonLabel: 'Season',
             durrLabel: 'Darr',
             suhailLabel: 'Suhail',
+            moonPhaseLabel: 'Moon Phase',
+            moonAgeLabel: 'Moon Age',
+            moonAgeDays: 'days',
+            moonIllumination: 'Illumination',
             exportTitle: 'Export to Calendar (iCal)',
             exportFrom: 'From', exportTo: 'To',
             exportBtn: 'Export .ics',
@@ -434,6 +442,90 @@ const HijriCalendar = (() => {
                 return { name: currentLang === 'en' ? s.en : s.ar, nameAr: s.ar, nameEn: s.en };
         }
         return null;
+    }
+
+    // ─── أطوار القمر ──────────────────────────────────────────
+    const MOON_PHASES = {
+        ar: ['محاق', 'هلال أول', 'تربيع أول', 'أحدب متزايد', 'بدر', 'أحدب متناقص', 'تربيع أخير', 'هلال أخير'],
+        en: ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent']
+    };
+    const MOON_EMOJIS = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+
+    /**
+     * حساب طور القمر لتاريخ ميلادي
+     * يستخدم خوارزمية Jean Meeus للمحاق ثم يحسب عمر القمر
+     * المُخرج: { phase: 0-7, name, emoji, age, illumination }
+     */
+    function getMoonPhase(gYear, gMonth, gDay) {
+        // تحويل التاريخ إلى JDE
+        const jdn = gregorianToJDN(gYear, gMonth, gDay);
+        const jde = jdn + 0.5; // منتصف اليوم تقريباً
+
+        // تقدير k (رقم الاقتران) لهذا التاريخ
+        // k = 0 عند يناير 2000
+        const decYear = gYear + (gMonth - 1) / 12 + (gDay - 1) / 365.25;
+        const kApprox = (decYear - 2000.0) * 12.3685;
+        const k0 = Math.floor(kApprox);
+
+        // البحث عن أقرب محاق (new moon) قبل أو يساوي هذا التاريخ
+        let bestK = k0;
+        let bestJDE = Astronomical.newMoonJDE(k0);
+
+        // تحقق من عدة اقترانات قريبة
+        for (let dk = -2; dk <= 2; dk++) {
+            const testK = k0 + dk;
+            const testJDE = Astronomical.newMoonJDE(testK);
+            if (testJDE <= jde && testJDE > bestJDE) {
+                bestK = testK;
+                bestJDE = testJDE;
+            }
+        }
+
+        // إذا لم نجد محاقاً قبل التاريخ، ابحث أبعد
+        if (bestJDE > jde) {
+            for (let dk = -5; dk <= 0; dk++) {
+                const testK = k0 + dk;
+                const testJDE = Astronomical.newMoonJDE(testK);
+                if (testJDE <= jde) {
+                    bestK = testK;
+                    bestJDE = testJDE;
+                    break;
+                }
+            }
+        }
+
+        // عمر القمر بالأيام منذ آخر محاق
+        const moonAge = jde - bestJDE;
+
+        // الدورة القمرية ≈ 29.53 يوم
+        const synodicMonth = 29.530588861;
+
+        // نسبة الإضاءة (تقريب مبسط بالجيب)
+        const phaseAngle = (moonAge / synodicMonth) * 2 * Math.PI;
+        const illumination = Math.round((1 - Math.cos(phaseAngle)) / 2 * 100);
+
+        // تحديد الطور (8 أطوار)
+        const phaseFraction = moonAge / synodicMonth;
+        let phaseIdx;
+        if (phaseFraction < 0.0625)       phaseIdx = 0; // محاق
+        else if (phaseFraction < 0.1875)  phaseIdx = 1; // هلال أول
+        else if (phaseFraction < 0.3125)  phaseIdx = 2; // تربيع أول
+        else if (phaseFraction < 0.4375)  phaseIdx = 3; // أحدب متزايد
+        else if (phaseFraction < 0.5625)  phaseIdx = 4; // بدر
+        else if (phaseFraction < 0.6875)  phaseIdx = 5; // أحدب متناقص
+        else if (phaseFraction < 0.8125)  phaseIdx = 6; // تربيع أخير
+        else if (phaseFraction < 0.9375)  phaseIdx = 7; // هلال أخير
+        else                               phaseIdx = 0; // محاق (دورة جديدة)
+
+        return {
+            phase: phaseIdx,
+            name: MOON_PHASES[currentLang][phaseIdx],
+            nameAr: MOON_PHASES.ar[phaseIdx],
+            nameEn: MOON_PHASES.en[phaseIdx],
+            emoji: MOON_EMOJIS[phaseIdx],
+            age: Math.round(moonAge * 10) / 10,
+            illumination: illumination
+        };
     }
 
     // تصحيحات المستخدم: { "1447-9": +1, "1447-10": -1 }
@@ -1046,8 +1138,8 @@ const HijriCalendar = (() => {
         // المناسبات
         ISLAMIC_EVENTS, getEvent,
 
-        // الأنواء والمواسم والأبراج والدرور
-        getTale3, getZodiac, getSeason, getDurr,
+        // الأنواء والمواسم والأبراج والدرور وأطوار القمر
+        getTale3, getZodiac, getSeason, getDurr, getMoonPhase,
 
         // مساعدات
         toArabicNumerals,
