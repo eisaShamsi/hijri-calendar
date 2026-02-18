@@ -1512,16 +1512,16 @@ html[dir="ltr"] .anwa-card {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .tide-icon {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .tide-type {
     font-family: var(--font-display);
-    font-size: 0.88rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--gray-700);
 }
@@ -1534,33 +1534,48 @@ html[dir="ltr"] .anwa-card {
     color: var(--gray-400);
 }
 
-.tide-times {
+.tide-events {
     display: flex;
-    gap: 24px;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
-.tide-pair {
+.tide-event {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-.tide-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--gray-500);
-    min-width: 48px;
-}
-
-.tide-time {
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--gray-700);
-    direction: ltr;
-    background: var(--gray-50);
-    padding: 2px 8px;
+    gap: 6px;
+    padding: 6px 12px;
     border-radius: var(--radius-sm);
+    background: var(--gray-50);
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.tide-event-high {
+    background: rgba(3, 105, 161, 0.08);
+}
+
+.tide-event-low {
+    background: var(--gray-50);
+}
+
+.tide-event-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--gray-600);
+}
+
+.tide-event-high .tide-event-label {
+    color: #0369a1;
+}
+
+.tide-event-time {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    direction: ltr;
 }
 
 /* ─── الوضع الداكن — القمر والمد ──────────────────────────── */
@@ -1601,8 +1616,23 @@ html[dir="ltr"] .anwa-card {
     color: #38bdf8;
 }
 
-[data-theme="dark"] .tide-time {
-    background: rgba(255,255,255,0.06);
+[data-theme="dark"] .tide-event {
+    background: rgba(255,255,255,0.04);
+}
+
+[data-theme="dark"] .tide-event-high {
+    background: rgba(56, 189, 248, 0.08);
+}
+
+[data-theme="dark"] .tide-event-high .tide-event-label {
+    color: #38bdf8;
+}
+
+[data-theme="dark"] .tide-event-label {
+    color: var(--gray-400);
+}
+
+[data-theme="dark"] .tide-event-time {
     color: var(--gray-500);
 }
 

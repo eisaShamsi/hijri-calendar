@@ -610,8 +610,14 @@ const App = (() => {
         // وصف حالة الطقس
         setVal('anwa-weather', tale3 ? tale3.weather : '');
 
-        // طور القمر
-        const moon = H.getMoonPhase(gYear, gMonth, gDay);
+        // طور القمر (مع إحداثيات المستخدم للمد والجزر)
+        let userLat = 0, userLng = 0;
+        if (typeof PT !== 'undefined' && PT.getSettings) {
+            const ps = PT.getSettings();
+            userLat = ps.lat || 0;
+            userLng = ps.lng || 0;
+        }
+        const moon = H.getMoonPhase(gYear, gMonth, gDay, userLat, userLng);
         if (moon) {
             setVal('moon-symbol', moon.symbol);
             setVal('moon-name', moon.name);
@@ -626,22 +632,25 @@ const App = (() => {
             const np = moon.nextPhase;
             setVal('moon-next-value', `${np.symbol} ${np.name} — ${H.t('moonDaysLeft')} ${np.daysRemaining} ${H.t('moonAgeDays')}`);
 
-            // المد والجزر
+            // المد والجزر — أحداث مرتبة زمنياً
             const tide = moon.tide;
             setVal('tide-type', tide.type);
-            setVal('tide-high-lbl', H.t('tideHigh'));
-            setVal('tide-low-lbl', H.t('tideLow'));
-            setVal('tide-high-1', tide.high[0]);
-            setVal('tide-high-2', tide.high[1]);
-            setVal('tide-low-1', tide.low[0]);
-            setVal('tide-low-2', tide.low[1]);
+            const eventsEl = document.getElementById('tide-events');
+            if (eventsEl) {
+                eventsEl.innerHTML = tide.events.map(ev =>
+                    `<div class="tide-event tide-event-${ev.type}">` +
+                    `<span class="tide-event-label">${ev.label}</span>` +
+                    `<span class="tide-event-time">${ev.time}</span>` +
+                    `</div>`
+                ).join('');
+            }
 
             // شريط قوة المد
-            const tideBar = document.getElementById('tide-section');
-            if (tideBar) {
-                tideBar.className = 'tide-section';
-                if (tide.strength >= 90) tideBar.classList.add('tide-spring');
-                else if (tide.strength <= 40) tideBar.classList.add('tide-neap');
+            const tideSec = document.getElementById('tide-section');
+            if (tideSec) {
+                tideSec.className = 'tide-section';
+                if (tide.strength >= 90) tideSec.classList.add('tide-spring');
+                else if (tide.strength <= 40) tideSec.classList.add('tide-neap');
             }
         }
 
