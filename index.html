@@ -30,6 +30,7 @@
             <div class="greg-date" id="today-gregorian"></div>
             <div class="anwa-date" id="today-anwa"></div>
         </div>
+        <button class="share-btn" id="share-date-btn" title="مشاركة"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
         <span class="mode-badge mode-astro" id="mode-badge">فلكي</span>
     </div>
 
@@ -119,6 +120,7 @@
                 </div>
                 <button class="convert-btn" id="goto-btn"></button>
             </div>
+            <div class="converter-result" id="converter-result" style="display:none"></div>
         </div>
     </div>
 
@@ -155,6 +157,7 @@
         <div class="prayer-header">
             <span class="prayer-icon">&#x1F54C;</span>
             <span id="prayer-title">مواقيت الصلاة</span>
+            <button class="share-btn share-btn-prayer" id="share-prayer-btn" title="مشاركة المواقيت"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
         </div>
         <div class="prayer-no-location" id="prayer-no-location">
             <span id="prayer-no-loc-text">حدد موقعك لعرض مواقيت الصلاة</span>
@@ -195,6 +198,13 @@
             <span id="prayer-next-in">بعد</span>
             <span id="prayer-next-time"></span>
         </div>
+        <!-- رمضان -->
+        <div class="ramadan-section" id="ramadan-section" style="display:none">
+            <div class="ramadan-night" id="ramadan-night"></div>
+            <div class="ramadan-info" id="ramadan-info"></div>
+        </div>
+        <!-- قوس الشمس -->
+        <div class="sun-arc-container" id="sun-arc-container" style="display:none"></div>
         <div class="prayer-method-info" id="prayer-method-info" style="display:none">
             <span id="prayer-method-name"></span>
         </div>
@@ -333,8 +343,31 @@
                 </div>
                 <div class="tide-events" id="tide-events"></div>
             </div>
+            <div class="hilal-section" id="hilal-section" style="display:none">
+                <div class="hilal-header">
+                    <span class="hilal-icon">🌙</span>
+                    <span class="hilal-title" id="hilal-title">ولادة الهلال</span>
+                </div>
+                <div class="hilal-details" id="hilal-details"></div>
+            </div>
         </div>
         <div class="anwa-weather" id="anwa-weather"></div>
+    </div>
+
+    <!-- ═══ الأذكار ═══ -->
+    <div class="adhkar-card" id="adhkar-card">
+        <div class="adhkar-header" id="adhkar-toggle">
+            <span class="adhkar-icon">📿</span>
+            <span id="adhkar-title">الأذكار</span>
+            <span class="adhkar-arrow" id="adhkar-arrow">▼</span>
+        </div>
+        <div class="adhkar-body" id="adhkar-body" style="display:none">
+            <div class="adhkar-tabs">
+                <button class="adhkar-tab active" id="adhkar-tab-morning">أذكار الصباح</button>
+                <button class="adhkar-tab" id="adhkar-tab-evening">أذكار المساء</button>
+            </div>
+            <div class="adhkar-list" id="adhkar-list"></div>
+        </div>
     </div>
 
     <!-- ═══ تصدير iCal ═══ -->
@@ -379,6 +412,7 @@
                     </div>
                 </div>
                 <button class="convert-btn export-btn" id="export-btn"></button>
+                <button class="convert-btn export-pdf-btn" id="export-pdf-btn">📄 <span id="export-pdf-label">PDF</span></button>
             </div>
         </div>
     </div>

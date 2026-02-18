@@ -81,7 +81,7 @@ const HijriCalendar = (() => {
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'إعداد عيسى بن راشد الشامسي — دولة الإمارات العربية المتحدة',
-            version: 'الإصدار 1.6',
+            version: 'الإصدار 2.0',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
@@ -95,6 +95,16 @@ const HijriCalendar = (() => {
             moonNextPhase: 'القادم',
             moonDaysLeft: 'بعد',
             tideLabel: 'المد والجزر',
+            hilalTitle: 'ولادة الهلال',
+            hilalConjunction: 'الاقتران',
+            hilalMoonAge: 'عمر الهلال',
+            hilalAltitude: 'الارتفاع',
+            hilalElongation: 'الاستطالة',
+            hilalVisibility: 'إمكانية الرؤية',
+            hilalHours: 'ساعة',
+            hilalDegree: '°',
+            hilalAtSunset: 'عند الغروب',
+            hilalDirection: 'الاتجاه',
             exportTitle: 'تصدير إلى أجندة (iCal)',
             exportFrom: 'من', exportTo: 'إلى',
             exportBtn: 'تصدير .ics',
@@ -124,6 +134,22 @@ const HijriCalendar = (() => {
             // الإشعارات
             notifyEnable: 'تفعيل الإشعارات', notifyBefore: 'قبل الصلاة بـ', notifyMinutes: 'دقائق',
             notifyGranted: 'الإشعارات مفعلة', notifyDenied: 'الإشعارات مرفوضة', notifyDefault: 'اضغط لتفعيل الإشعارات',
+            // رمضان
+            ramadanNight: 'ليلة رمضان', ramadanLastTen: 'العشر الأواخر', ramadanQadr: 'تُرجى فيها ليلة القدر',
+            ramadanImsak: 'الإمساك', ramadanFasting: 'مدة الصيام',
+            // التحويل
+            converterResult: 'نتيجة التحويل', converterCopy: 'نسخ',
+            converterCopied: 'تم النسخ!',
+            // المشاركة
+            shareTitle: 'مشاركة', shareCopied: 'تم نسخ النص!', shareError: 'تعذرت المشاركة',
+            sharePrayerTitle: 'مشاركة المواقيت',
+            // قوس الشمس
+            sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
+            // الأذكار
+            adhkarTitle: 'الأذكار', adhkarMorning: 'أذكار الصباح', adhkarEvening: 'أذكار المساء',
+            adhkarCount: 'مرات', adhkarSource: 'المصدر', adhkarDone: 'تمت',
+            // التصدير PDF
+            exportPDF: 'طباعة PDF',
         },
         en: {
             title: 'Hijri Calendar',
@@ -147,7 +173,7 @@ const HijriCalendar = (() => {
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'By Eisa bin Rashid Al Shamsi — United Arab Emirates',
-            version: 'Version 1.6',
+            version: 'Version 2.0',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
@@ -161,6 +187,16 @@ const HijriCalendar = (() => {
             moonNextPhase: 'Next',
             moonDaysLeft: 'in',
             tideLabel: 'Tides',
+            hilalTitle: 'Crescent Birth',
+            hilalConjunction: 'Conjunction',
+            hilalMoonAge: 'Moon Age',
+            hilalAltitude: 'Altitude',
+            hilalElongation: 'Elongation',
+            hilalVisibility: 'Visibility',
+            hilalHours: 'hrs',
+            hilalDegree: '°',
+            hilalAtSunset: 'At Sunset',
+            hilalDirection: 'Direction',
             exportTitle: 'Export to Calendar (iCal)',
             exportFrom: 'From', exportTo: 'To',
             exportBtn: 'Export .ics',
@@ -190,6 +226,22 @@ const HijriCalendar = (() => {
             // Notifications
             notifyEnable: 'Enable Notifications', notifyBefore: 'Before prayer by', notifyMinutes: 'minutes',
             notifyGranted: 'Notifications enabled', notifyDenied: 'Notifications denied', notifyDefault: 'Click to enable notifications',
+            // Ramadan
+            ramadanNight: 'Ramadan Night', ramadanLastTen: 'Last 10 Nights', ramadanQadr: 'Laylat al-Qadr potential',
+            ramadanImsak: 'Imsak', ramadanFasting: 'Fasting Duration',
+            // Converter
+            converterResult: 'Conversion Result', converterCopy: 'Copy',
+            converterCopied: 'Copied!',
+            // Share
+            shareTitle: 'Share', shareCopied: 'Text copied!', shareError: 'Could not share',
+            sharePrayerTitle: 'Share Prayer Times',
+            // Sun arc
+            sunArcDay: 'Day Length', sunArcNight: 'Night Length',
+            // Adhkar
+            adhkarTitle: 'Adhkar', adhkarMorning: 'Morning Adhkar', adhkarEvening: 'Evening Adhkar',
+            adhkarCount: 'times', adhkarSource: 'Source', adhkarDone: 'Done',
+            // PDF Export
+            exportPDF: 'Print PDF',
         }
     };
 
@@ -658,6 +710,337 @@ const HijriCalendar = (() => {
         };
     }
 
+    // ─── ولادة الهلال ──────────────────────────────────────────
+
+    /**
+     * حساب وقت ولادة الهلال (الاقتران) وموقعه المتوقع في السماء
+     * لتحديد بداية الشهر الهجري
+     * @param {number} hijriYear - السنة الهجرية
+     * @param {number} hijriMonth - الشهر الهجري (1-12)
+     * @param {number} lat - خط العرض
+     * @param {number} lng - خط الطول
+     * @param {number} tz - فرق التوقيت عن UTC بالساعات
+     * @returns {object} معلومات الهلال
+     */
+    function getHilalInfo(hijriYear, hijriMonth, lat, lng, tz) {
+        if (!lat && !lng) return null;
+        if (tz === undefined) tz = 0;
+
+        const toRad = Math.PI / 180;
+        const toDeg = 180 / Math.PI;
+
+        // إيجاد الاقتران المقابل لهذا الشهر عبر بداية الشهر الفعلية
+        // monthStartJDN يعطينا أول يوم من الشهر الهجري
+        // الاقتران يحدث قبل بداية الشهر بيوم أو يومين
+        const monthStart = Astronomical.monthStartJDN(hijriYear, hijriMonth);
+        const targetJDE = monthStart - 1.0; // تقريب: الاقتران قبل بداية الشهر
+
+        // إيجاد k الأقرب لهذا التاريخ
+        const decYear = (targetJDE - 2451545.0) / 365.25 + 2000.0;
+        const kApprox = (decYear - 2000.0) * 12.3685;
+        let bestK = Math.round(kApprox);
+
+        // نجرب k-1, k, k+1 لإيجاد الاقتران الأقرب قبل بداية الشهر
+        let conjJDE = Astronomical.newMoonJDE(bestK);
+        for (let dk = -1; dk <= 1; dk++) {
+            const testK = Math.round(kApprox) + dk;
+            const testJDE = Astronomical.newMoonJDE(testK);
+            // نريد أقرب اقتران قبل بداية الشهر
+            if (testJDE < monthStart && testJDE > conjJDE) {
+                bestK = testK;
+                conjJDE = testJDE;
+            }
+        }
+        // تأكد أن الاقتران قبل بداية الشهر
+        if (conjJDE >= monthStart) {
+            conjJDE = Astronomical.newMoonJDE(bestK - 1);
+        }
+
+        // تحويل JDE إلى تاريخ ووقت ميلادي
+        const conjLocal = _jdeToLocalDate(conjJDE, tz);
+
+        // حساب غروب الشمس في يوم الاقتران واليومين التاليين
+        const conjJDN = Math.floor(conjJDE + 0.5);
+        const conjGreg = jdnToGregorian(conjJDN);
+        const lang = currentLang;
+
+        // نحسب بيانات الرؤية لكل غروب بعد الاقتران (حتى 3 أيام)
+        function _calcSighting(sunsetJDE, sunsetGregDate) {
+            const ageHrs = (sunsetJDE - conjJDE) * 24;
+            const mPos = _moonPosition(sunsetJDE);
+            const sPos = _sunPosition(sunsetJDE);
+            const mH = _equatorialToHorizontal(mPos.ra, mPos.dec, sunsetJDE, lat, lng);
+            const sH = _equatorialToHorizontal(sPos.ra, sPos.dec, sunsetJDE, lat, lng);
+            const elong = _angularSeparation(mPos.ra, mPos.dec, sPos.ra, sPos.dec);
+            const av = mH.alt - sH.alt;
+
+            let vis;
+            if (ageHrs < 12 || elong < 7 || mH.alt < 2) {
+                vis = lang === 'en' ? 'Impossible' : 'مستحيلة';
+            } else if (ageHrs < 17 || elong < 10 || av < 4) {
+                vis = lang === 'en' ? 'Difficult (telescope)' : 'صعبة (تلسكوب)';
+            } else if (ageHrs < 21 || elong < 12 || av < 6) {
+                vis = lang === 'en' ? 'Possible (binoculars)' : 'ممكنة (منظار)';
+            } else {
+                vis = lang === 'en' ? 'Visible (naked eye)' : 'ممكنة (بالعين)';
+            }
+
+            const local = _jdeToLocalDate(sunsetJDE, tz);
+            return {
+                sunset: { date: local.dateStr, time: local.timeStr, gregDate: sunsetGregDate },
+                moonAge: Math.round(ageHrs * 10) / 10,
+                altitude: Math.round(mH.alt * 10) / 10,
+                azimuth: Math.round(mH.az * 10) / 10,
+                azimuthDir: _azimuthDirection(mH.az, lang),
+                elongation: Math.round(elong * 10) / 10,
+                arcv: Math.round(av * 10) / 10,
+                visibility: vis
+            };
+        }
+
+        // نحسب لغروبين: أول غروب بعد الاقتران، والغروب التالي
+        const sightings = [];
+        for (let d = 0; d <= 2; d++) {
+            const g = jdnToGregorian(conjJDN + d);
+            const ss = _sunsetJDE(g.year, g.month, g.day, lat, lng, tz);
+            if (ss > conjJDE) {
+                sightings.push(_calcSighting(ss, g));
+                if (sightings.length >= 2) break;
+            }
+        }
+
+        // المساء الأفضل = أول مساء بإمكانية رؤية غير مستحيلة، أو الثاني
+        let best = sightings[0];
+        if (sightings.length > 1) {
+            const vis0 = sightings[0].visibility;
+            const impossible = (vis0 === 'مستحيلة' || vis0 === 'Impossible');
+            if (impossible) best = sightings[1];
+        }
+
+        return {
+            conjunction: {
+                date: conjLocal.dateStr,
+                time: conjLocal.timeStr,
+                jde: conjJDE
+            },
+            // المساء الأفضل للترائي
+            sunset: best.sunset,
+            moonAge: best.moonAge,
+            altitude: best.altitude,
+            azimuth: best.azimuth,
+            azimuthDir: best.azimuthDir,
+            elongation: best.elongation,
+            arcv: best.arcv,
+            visibility: best.visibility,
+            // كل المساءات للمقارنة
+            sightings: sightings
+        };
+    }
+
+    // ─── دوال فلكية مساعدة ──────────────────────────────────
+
+    /** تحويل JDE إلى تاريخ ووقت محلي */
+    function _jdeToLocalDate(jde, tz) {
+        // JDE = Julian Ephemeris Day (TDT)
+        // نهمل delta-T (بضع ثوانٍ) للعرض
+        const jd = jde;
+        const z = Math.floor(jd + 0.5);
+        const f = jd + 0.5 - z;
+
+        let a;
+        if (z < 2299161) {
+            a = z;
+        } else {
+            const alpha = Math.floor((z - 1867216.25) / 36524.25);
+            a = z + 1 + alpha - Math.floor(alpha / 4);
+        }
+
+        const b = a + 1524;
+        const c = Math.floor((b - 122.1) / 365.25);
+        const d = Math.floor(365.25 * c);
+        const e = Math.floor((b - d) / 30.6001);
+
+        const day = b - d - Math.floor(30.6001 * e);
+        const month = e < 14 ? e - 1 : e - 13;
+        const year = month > 2 ? c - 4716 : c - 4715;
+
+        // الوقت UTC
+        let hours = f * 24;
+        // إضافة المنطقة الزمنية
+        hours += tz;
+        let dy = day;
+        if (hours >= 24) { hours -= 24; dy++; }
+        if (hours < 0) { hours += 24; dy--; }
+
+        const h = Math.floor(hours);
+        const m = Math.floor((hours - h) * 60);
+
+        return {
+            dateStr: `${year}/${String(month).padStart(2, '0')}/${String(dy).padStart(2, '0')}`,
+            timeStr: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+            year, month, day: dy, hours: h, minutes: m
+        };
+    }
+
+    /** حساب وقت غروب الشمس (JDE) لتاريخ وموقع */
+    function _sunsetJDE(gYear, gMonth, gDay, lat, lng, tz) {
+        const toRad = Math.PI / 180;
+        const jdn = gregorianToJDN(gYear, gMonth, gDay);
+        const n = jdn - 2451545.0 + 0.0008;
+
+        // المعادلة الشمسية المبسطة
+        const Jstar = n - (lng / 360);
+        const M = (357.5291 + 0.98560028 * Jstar) % 360;
+        const Mr = M * toRad;
+        const C = 1.9148 * Math.sin(Mr) + 0.0200 * Math.sin(2 * Mr) + 0.0003 * Math.sin(3 * Mr);
+        const lambda = (M + C + 180 + 102.9372) % 360;
+        const lambdaR = lambda * toRad;
+
+        const sinDec = Math.sin(lambdaR) * Math.sin(23.4393 * toRad);
+        const dec = Math.asin(sinDec);
+        const cosDec = Math.cos(dec);
+
+        // زاوية الساعة عند الغروب (الشمس تحت الأفق -0.833°)
+        const latR = lat * toRad;
+        const cosH = (Math.sin(-0.8333 * toRad) - Math.sin(latR) * sinDec) / (Math.cos(latR) * cosDec);
+
+        if (cosH > 1 || cosH < -1) {
+            // لا غروب (قطبي)
+            return jdn + 0.75; // تقريب: 18:00
+        }
+
+        const H = Math.acos(cosH) * 180 / Math.PI;
+
+        // العبور (الظهر الشمسي)
+        const Jtransit = 2451545.0 + Jstar + 0.0053 * Math.sin(Mr) - 0.0069 * Math.sin(2 * lambdaR);
+        const Jset = Jtransit + (H / 360);
+
+        return Jset;
+    }
+
+    /** حساب الموقع الظاهري للقمر (خطوط عرض وطول مسارية → RA/Dec) */
+    function _moonPosition(jde) {
+        const toRad = Math.PI / 180;
+        const T = (jde - 2451545.0) / 36525;
+
+        // خط الطول المتوسط للقمر (L')
+        const Lp = (218.3165 + 481267.8813 * T) % 360;
+        // الشذوذ المتوسط للقمر (M')
+        const Mp = (134.9634 + 477198.8676 * T) % 360;
+        // الشذوذ المتوسط للشمس (M)
+        const M = (357.5291 + 35999.0503 * T) % 360;
+        // حجة خط العرض (F)
+        const F = (93.2720 + 483202.0175 * T) % 360;
+        // الاستطالة المتوسطة (D)
+        const D = (297.8502 + 445267.1115 * T) % 360;
+
+        const LpR = Lp * toRad, MpR = Mp * toRad, MR = M * toRad;
+        const FR = F * toRad, DR = D * toRad;
+
+        // تصحيحات أساسية لخط الطول
+        let dLon = 6.289 * Math.sin(MpR)
+            + 1.274 * Math.sin(2 * DR - MpR)
+            + 0.658 * Math.sin(2 * DR)
+            + 0.214 * Math.sin(2 * MpR)
+            - 0.186 * Math.sin(MR)
+            - 0.114 * Math.sin(2 * FR);
+
+        // تصحيحات أساسية لخط العرض
+        let dLat = 5.128 * Math.sin(FR)
+            + 0.281 * Math.sin(MpR + FR)
+            + 0.278 * Math.sin(MpR - FR)
+            + 0.173 * Math.sin(2 * DR - FR);
+
+        const moonLon = (Lp + dLon) * toRad;
+        const moonLat = dLat * toRad;
+
+        // ميل محور الأرض
+        const eps = (23.4393 - 0.01300 * T) * toRad;
+
+        // تحويل مسارية → استوائية
+        const sinLon = Math.sin(moonLon);
+        const cosLon = Math.cos(moonLon);
+        const sinLat = Math.sin(moonLat);
+        const cosLat = Math.cos(moonLat);
+        const sinEps = Math.sin(eps);
+        const cosEps = Math.cos(eps);
+
+        const ra = Math.atan2(sinLon * cosEps - Math.tan(moonLat) * sinEps, cosLon);
+        const dec = Math.asin(sinLat * cosEps + cosLat * sinEps * sinLon);
+
+        return { ra: ra * 180 / Math.PI, dec: dec * 180 / Math.PI };
+    }
+
+    /** حساب الموقع الظاهري للشمس */
+    function _sunPosition(jde) {
+        const toRad = Math.PI / 180;
+        const T = (jde - 2451545.0) / 36525;
+
+        const L0 = (280.46646 + 36000.76983 * T) % 360;
+        const M = (357.52911 + 35999.05029 * T) % 360;
+        const MR = M * toRad;
+
+        const C = (1.914602 - 0.004817 * T) * Math.sin(MR)
+            + 0.019993 * Math.sin(2 * MR);
+        const sunLon = (L0 + C) * toRad;
+
+        const eps = (23.4393 - 0.01300 * T) * toRad;
+
+        const ra = Math.atan2(Math.cos(eps) * Math.sin(sunLon), Math.cos(sunLon));
+        const dec = Math.asin(Math.sin(eps) * Math.sin(sunLon));
+
+        return { ra: ra * 180 / Math.PI, dec: dec * 180 / Math.PI };
+    }
+
+    /** تحويل إحداثيات استوائية (RA, Dec) إلى أفقية (Alt, Az) */
+    function _equatorialToHorizontal(ra, dec, jde, lat, lng) {
+        const toRad = Math.PI / 180;
+        // الزمن النجمي في غرينتش
+        const T = (jde - 2451545.0) / 36525;
+        const GMST = (280.46061837 + 360.98564736629 * (jde - 2451545.0)
+            + 0.000387933 * T * T) % 360;
+        // الزمن النجمي المحلي
+        const LST = (GMST + lng) % 360;
+        // زاوية الساعة
+        const H = (LST - ra) * toRad;
+
+        const latR = lat * toRad;
+        const decR = dec * toRad;
+
+        // الارتفاع
+        const sinAlt = Math.sin(latR) * Math.sin(decR)
+            + Math.cos(latR) * Math.cos(decR) * Math.cos(H);
+        const alt = Math.asin(sinAlt) * 180 / Math.PI;
+
+        // السمت
+        const cosAz = (Math.sin(decR) - Math.sin(latR) * sinAlt)
+            / (Math.cos(latR) * Math.cos(Math.asin(sinAlt)));
+        let az = Math.acos(Math.max(-1, Math.min(1, cosAz))) * 180 / Math.PI;
+        if (Math.sin(H) > 0) az = 360 - az;
+
+        return { alt, az };
+    }
+
+    /** حساب الفصل الزاوي بين نقطتين سماويتين */
+    function _angularSeparation(ra1, dec1, ra2, dec2) {
+        const toRad = Math.PI / 180;
+        const d = Math.acos(
+            Math.sin(dec1 * toRad) * Math.sin(dec2 * toRad)
+            + Math.cos(dec1 * toRad) * Math.cos(dec2 * toRad)
+                * Math.cos((ra1 - ra2) * toRad)
+        );
+        return d * 180 / Math.PI;
+    }
+
+    /** تحويل السمت لوصف اتجاه */
+    function _azimuthDirection(az, lang) {
+        const dirs = lang === 'en'
+            ? ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+            : ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب'];
+        const idx = Math.round(az / 45) % 8;
+        return dirs[idx];
+    }
+
     // تصحيحات المستخدم: { "1447-9": +1, "1447-10": -1 }
     // المفتاح = "سنة-شهر"، القيمة = عدد أيام الإزاحة
     let userCorrections = {};
@@ -1028,7 +1411,7 @@ const HijriCalendar = (() => {
             return { year: y, month: m, day: d };
         }
 
-        return { isLeapYear, daysInMonth, daysInYear, hijriToJDN, jdnToHijri, monthStartJDN, newMoonJDE };
+        return { isLeapYear, daysInMonth, daysInYear, hijriToJDN, jdnToHijri, monthStartJDN, newMoonJDE, _approxK };
     })();
 
     // ═══════════════════════════════════════════════════════════
@@ -1268,8 +1651,8 @@ const HijriCalendar = (() => {
         // المناسبات
         ISLAMIC_EVENTS, getEvent,
 
-        // الأنواء والمواسم والأبراج والدرور وأطوار القمر
-        getTale3, getZodiac, getSeason, getDurr, getMoonPhase,
+        // الأنواء والمواسم والأبراج والدرور وأطوار القمر والهلال
+        getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getHilalInfo,
 
         // مساعدات
         toArabicNumerals,

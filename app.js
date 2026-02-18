@@ -28,6 +28,8 @@ const App = (() => {
         setupCorrectionControls();
         setupGoToDate();
         setupExport();
+        setupAdhkar();
+        setupShare();
         if (PT) setupPrayerTimes();
         if (PT) setupNotifications();
         applyLabels();
@@ -111,6 +113,21 @@ const App = (() => {
         document.getElementById('export-to-month-lbl').textContent = H.t('exportMonth');
         document.getElementById('export-to-year-lbl').textContent = H.t('exportYear');
         document.getElementById('export-btn').textContent = H.t('exportBtn');
+        document.getElementById('export-pdf-label').textContent = H.t('exportPDF');
+
+        // الأذكار
+        const adhkarTitle = document.getElementById('adhkar-title');
+        if (adhkarTitle) adhkarTitle.textContent = H.t('adhkarTitle');
+        const adhkarMorning = document.getElementById('adhkar-tab-morning');
+        if (adhkarMorning) adhkarMorning.textContent = H.t('adhkarMorning');
+        const adhkarEvening = document.getElementById('adhkar-tab-evening');
+        if (adhkarEvening) adhkarEvening.textContent = H.t('adhkarEvening');
+
+        // المشاركة
+        const shareBtn = document.getElementById('share-date-btn');
+        if (shareBtn) shareBtn.title = H.t('shareTitle');
+        const sharePrayerBtn = document.getElementById('share-prayer-btn');
+        if (sharePrayerBtn) sharePrayerBtn.title = H.t('sharePrayerTitle');
 
         // التنقل
         document.getElementById('today-btn').textContent = H.t('todayBtn');
@@ -277,6 +294,7 @@ const App = (() => {
             }
 
             renderCalendar();
+            showConverterResult(type, d, m, y);
         });
     }
 
@@ -311,6 +329,8 @@ const App = (() => {
             const ics = generateICS(fromY, fromM, toY, toM, type);
             downloadFile('hijri-calendar.ics', ics, 'text/calendar;charset=utf-8');
         });
+
+        setupPDFExport();
     }
 
     function generateICS(fromYear, fromMonth, toYear, toMonth, type) {
@@ -521,6 +541,19 @@ const App = (() => {
                 }
             }
 
+            // رمز طور القمر في الخلية
+            if (!day.isOtherMonth) {
+                const gd = day.gregorian;
+                const moon = H.getMoonPhase(gd.year, gd.month, gd.day);
+                if (moon) {
+                    const moonSpan = document.createElement('span');
+                    moonSpan.className = 'cell-moon-phase';
+                    moonSpan.textContent = moon.symbol;
+                    moonSpan.title = moon.name;
+                    cell.appendChild(moonSpan);
+                }
+            }
+
             const gregDate = `${day.gregorian.year}/${day.gregorian.month}/${day.gregorian.day}`;
             let titleText = `${H.dayName(day.dayOfWeek)} — ${gregDate}`;
             if (event) titleText += `\n${event.name}`;
@@ -651,6 +684,86 @@ const App = (() => {
                 tideSec.className = 'tide-section';
                 if (tide.strength >= 90) tideSec.classList.add('tide-spring');
                 else if (tide.strength <= 40) tideSec.classList.add('tide-neap');
+            }
+        }
+
+        // ── ولادة الهلال — فقط عند اختيار أول يوم من الشهر الهجري ──
+        const hilalSec = document.getElementById('hilal-section');
+        if (hilalSec) {
+            const hijriDate = H.gregorianToHijri(gYear, gMonth, gDay);
+            let hilal = null;
+            if (hijriDate.day === 1) {
+                let userTz = 0;
+                if (typeof PT !== 'undefined' && PT.getSettings) {
+                    const ps = PT.getSettings();
+                    userLat = ps.lat || 0;
+                    userLng = ps.lng || 0;
+                    userTz = ps.tz || 0;
+                }
+                hilal = H.getHilalInfo(hijriDate.year, hijriDate.month, userLat, userLng, userTz);
+            }
+            if (hilal) {
+                hilalSec.style.display = '';
+                setVal('hilal-title', H.t('hilalTitle'));
+                const detailsEl = document.getElementById('hilal-details');
+                if (detailsEl) {
+                    const lang = H.getLang();
+                    const conjLabel = H.t('hilalConjunction');
+                    const ageLabel = H.t('hilalMoonAge');
+                    const altLabel = H.t('hilalAltitude');
+                    const elongLabel = H.t('hilalElongation');
+                    const visLabel = H.t('hilalVisibility');
+                    const hrsLabel = H.t('hilalHours');
+                    const degLabel = H.t('hilalDegree');
+                    const dirLabel = H.t('hilalDirection');
+                    const sunsetLabel = H.t('hilalAtSunset');
+
+                    // تقييم الرؤية: لون مختلف حسب المستوى
+                    let visClass = 'hilal-vis-impossible';
+                    if (hilal.moonAge >= 21 && hilal.elongation >= 12 && hilal.arcv >= 6) {
+                        visClass = 'hilal-vis-visible';
+                    } else if (hilal.moonAge >= 17 && hilal.elongation >= 10) {
+                        visClass = 'hilal-vis-possible';
+                    } else if (hilal.moonAge >= 12) {
+                        visClass = 'hilal-vis-difficult';
+                    }
+
+                    detailsEl.innerHTML =
+                        `<div class="hilal-grid">` +
+                        `<div class="hilal-item">` +
+                        `<span class="hilal-label">${conjLabel}</span>` +
+                        `<span class="hilal-value">${hilal.conjunction.date}</span>` +
+                        `<span class="hilal-value hilal-time">${hilal.conjunction.time}</span>` +
+                        `</div>` +
+                        `<div class="hilal-item">` +
+                        `<span class="hilal-label">${sunsetLabel}</span>` +
+                        `<span class="hilal-value">${hilal.sunset.date}</span>` +
+                        `<span class="hilal-value hilal-time">${hilal.sunset.time}</span>` +
+                        `</div>` +
+                        `<div class="hilal-item">` +
+                        `<span class="hilal-label">${ageLabel}</span>` +
+                        `<span class="hilal-value">${hilal.moonAge} ${hrsLabel}</span>` +
+                        `</div>` +
+                        `<div class="hilal-item">` +
+                        `<span class="hilal-label">${altLabel}</span>` +
+                        `<span class="hilal-value">${hilal.altitude}${degLabel}</span>` +
+                        `</div>` +
+                        `<div class="hilal-item">` +
+                        `<span class="hilal-label">${elongLabel}</span>` +
+                        `<span class="hilal-value">${hilal.elongation}${degLabel}</span>` +
+                        `</div>` +
+                        `<div class="hilal-item">` +
+                        `<span class="hilal-label">${dirLabel}</span>` +
+                        `<span class="hilal-value">${hilal.azimuthDir} (${hilal.azimuth}${degLabel})</span>` +
+                        `</div>` +
+                        `<div class="hilal-item hilal-vis-item">` +
+                        `<span class="hilal-label">${visLabel}</span>` +
+                        `<span class="hilal-value ${visClass}">${hilal.visibility}</span>` +
+                        `</div>` +
+                        `</div>`;
+                }
+            } else {
+                hilalSec.style.display = 'none';
             }
         }
 
@@ -899,6 +1012,15 @@ const App = (() => {
             if (_prayerTimer) clearInterval(_prayerTimer);
             _prayerTimer = setInterval(() => _updatePrayerCountdown(times), 30000);
         }
+
+        // Ramadan night counter
+        const hijriForRamadan = isSelectedDate
+            ? H.gregorianToHijri(_selectedDate.year, _selectedDate.month, _selectedDate.day)
+            : H.todayHijri();
+        renderRamadanSection(hijriForRamadan, times);
+
+        // Sun arc
+        renderSunArc(times, !isSelectedDate);
     }
 
     function _updatePrayerCountdown(times) {
@@ -1180,6 +1302,521 @@ const App = (() => {
                 }, delay);
                 _notifyTimers.push(timer);
             }
+        }
+    }
+
+    // ─── رمضان — عداد الليالي ─────────────────────────────────
+    function renderRamadanSection(hijriDate, times) {
+        const sec = document.getElementById('ramadan-section');
+        if (!sec) return;
+        if (!hijriDate || hijriDate.month !== 9) { sec.style.display = 'none'; return; }
+
+        sec.style.display = '';
+        const nightNum = hijriDate.day;
+        const isLastTen = nightNum >= 21;
+        const isQadrNight = isLastTen && (nightNum % 2 === 1); // odd nights 21,23,25,27,29
+        const lang = H.getLang();
+
+        // Night number display
+        const nightEl = document.getElementById('ramadan-night');
+        let nightText = `${H.t('ramadanNight')} ${lang === 'ar' ? H.toArabicNumerals(nightNum) : nightNum}`;
+        if (isLastTen) nightText += ` — ${H.t('ramadanLastTen')}`;
+        nightEl.textContent = nightText;
+
+        // Styling
+        sec.className = 'ramadan-section';
+        if (isLastTen) sec.classList.add('ramadan-last-ten');
+        if (isQadrNight) sec.classList.add('ramadan-qadr');
+
+        // Info: imsak + fasting duration
+        const infoEl = document.getElementById('ramadan-info');
+        let infoHtml = '';
+        if (isQadrNight) {
+            infoHtml += `<span class="ramadan-qadr-text">✦ ${H.t('ramadanQadr')}</span>`;
+        }
+        if (times) {
+            infoHtml += `<span class="ramadan-imsak">${H.t('ramadanImsak')}: ${times.imsak || ''}</span>`;
+            // Fasting duration (Imsak to Maghrib)
+            if (times._raw && times._raw.fajr !== null && times._raw.maghrib !== null) {
+                const dur = times._raw.maghrib - times._raw.fajr;
+                const h = Math.floor(dur);
+                const m = Math.round((dur - h) * 60);
+                const durStr = lang === 'ar'
+                    ? `${H.toArabicNumerals(h)}:${H.toArabicNumerals(String(m).padStart(2, '0'))}`
+                    : `${h}:${String(m).padStart(2, '0')}`;
+                infoHtml += `<span class="ramadan-fasting">${H.t('ramadanFasting')}: ${durStr}</span>`;
+            }
+        }
+        infoEl.innerHTML = infoHtml;
+    }
+
+    // ─── قوس الشمس ──────────────────────────────────────────
+    function renderSunArc(times, isToday) {
+        const container = document.getElementById('sun-arc-container');
+        if (!container) return;
+        if (!times || !times._raw || times._raw.fajr === null || times._raw.isha === null) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = '';
+        const raw = times._raw;
+        const fajr = raw.fajr, sunrise = raw.sunrise, dhuhr = raw.dhuhr;
+        const asr = raw.asr, maghrib = raw.maghrib, isha = raw.isha;
+        const span = isha - fajr;
+        if (span <= 0) { container.style.display = 'none'; return; }
+
+        // Generous dimensions — padding around all sides to prevent clipping
+        const R = 90;
+        const PAD_TOP = 40;    // space above arc for Dhuhr label
+        const PAD_SIDE = 70;   // space on sides for Fajr/Isha labels
+        const PAD_BOTTOM = 35; // space below baseline for labels
+        const W = 2 * R + 2 * PAD_SIDE;
+        const CX = W / 2;
+        const CY = PAD_TOP + R;       // center of arc circle
+        const TOTAL_H = CY + PAD_BOTTOM;
+        const lang = H.getLang();
+        const isRTL = lang === 'ar';
+
+        // Map time to angle on the semicircle
+        // RTL: Fajr on RIGHT (angle 0) → Isha on LEFT (angle π)  — natural Arabic reading order
+        // LTR: Fajr on LEFT  (angle π) → Isha on RIGHT (angle 0) — natural English reading order
+        const timeToAngle = isRTL
+            ? (t => ((t - fajr) / span) * Math.PI)
+            : (t => Math.PI - ((t - fajr) / span) * Math.PI);
+        const angleToXY = (a, r) => ({ x: CX + (r || R) * Math.cos(a), y: CY - (r || R) * Math.sin(a) });
+
+        // Prayer markers data
+        const prayers = [
+            { key: 'fajr', t: fajr, label: H.t('prayerFajr') },
+            { key: 'sunrise', t: sunrise, label: H.t('prayerSunrise') },
+            { key: 'dhuhr', t: dhuhr, label: H.t('prayerDhuhr') },
+            { key: 'asr', t: asr, label: H.t('prayerAsr') },
+            { key: 'maghrib', t: maghrib, label: H.t('prayerMaghrib') },
+            { key: 'isha', t: isha, label: H.t('prayerIsha') },
+        ];
+
+        // Day/night sub-arcs
+        const sunriseAngle = timeToAngle(sunrise);
+        const maghribAngle = timeToAngle(maghrib);
+        const sunriseP = angleToXY(sunriseAngle);
+        const maghribP = angleToXY(maghribAngle);
+
+        let svg = `<svg viewBox="0 0 ${W} ${TOTAL_H}" class="sun-arc-svg" xmlns="http://www.w3.org/2000/svg">`;
+
+        // Night arc (full semicircle, dim)
+        svg += `<path d="M ${CX - R} ${CY} A ${R} ${R} 0 1 1 ${CX + R} ${CY}" fill="none" stroke="var(--arc-night)" stroke-width="7" stroke-linecap="round"/>`;
+
+        // Day arc (sunrise → maghrib, bright)
+        // Sweep direction depends on layout: we always sweep counter-clockwise on the visible arc
+        const angleDiff = Math.abs(sunriseAngle - maghribAngle);
+        const dayLargeFlag = angleDiff > Math.PI ? 1 : 0;
+        // Sweep flag: in RTL sunrise angle < maghrib angle, so sweep=0 (CCW); in LTR sunrise > maghrib, sweep=1 (CW)
+        const sweepFlag = isRTL ? 0 : 1;
+        svg += `<path d="M ${sunriseP.x} ${sunriseP.y} A ${R} ${R} 0 ${dayLargeFlag} ${sweepFlag} ${maghribP.x} ${maghribP.y}" fill="none" stroke="var(--arc-day)" stroke-width="7" stroke-linecap="round"/>`;
+
+        // Prayer markers + labels
+        prayers.forEach(p => {
+            if (p.t === null) return;
+            const a = timeToAngle(p.t);
+            const pt = angleToXY(a);
+            // Marker dot on the arc
+            svg += `<circle cx="${pt.x}" cy="${pt.y}" r="4" fill="var(--arc-marker)"/>`;
+
+            // Label positioned well outside the arc
+            const labelR = R + 30;
+            const lp = angleToXY(a, labelR);
+            // Small tick from arc dot outward
+            const tickEnd = angleToXY(a, R + 12);
+            svg += `<line x1="${pt.x}" y1="${pt.y}" x2="${tickEnd.x}" y2="${tickEnd.y}" stroke="var(--arc-marker)" stroke-width="1.5" opacity="0.5"/>`;
+
+            // Determine text anchor so text extends OUTWARD from arc
+            // For LTR text: right side → start (extends right), left side → end (extends left)
+            // For RTL text: right side → end (extends right), left side → start (extends left)
+            let anchor = 'middle';
+            let dx = 0;
+            const cosA = Math.cos(a); // negative = left side, positive = right side
+            if (cosA > 0.3) {
+                // Right side of arc — text should extend rightward
+                anchor = isRTL ? 'end' : 'start';
+                dx = 6;
+            } else if (cosA < -0.3) {
+                // Left side of arc — text should extend leftward
+                anchor = isRTL ? 'start' : 'end';
+                dx = -6;
+            }
+
+            svg += `<text x="${lp.x + dx}" y="${lp.y + 4}" text-anchor="${anchor}" class="arc-label">${p.label}</text>`;
+        });
+
+        // Sun dot (only for today — live position)
+        if (isToday) {
+            const now = new Date();
+            const nowH = now.getHours() + now.getMinutes() / 60;
+            if (nowH >= fajr && nowH <= isha) {
+                const sunAngle = timeToAngle(nowH);
+                const sunPt = angleToXY(sunAngle);
+                svg += `<circle cx="${sunPt.x}" cy="${sunPt.y}" r="8" fill="var(--arc-sun)" class="sun-dot"/>`;
+                svg += `<circle cx="${sunPt.x}" cy="${sunPt.y}" r="12" fill="none" stroke="var(--arc-sun)" stroke-width="1.5" opacity="0.4" class="sun-dot-ring"/>`;
+            }
+        }
+
+        svg += `</svg>`;
+
+        // Day/night lengths
+        const dayLen = maghrib - sunrise;
+        const nightLen = 24 - dayLen;
+        const fmtLen = (hrs) => {
+            const h = Math.floor(hrs), m = Math.round((hrs - h) * 60);
+            return lang === 'ar'
+                ? `${H.toArabicNumerals(h)}:${H.toArabicNumerals(String(m).padStart(2, '0'))}`
+                : `${h}:${String(m).padStart(2, '0')}`;
+        };
+
+        svg += `<div class="sun-arc-info">`;
+        svg += `<span>☀️ ${H.t('sunArcDay')}: ${fmtLen(dayLen)}</span>`;
+        svg += `<span>🌙 ${H.t('sunArcNight')}: ${fmtLen(nightLen)}</span>`;
+        svg += `</div>`;
+
+        container.innerHTML = svg;
+    }
+
+    // ─── تحويل التاريخ — نتيجة محسّنة ───────────────────────
+    function showConverterResult(type, day, month, year) {
+        const resultEl = document.getElementById('converter-result');
+        if (!resultEl) return;
+
+        let hijri, greg, jdn;
+        if (type === 'hijri') {
+            jdn = H.hijriToJDN(year, month, day);
+            hijri = { year, month, day };
+            greg = H.jdnToGregorian(jdn);
+        } else {
+            jdn = H.gregorianToJDN(year, month, day);
+            greg = { year, month, day };
+            hijri = H.jdnToHijri(jdn);
+        }
+
+        const dow = H.dayOfWeek(jdn);
+        const dayStr = H.dayName(dow);
+        const hijriStr = `${hijri.day} ${H.monthName(hijri.month - 1)} ${hijri.year} ${H.t('hSuffix')}`;
+        const gregStr = `${greg.day} ${H.gregMonthName(greg.month - 1)} ${greg.year}${H.t('gSuffix')}`;
+
+        let html = `<div class="converter-text">`;
+        html += `<div class="converter-day">${dayStr}</div>`;
+        html += `<div class="converter-hijri">📅 ${hijriStr}</div>`;
+        html += `<div class="converter-greg">📆 ${gregStr}</div>`;
+
+        const event = H.getEvent(hijri.month, hijri.day);
+        if (event) html += `<div class="converter-event">🌙 ${event.name}</div>`;
+
+        const tale3 = H.getTale3(greg.month, greg.day);
+        if (tale3) html += `<div class="converter-anwa">☆ ${H.t('tale3Label')}: ${tale3.name}</div>`;
+
+        html += `</div>`;
+        html += `<button class="convert-btn converter-copy-btn" id="converter-copy-btn">${H.t('converterCopy')}</button>`;
+
+        resultEl.innerHTML = html;
+        resultEl.style.display = '';
+
+        document.getElementById('converter-copy-btn').addEventListener('click', () => {
+            const text = `${dayStr}\n${hijriStr}\n${gregStr}${event ? '\n' + event.name : ''}`;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('converter-copy-btn');
+                btn.textContent = H.t('converterCopied');
+                setTimeout(() => btn.textContent = H.t('converterCopy'), 2000);
+            });
+        });
+    }
+
+    // ─── المشاركة ────────────────────────────────────────────
+    function setupShare() {
+        const dateBtn = document.getElementById('share-date-btn');
+        if (dateBtn) dateBtn.addEventListener('click', () => shareInfo('date'));
+
+        const prayerBtn = document.getElementById('share-prayer-btn');
+        if (prayerBtn) prayerBtn.addEventListener('click', () => shareInfo('prayer'));
+    }
+
+    async function shareInfo(mode) {
+        const now = new Date();
+        let gYear, gMonth, gDay;
+        if (_selectedDate) {
+            gYear = _selectedDate.year; gMonth = _selectedDate.month; gDay = _selectedDate.day;
+        } else {
+            gYear = now.getFullYear(); gMonth = now.getMonth() + 1; gDay = now.getDate();
+        }
+        const hijri = H.gregorianToHijri(gYear, gMonth, gDay);
+        const jdn = H.gregorianToJDN(gYear, gMonth, gDay);
+        const dow = H.dayOfWeek(jdn);
+        const lang = H.getLang();
+
+        const dayStr = H.dayName(dow);
+        const hijriStr = `${hijri.day} ${H.monthName(hijri.month - 1)} ${hijri.year} ${H.t('hSuffix')}`;
+        const gregStr = `${gDay} ${H.gregMonthName(gMonth - 1)} ${gYear}${H.t('gSuffix')}`;
+
+        let lines = [];
+        lines.push(`📅 ${dayStr}، ${hijriStr}`);
+        lines.push(`📆 ${gregStr}`);
+
+        const event = H.getEvent(hijri.month, hijri.day);
+        if (event) lines.push(`🌙 ${event.name}`);
+
+        // Prayer times
+        if (mode === 'prayer' && PT) {
+            const s = PT.getSettings();
+            if (s.lat || s.lng) {
+                const isRamadan = hijri.month === 9;
+                const times = _selectedDate ? PT.getForDate(_selectedDate, isRamadan) : PT.getForToday(isRamadan);
+                lines.push(`🕌 ${H.t('prayerFajr')} ${times.fajr} | ${H.t('prayerDhuhr')} ${times.dhuhr} | ${H.t('prayerAsr')} ${times.asr} | ${H.t('prayerMaghrib')} ${times.maghrib} | ${H.t('prayerIsha')} ${times.isha}`);
+            }
+        }
+
+        // Anwa
+        const tale3 = H.getTale3(gMonth, gDay);
+        const zodiac = H.getZodiac(gMonth, gDay);
+        if (tale3 || zodiac) {
+            const parts = [];
+            if (tale3) parts.push(`${H.t('tale3Label')}: ${tale3.name}`);
+            if (zodiac) parts.push(`${zodiac.symbol} ${zodiac.name}`);
+            lines.push(`☆ ${parts.join(' • ')}`);
+        }
+
+        const text = lines.join('\n');
+
+        // Try native share, then Web Share API, then clipboard
+        if (isNative()) {
+            try {
+                const { Share } = window.Capacitor.Plugins;
+                await Share.share({ title: H.t('shareTitle'), text });
+                return;
+            } catch (e) {}
+        }
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: H.t('shareTitle'), text });
+                return;
+            } catch (e) {}
+        }
+        // Fallback: clipboard
+        try {
+            await navigator.clipboard.writeText(text);
+            _showShareToast(H.t('shareCopied'));
+        } catch (e) {
+            _showShareToast(H.t('shareError'));
+        }
+    }
+
+    function _showShareToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'share-toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2000);
+    }
+
+    // ─── الأذكار ─────────────────────────────────────────────
+    const ADHKAR_DATA = {
+        morning: [
+            { ar: 'أعوذ بالله من الشيطان الرجيم. اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ (آية الكرسي)', en: 'Ayat al-Kursi', count: 1, source: 'البخاري' },
+            { ar: 'قُلْ هُوَ اللَّهُ أَحَدٌ... (الإخلاص والمعوذتين)', en: 'Al-Ikhlas, Al-Falaq, An-Nas', count: 3, source: 'أبو داود والترمذي' },
+            { ar: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ', en: 'Asbahna wa asbahal mulku lillah...', count: 1, source: 'مسلم' },
+            { ar: 'اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ', en: 'Allahumma bika asbahna...', count: 1, source: 'الترمذي' },
+            { ar: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ', en: "Allahumma inni as'alukal 'afiyah...", count: 1, source: 'ابن ماجه' },
+            { ar: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي', en: "Allahumma 'afini fi badani...", count: 3, source: 'أبو داود' },
+            { ar: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ', en: 'Bismillahil-ladhi la yadurr...', count: 3, source: 'أبو داود والترمذي' },
+            { ar: 'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا', en: 'Raditu billahi rabba...', count: 3, source: 'أحمد' },
+            { ar: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ', en: 'SubhanAllahi wa bihamdihi', count: 100, source: 'مسلم' },
+            { ar: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ', en: 'La ilaha illAllah wahdahu la sharika lah...', count: 10, source: 'البخاري ومسلم' },
+            { ar: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ', en: 'Astaghfirullaha wa atubu ilayh', count: 100, source: 'البخاري ومسلم' },
+        ],
+        evening: [
+            { ar: 'أعوذ بالله من الشيطان الرجيم. اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ (آية الكرسي)', en: 'Ayat al-Kursi', count: 1, source: 'البخاري' },
+            { ar: 'قُلْ هُوَ اللَّهُ أَحَدٌ... (الإخلاص والمعوذتين)', en: 'Al-Ikhlas, Al-Falaq, An-Nas', count: 3, source: 'أبو داود والترمذي' },
+            { ar: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ', en: 'Amsayna wa amsal mulku lillah...', count: 1, source: 'مسلم' },
+            { ar: 'اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ', en: 'Allahumma bika amsayna...', count: 1, source: 'الترمذي' },
+            { ar: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ', en: "Allahumma inni as'alukal 'afiyah...", count: 1, source: 'ابن ماجه' },
+            { ar: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي', en: "Allahumma 'afini fi badani...", count: 3, source: 'أبو داود' },
+            { ar: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ', en: 'Bismillahil-ladhi la yadurr...', count: 3, source: 'أبو داود والترمذي' },
+            { ar: 'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا', en: 'Raditu billahi rabba...', count: 3, source: 'أحمد' },
+            { ar: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ', en: 'SubhanAllahi wa bihamdihi', count: 100, source: 'مسلم' },
+            { ar: 'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ', en: "A'udhu bi kalimatillahi at-tammati...", count: 3, source: 'مسلم' },
+            { ar: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ', en: 'La ilaha illAllah wahdahu la sharika lah...', count: 10, source: 'البخاري ومسلم' },
+        ]
+    };
+
+    let _adhkarTab = 'morning';
+    function setupAdhkar() {
+        const toggle = document.getElementById('adhkar-toggle');
+        const body = document.getElementById('adhkar-body');
+        const arrow = document.getElementById('adhkar-arrow');
+        if (!toggle || !body) return;
+
+        toggle.addEventListener('click', () => {
+            const open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : '';
+            if (arrow) arrow.textContent = open ? '▼' : '▲';
+        });
+
+        // Auto-select tab based on time of day
+        const now = new Date();
+        const hour = now.getHours();
+        _adhkarTab = hour >= 15 ? 'evening' : 'morning'; // After 3pm → evening
+
+        const morningBtn = document.getElementById('adhkar-tab-morning');
+        const eveningBtn = document.getElementById('adhkar-tab-evening');
+        if (morningBtn) morningBtn.addEventListener('click', () => { _adhkarTab = 'morning'; renderAdhkarList(); _updateAdhkarTabs(); });
+        if (eveningBtn) eveningBtn.addEventListener('click', () => { _adhkarTab = 'evening'; renderAdhkarList(); _updateAdhkarTabs(); });
+
+        _updateAdhkarTabs();
+        renderAdhkarList();
+    }
+
+    function _updateAdhkarTabs() {
+        const morningBtn = document.getElementById('adhkar-tab-morning');
+        const eveningBtn = document.getElementById('adhkar-tab-evening');
+        if (morningBtn) { morningBtn.classList.toggle('active', _adhkarTab === 'morning'); }
+        if (eveningBtn) { eveningBtn.classList.toggle('active', _adhkarTab === 'evening'); }
+    }
+
+    function renderAdhkarList() {
+        const list = document.getElementById('adhkar-list');
+        if (!list) return;
+
+        const data = ADHKAR_DATA[_adhkarTab];
+        const lang = H.getLang();
+        const today = new Date().toISOString().slice(0, 10);
+        let stored = {};
+        try { stored = JSON.parse(localStorage.getItem('adhkar-counts-' + today) || '{}'); } catch (e) {}
+
+        list.innerHTML = data.map((d, i) => {
+            const key = `${_adhkarTab}-${i}`;
+            const remaining = stored[key] !== undefined ? stored[key] : d.count;
+            const done = remaining <= 0;
+            return `<div class="dhikr-item${done ? ' dhikr-done' : ''}" data-key="${key}" data-idx="${i}">` +
+                `<div class="dhikr-text">${lang === 'en' ? d.en : d.ar}</div>` +
+                `<div class="dhikr-meta">` +
+                `<span class="dhikr-source">${d.source}</span>` +
+                `<span class="dhikr-counter">${done ? H.t('adhkarDone') + ' ✓' : remaining}</span>` +
+                `</div></div>`;
+        }).join('');
+
+        // Tap handlers
+        list.querySelectorAll('.dhikr-item:not(.dhikr-done)').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.dataset.key;
+                const idx = parseInt(el.dataset.idx);
+                const d = data[idx];
+                const remaining = stored[key] !== undefined ? stored[key] : d.count;
+                const newVal = remaining - 1;
+                stored[key] = newVal;
+                try { localStorage.setItem('adhkar-counts-' + today, JSON.stringify(stored)); } catch (e) {}
+
+                const counter = el.querySelector('.dhikr-counter');
+                if (newVal <= 0) {
+                    el.classList.add('dhikr-done');
+                    counter.textContent = H.t('adhkarDone') + ' ✓';
+                } else {
+                    counter.textContent = newVal;
+                    el.classList.add('dhikr-pulse');
+                    setTimeout(() => el.classList.remove('dhikr-pulse'), 200);
+                }
+            });
+        });
+    }
+
+    // ─── تصدير PDF ───────────────────────────────────────────
+    function setupPDFExport() {
+        const btn = document.getElementById('export-pdf-btn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            const fromM = parseInt(document.getElementById('export-from-month').value);
+            const fromY = parseInt(document.getElementById('export-from-year').value);
+            const toM = parseInt(document.getElementById('export-to-month').value);
+            const toY = parseInt(document.getElementById('export-to-year').value);
+            const type = document.querySelector('input[name="export-type"]:checked').value;
+            if (!fromM || !fromY || !toM || !toY) return;
+            generatePDFView(fromY, fromM, toY, toM, type);
+        });
+    }
+
+    function generatePDFView(fromYear, fromMonth, toYear, toMonth, type) {
+        let startJDN, endJDN;
+        if (type === 'hijri') {
+            startJDN = H.hijriToJDN(fromYear, fromMonth, 1);
+            endJDN = H.hijriToJDN(toYear, toMonth, H.daysInMonth(toYear, toMonth));
+        } else {
+            startJDN = H.gregorianToJDN(fromYear, fromMonth, 1);
+            const nextM = toMonth === 12 ? 1 : toMonth + 1;
+            const nextY = toMonth === 12 ? toYear + 1 : toYear;
+            endJDN = H.gregorianToJDN(nextY, nextM, 1) - 1;
+        }
+
+        // Group by Hijri month
+        const months = {};
+        for (let jdn = startJDN; jdn <= endJDN; jdn++) {
+            const hijri = H.jdnToHijri(jdn);
+            const greg = H.jdnToGregorian(jdn);
+            const dow = H.dayOfWeek(jdn);
+            const event = H.getEvent(hijri.month, hijri.day);
+            const moon = H.getMoonPhase(greg.year, greg.month, greg.day);
+            const key = `${hijri.year}-${hijri.month}`;
+            if (!months[key]) months[key] = { year: hijri.year, month: hijri.month, days: [] };
+            months[key].days.push({ hijri, greg, dow, event, moon });
+        }
+
+        const lang = H.getLang();
+        const isRTL = lang === 'ar';
+
+        let html = `<!DOCTYPE html><html lang="${lang}" dir="${isRTL ? 'rtl' : 'ltr'}">
+<head><meta charset="UTF-8"><title>${H.t('exportPDF')}</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #333; direction: ${isRTL ? 'rtl' : 'ltr'}; }
+.month-block { page-break-inside: avoid; margin-bottom: 20px; }
+.month-title { background: #14553f; color: #fff; padding: 8px 16px; font-size: 14pt; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #f0f0f0; padding: 4px 6px; font-weight: 600; border: 1px solid #ddd; font-size: 9pt; }
+td { padding: 4px 6px; border: 1px solid #ddd; font-size: 9pt; }
+tr:nth-child(even) { background: #fafafa; }
+.event-cell { color: #14553f; font-weight: 600; }
+.friday { background: #f5fff5; }
+@media print { .no-print { display: none; } body { margin: 10mm; } }
+.print-bar { position: fixed; top: 0; left: 0; right: 0; background: #14553f; color: #fff; padding: 10px 20px; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+.print-bar button { background: #fff; color: #14553f; border: none; padding: 8px 20px; cursor: pointer; font-weight: 700; border-radius: 4px; }
+</style></head><body>
+<div class="print-bar no-print"><span>${H.t('exportPDF')}</span><button onclick="window.print()">${H.t('exportPDF')}</button></div>
+<div style="margin-top: 50px">`;
+
+        Object.values(months).forEach(m => {
+            const title = `${H.monthName(m.month - 1)} ${m.year} ${H.t('hSuffix')}`;
+            html += `<div class="month-block"><div class="month-title">${title}</div><table>`;
+            html += `<thead><tr>`;
+            html += `<th>${H.t('day')}</th><th>${H.t('hijri')}</th><th>${H.t('gregorian')}</th>`;
+            html += `<th>${H.t('eventsLabel')}</th><th>${H.t('moonPhaseLabel')}</th>`;
+            html += `</tr></thead><tbody>`;
+
+            m.days.forEach(d => {
+                const isFriday = d.dow === 6;
+                html += `<tr class="${isFriday ? 'friday' : ''}">`;
+                html += `<td>${H.dayName(d.dow)}</td>`;
+                html += `<td>${d.hijri.day}</td>`;
+                html += `<td>${d.greg.day}/${d.greg.month}/${d.greg.year}</td>`;
+                html += `<td class="${d.event ? 'event-cell' : ''}">${d.event ? d.event.name : ''}</td>`;
+                html += `<td>${d.moon ? d.moon.symbol + ' ' + d.moon.name : ''}</td>`;
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+        });
+
+        html += `</div></body></html>`;
+
+        const win = window.open('', '_blank');
+        if (win) {
+            win.document.write(html);
+            win.document.close();
         }
     }
 
