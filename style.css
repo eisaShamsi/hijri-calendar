@@ -93,8 +93,33 @@
     --radius-lg: 16px;
     --radius-xl: 24px;
 
-    --font-arabic: 'Cairo', 'Amiri', 'Segoe UI', Tahoma, sans-serif;
-    --font-display: 'Amiri', 'Cairo', serif;
+    --font-arabic: 'Calibri', 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    --font-display: 'Calibri', 'Cairo', sans-serif;
+
+    /* ─── ألوان البردي (الوضع الفاتح) ─── */
+    --papyrus-bg: #f5e6c8;
+    --papyrus-light: #faf0d8;
+    --papyrus-dark: #e0c9a0;
+    --papyrus-text: #3d2517;
+    --papyrus-text-secondary: #6b4c35;
+    --papyrus-border: rgba(139,90,43,0.25);
+    --papyrus-card: rgba(255,248,230,0.7);
+    --papyrus-section: rgba(245,230,200,0.5);
+
+    /* ─── متغيرات النسيج والأزرار (مجردة) ─── */
+    --tex-spot-r: 160; --tex-spot-g: 120; --tex-spot-b: 60;
+    --tex-fiber: rgba(139,90,43,0.04);
+    --tex-fiber-v: rgba(139,90,43,0.02);
+    --tex-grad-top: #f5e6c8;
+    --tex-grad-mid1: #ecdbb4;
+    --tex-grad-mid2: #e8d5a8;
+    --tex-grad-bottom: #dfc99e;
+    --btn-grad-from: #8b5a2b;
+    --btn-grad-to: #6b4c35;
+    --btn-text: #fdf3d7;
+    --header-from: #5a3a1e;
+    --header-to: #7a5a3a;
+    --arc-label: #8b5a2b;
 }
 
 /* ─── الوضع الداكن ────────────────────────────────────────── */
@@ -115,26 +140,37 @@
     --gold-200: #92400e;
     --gold-100: #78350f;
 
-    --cream:     #0f172a;
-    --white:     #1e293b;
-    --gray-50:   #1e293b;
-    --gray-100:  #334155;
-    --gray-200:  #475569;
-    --gray-300:  #64748b;
-    --gray-400:  #94a3b8;
-    --gray-500:  #cbd5e1;
-    --gray-600:  #e2e8f0;
-    --gray-700:  #f1f5f9;
-    --gray-800:  #f8fafc;
-    --gray-900:  #ffffff;
+    --cream:     #14100a;
+    --white:     #1e180e;
+    --gray-50:   #1e180e;
+    --gray-100:  #2d2418;
+    --gray-200:  #3d3020;
+    --gray-300:  #6b5a44;
+    --gray-400:  #9a8a70;
+    --gray-500:  #c4b498;
+    --gray-600:  #ddd0b8;
+    --gray-700:  #efe6d4;
+    --gray-800:  #f5edd8;
+    --gray-900:  #faf4e6;
 
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
     --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
-}
 
-[data-theme="dark"] body::before {
-    background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
+    /* ─── متغيرات النسيج والأزرار (داكن) ─── */
+    --tex-spot-r: 100; --tex-spot-g: 70; --tex-spot-b: 30;
+    --tex-fiber: rgba(139,90,43,0.05);
+    --tex-fiber-v: rgba(139,90,43,0.03);
+    --tex-grad-top: #1a1408;
+    --tex-grad-mid1: #1e180e;
+    --tex-grad-mid2: #211a10;
+    --tex-grad-bottom: #1a1408;
+    --btn-grad-from: #5a3a1e;
+    --btn-grad-to: #4a2c14;
+    --btn-text: #f5edd8;
+    --header-from: #2a1a08;
+    --header-to: #3d2517;
+    --arc-label: #f4a940;
 }
 
 [data-theme="dark"] .calendar-cell.today {
@@ -235,10 +271,13 @@ html {
 body {
     font-family: var(--font-arabic);
     background: var(--cream);
-    color: var(--gray-800);
+    color: var(--papyrus-text);
     direction: rtl;
     min-height: 100vh;
     line-height: 1.6;
+}
+[data-theme="dark"] body {
+    color: var(--gray-800);
 }
 
 /* ─── زخرفة الخلفية ──────────────────────────────────────── */
@@ -249,8 +288,11 @@ body::before {
     left: 0;
     right: 0;
     height: 320px;
-    background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 100%);
+    background: linear-gradient(135deg, var(--header-from) 0%, var(--header-to) 100%);
     z-index: -1;
+}
+[data-theme="dark"] body::before {
+    background: linear-gradient(135deg, #2a1a08 0%, #3d2517 100%);
 }
 
 /* ─── الحاوية الرئيسية ───────────────────────────────────── */
@@ -2018,7 +2060,7 @@ html[dir="ltr"] .anwa-card {
     font-size: 11px;
     font-weight: 600;
     fill: var(--arc-label-color);
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Calibri', 'Cairo', sans-serif;
 }
 .sun-dot {
     filter: drop-shadow(0 0 6px rgba(244, 169, 64, 0.9));
@@ -2026,11 +2068,56 @@ html[dir="ltr"] .anwa-card {
 .sun-arc-info {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 24px;
     margin-top: 10px;
     font-size: 0.88rem;
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+/* Day View arc info */
+.dv-arc-info {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 40px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   الساعة العربية — Arabic Analog Clock
+   ═══════════════════════════════════════════════════════════ */
+.arabic-clock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+    padding: 4px 0;
+}
+.arabic-clock-label {
+    color: var(--gold, #f4a940);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+.arabic-clock-svg {
+    filter: drop-shadow(0 0 12px rgba(244, 169, 64, 0.15));
+}
+.arabic-clock-time {
+    color: var(--gold, #f4a940);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+[data-theme="dark"] .arabic-clock-svg {
+    filter: drop-shadow(0 0 16px rgba(244, 169, 64, 0.2));
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2256,3 +2343,1910 @@ html[dir="ltr"] .anwa-card {
 .export-pdf-btn {
     margin-inline-start: 4px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   واجهة اليوم — Day View (الشاشة الرئيسية)
+   ═══════════════════════════════════════════════════════════ */
+.day-view {
+    text-align: center;
+    padding: 20px 16px 30px;
+    position: relative;
+    /* ─── نسيج البردي (متغيرات) ─── */
+    background:
+        radial-gradient(ellipse 80px 60px at 15% 20%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 120px 80px at 75% 15%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 90px 70px at 50% 45%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 100px 60px at 25% 70%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 110px 90px at 80% 60%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.09) 0%, transparent 70%),
+        radial-gradient(ellipse 70px 50px at 60% 85%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.11) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 3px, var(--tex-fiber) 3px, var(--tex-fiber) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 8px, var(--tex-fiber-v) 8px, var(--tex-fiber-v) 9px),
+        linear-gradient(180deg, var(--tex-grad-top) 0%, var(--tex-grad-mid1) 30%, var(--tex-grad-mid2) 60%, var(--tex-grad-bottom) 100%);
+    background-attachment: local;
+}
+.calendar-view {
+    /* inherits normal layout */
+}
+
+/* ─── Card wrapper ─── */
+.dv-card {
+    border: 2px solid var(--papyrus-border);
+    border-radius: 20px;
+    padding: 24px 16px 20px;
+    background: var(--papyrus-card);
+    box-shadow: 0 2px 12px rgba(100, 60, 20, 0.1);
+    position: relative;
+}
+[data-theme="dark"] .dv-card {
+    border-color: rgba(139,90,43,0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    background: rgba(30,24,14,0.7);
+}
+
+/* ─── Top controls (lang + theme) ─── */
+.dv-top-controls {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.dv-lang-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1.5px solid var(--papyrus-border);
+    box-shadow: 0 1px 4px rgba(100, 60, 20, 0.12);
+}
+.dv-theme-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--papyrus-border);
+    background: var(--papyrus-card);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(100, 60, 20, 0.12);
+    padding: 0;
+    line-height: 1;
+}
+.dv-theme-btn:active {
+    background: var(--papyrus-dark);
+}
+[data-theme="dark"] .dv-theme-btn {
+    background: rgba(30,24,14,0.7);
+    border-color: rgba(139,90,43,0.25);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .dv-theme-btn:active {
+    background: rgba(139,90,43,0.2);
+}
+.dv-lang-btn {
+    padding: 4px 14px;
+    border: none;
+    background: var(--papyrus-card);
+    color: var(--papyrus-text-secondary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    line-height: 1.3;
+}
+.dv-lang-btn.active {
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+    color: var(--btn-text);
+    font-weight: 700;
+}
+.dv-lang-btn:not(.active):hover {
+    background: var(--papyrus-section);
+}
+[data-theme="dark"] .dv-lang-toggle {
+    border-color: rgba(139,90,43,0.25);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .dv-lang-btn {
+    background: rgba(30,24,14,0.7);
+    color: var(--gray-500);
+}
+[data-theme="dark"] .dv-lang-btn.active {
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+    color: var(--btn-text);
+}
+[data-theme="dark"] .dv-lang-btn:not(.active):hover {
+    background: rgba(139,90,43,0.15);
+}
+
+/* ─── Navigation arrows ─── */
+.dv-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: var(--papyrus-card);
+    border: 1.5px solid var(--papyrus-border);
+    color: var(--papyrus-text);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(100, 60, 20, 0.12);
+    line-height: 1;
+    padding: 0;
+    font-family: inherit;
+}
+.dv-nav-arrow:active {
+    background: var(--papyrus-dark);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+[data-theme="dark"] .dv-nav-arrow {
+    background: rgba(30,24,14,0.7);
+    border-color: rgba(139,90,43,0.25);
+    color: var(--gray-500);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .dv-nav-arrow:active {
+    background: rgba(139,90,43,0.2);
+}
+/* RTL: "next" is on the LEFT, "prev" is on the RIGHT */
+.dv-nav-next {
+    left: 0px;
+}
+.dv-nav-prev {
+    right: 0px;
+}
+
+/* ─── Day name ─── */
+.dv-day-name {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--papyrus-text);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+}
+[data-theme="dark"] .dv-day-name {
+    color: var(--text-primary);
+}
+
+/* ─── Dates two-column ─── */
+.dv-dates {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 60px;
+}
+.dv-date-col {
+    text-align: center;
+    flex: 0 0 auto;
+}
+.dv-date-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.dv-date-num {
+    font-size: 3.8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--papyrus-text);
+}
+[data-theme="dark"] .dv-date-num { color: var(--text-primary); }
+.dv-date-month {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--papyrus-text);
+    margin-top: 2px;
+}
+[data-theme="dark"] .dv-date-month { color: var(--text-primary); }
+.dv-date-year {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--papyrus-text);
+}
+[data-theme="dark"] .dv-date-year { color: var(--text-primary); }
+
+/* ─── Event ─── */
+.dv-event {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gold-600, #b45309);
+    margin-top: 4px;
+    text-align: center;
+}
+[data-theme="dark"] .dv-event {
+    color: var(--gold-400, #f4a940);
+}
+
+/* ─── Location ─── */
+.dv-location {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--papyrus-text);
+    text-align: center;
+    line-height: 1.3;
+}
+[data-theme="dark"] .dv-location { color: var(--text-secondary); }
+.dv-suburb {
+    font-size: 1rem;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+/* ─── Arc section ─── */
+.dv-arc-section {
+    max-width: 420px;
+    margin: 0 auto;
+}
+.dv-arc-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+}
+.dv-arc-svg .arc-label {
+    fill: var(--arc-label);
+    opacity: 1;
+    font-weight: 800;
+}
+.dv-arc-svg .arc-time {
+    fill: var(--arc-label);
+    opacity: 1;
+    font-weight: 800;
+}
+
+/* ─── Moon ─── */
+.dv-moon-container {
+    margin: 15px auto 10px;
+    text-align: center;
+}
+.dv-moon-face {
+    display: inline-block;
+}
+.dv-moon-face img,
+.dv-moon-face svg {
+    filter: drop-shadow(0 0 8px rgba(139,90,43,0.4)) drop-shadow(0 0 20px rgba(180,140,80,0.25));
+}
+[data-theme="dark"] .dv-moon-face img,
+[data-theme="dark"] .dv-moon-face svg {
+    filter: drop-shadow(0 0 6px rgba(200, 200, 180, 0.3));
+}
+.dv-moon-label {
+    font-size: 0.85rem;
+    color: var(--papyrus-text-secondary);
+    margin-top: 4px;
+}
+[data-theme="dark"] .dv-moon-label { color: var(--text-secondary); }
+
+/* ─── Tide ─── */
+.dv-tide-section {
+    max-width: 420px;
+    margin: 8px auto;
+    background: var(--papyrus-section);
+    border-radius: 12px;
+    padding: 10px 16px;
+    border: 1px solid var(--papyrus-border);
+}
+[data-theme="dark"] .dv-tide-section {
+    background: rgba(30,24,14,0.5);
+    border-color: rgba(139,90,43,0.15);
+}
+.dv-tide-events {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+.dv-tide-item {
+    background: rgba(245,230,200,0.5);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--papyrus-text-secondary);
+}
+[data-theme="dark"] .dv-tide-item {
+    background: rgba(30,24,14,0.5);
+    color: var(--gray-500);
+}
+.dv-tide-high {
+    background: rgba(139,90,43,0.15);
+    font-weight: 700;
+    color: var(--papyrus-text);
+}
+[data-theme="dark"] .dv-tide-high {
+    background: rgba(139,90,43,0.2);
+    color: var(--gray-700);
+}
+
+/* ─── Sections (weather, anwa) ─── */
+.dv-section {
+    max-width: 420px;
+    margin: 8px auto;
+    background: var(--papyrus-section);
+    border-radius: 12px;
+    padding: 10px 16px;
+    text-align: start;
+    border: 1px solid var(--papyrus-border);
+}
+[data-theme="dark"] .dv-section {
+    background: rgba(30,24,14,0.5);
+    border-color: rgba(139,90,43,0.15);
+}
+.dv-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--papyrus-text);
+    margin-bottom: 6px;
+    text-align: center;
+}
+[data-theme="dark"] .dv-section-title { color: var(--text-primary); }
+.dv-section-body {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--papyrus-text-secondary);
+}
+[data-theme="dark"] .dv-section-body { color: var(--text-secondary); }
+
+/* ─── Live Weather ─── */
+.dv-weather-anwa {
+    margin-bottom: 10px;
+}
+.dv-weather-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dv-weather-current {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.dv-weather-icon {
+    font-size: 1.8rem;
+}
+.dv-weather-temp {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--papyrus-text);
+}
+[data-theme="dark"] .dv-weather-temp { color: var(--text-primary); }
+.dv-weather-desc {
+    font-size: 0.9rem;
+    color: var(--papyrus-text-secondary);
+}
+[data-theme="dark"] .dv-weather-desc { color: var(--text-secondary); }
+.dv-weather-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+.dv-weather-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+.dv-weather-detail-label {
+    font-size: 0.7rem;
+    color: var(--papyrus-text-secondary);
+    margin-bottom: 1px;
+}
+[data-theme="dark"] .dv-weather-detail-label { color: var(--text-secondary); }
+.dv-weather-detail span:last-child {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--papyrus-text);
+}
+[data-theme="dark"] .dv-weather-detail span:last-child { color: var(--text-primary); }
+
+/* ─── Anwa grid ─── */
+.dv-anwa-grid {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+.dv-anwa-card {
+    flex: 1;
+    border: 1px solid var(--papyrus-border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    background: rgba(245,230,200,0.4);
+}
+[data-theme="dark"] .dv-anwa-card {
+    border-color: rgba(139,90,43,0.2);
+    background: rgba(30,24,14,0.4);
+}
+.dv-anwa-label {
+    font-size: 0.7rem;
+    color: var(--papyrus-text-secondary);
+    margin-bottom: 4px;
+}
+[data-theme="dark"] .dv-anwa-label { color: var(--text-secondary); }
+.dv-anwa-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--papyrus-text);
+}
+[data-theme="dark"] .dv-anwa-value { color: var(--text-primary); }
+.dv-anwa-weather {
+    margin-top: 12px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--papyrus-text-secondary);
+    text-align: center;
+    border-top: 1px solid var(--papyrus-border);
+}
+[data-theme="dark"] .dv-anwa-weather {
+    color: var(--text-secondary);
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+/* ─── AI Section ─── */
+.dv-ai-section {
+    margin-top: 16px;
+}
+.dv-ai-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.dv-ai-card {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+.dv-ai-card-label {
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+.dv-ai-card-text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+.dv-ai-card-source {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-style: italic;
+}
+.dv-ai-skeleton {
+    animation: ai-pulse 1.5s ease-in-out infinite;
+}
+.dv-ai-skeleton .dv-ai-card {
+    min-height: 60px;
+    position: relative;
+    overflow: hidden;
+}
+.dv-ai-skeleton .dv-ai-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ai-shimmer 1.5s infinite;
+}
+@keyframes ai-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+@keyframes ai-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+.dv-ai-error {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 16px 0;
+}
+
+/* ─── Back button ─── */
+.dv-today-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 28px;
+    background: var(--btn-grad-from);
+    color: var(--btn-text);
+    border: none;
+    border-radius: var(--radius-xl);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.dv-today-btn:active {
+    opacity: 0.8;
+}
+.cv-back-container {
+    text-align: center;
+    margin: 24px 0 8px;
+}
+/* ─── Calendar view: simplified prayer card ─── */
+#calendar-view .prayer-header,
+#calendar-view .prayer-no-location,
+#calendar-view .ramadan-section,
+#calendar-view .sun-arc-container,
+#calendar-view .prayer-method-info,
+#calendar-view .prayer-settings-toggle,
+#calendar-view .prayer-settings,
+#calendar-view .prayer-timetable-toggle,
+#calendar-view .timetable-container,
+#calendar-view .prayer-date-indicator {
+    display: none !important;
+}
+.dv-back-btn {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 12px 36px;
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+    color: var(--btn-text);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.dv-back-btn:active {
+    opacity: 0.8;
+}
+
+/* ─── Share Button (Day View) ─── */
+.dv-share-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 36px;
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+    color: var(--btn-text);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.dv-share-btn:active {
+    opacity: 0.8;
+}
+
+/* ─── Credits ─── */
+.dv-credits {
+    text-align: center;
+    padding: 24px 16px 16px;
+    opacity: 0.5;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: var(--papyrus-text-secondary);
+}
+[data-theme="dark"] .dv-credits {
+    color: var(--text-secondary, #94a3b8);
+}
+.dv-credits-name {
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* ─── Share Screen ─── */
+.share-view {
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+}
+.share-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 20px;
+}
+.share-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text, #e8e0d0);
+    margin: 0;
+}
+.share-close-btn {
+    position: absolute;
+    left: 0;
+    background: none;
+    border: none;
+    color: var(--text, #e8e0d0);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 4px 10px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+[dir="ltr"] .share-close-btn {
+    left: auto;
+    right: 0;
+}
+.share-close-btn:hover {
+    opacity: 1;
+}
+
+/* Theme cards */
+.share-themes {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 4px 0 12px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+}
+.share-theme-card {
+    flex: 0 0 auto;
+    width: 90px;
+    padding: 8px 6px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+.share-theme-card.active {
+    border-color: var(--gold-500, #d4a340);
+    background: rgba(212,163,64,0.1);
+}
+.share-theme-mini {
+    width: 100%;
+    height: 48px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+.share-theme-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text, #e8e0d0);
+}
+
+/* Image preview */
+.share-preview-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.share-preview-img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* Actions */
+.share-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+.share-action-btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.share-action-btn:active {
+    opacity: 0.8;
+}
+.share-action-primary {
+    background: var(--gold-500, #d4a340);
+    color: #1a1a2e;
+}
+.share-action-secondary {
+    background: rgba(255,255,255,0.1);
+    color: var(--text, #e8e0d0);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Light mode overrides */
+[data-theme="light"] .share-theme-card {
+    border-color: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.02);
+}
+[data-theme="light"] .share-theme-card.active {
+    background: rgba(212,163,64,0.1);
+}
+[data-theme="light"] .share-action-secondary {
+    background: rgba(0,0,0,0.06);
+    color: #333;
+    border-color: rgba(0,0,0,0.15);
+}
+[data-theme="light"] .share-close-btn {
+    color: #333;
+}
+[data-theme="light"] .share-title {
+    color: #333;
+}
+[data-theme="light"] .share-theme-label {
+    color: #333;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   لوحات الألوان — Color Palettes
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── الأخضر (emerald) — فاتح ─── */
+[data-palette="emerald"] {
+    --tex-spot-r: 40; --tex-spot-g: 120; --tex-spot-b: 70;
+    --tex-fiber: rgba(30,100,60,0.04);
+    --tex-fiber-v: rgba(30,100,60,0.02);
+    --tex-grad-top: #d4f0e3;
+    --tex-grad-mid1: #c0e6d4;
+    --tex-grad-mid2: #b0dcc6;
+    --tex-grad-bottom: #a0d2b8;
+    --btn-grad-from: #2d7a4f;
+    --btn-grad-to: #1a5c38;
+    --btn-text: #e8f9f0;
+    --header-from: #1a4a30;
+    --header-to: #2d7a4f;
+    --arc-label: #1a5c38;
+    --arc-day: #2d7a4f;
+    --arc-sun: #2d7a4f;
+    --arc-marker: #1a5c38;
+    --arc-label-color: #1a5c38;
+    --gold: #2d7a4f;
+    --papyrus-bg: #d4f0e3;
+    --papyrus-light: #e8f9f0;
+    --papyrus-dark: #a0d2b8;
+    --papyrus-text: #0d3b2e;
+    --papyrus-text-secondary: #1a5c38;
+    --papyrus-border: rgba(30,100,60,0.25);
+    --papyrus-card: rgba(220,245,232,0.7);
+    --papyrus-section: rgba(200,235,218,0.5);
+}
+/* ─── الأخضر (emerald) — غامق ─── */
+[data-theme="dark"][data-palette="emerald"] {
+    --tex-spot-r: 20; --tex-spot-g: 70; --tex-spot-b: 40;
+    --tex-fiber: rgba(30,100,60,0.05);
+    --tex-fiber-v: rgba(30,100,60,0.03);
+    --tex-grad-top: #081a10;
+    --tex-grad-mid1: #0c2016;
+    --tex-grad-mid2: #10261a;
+    --tex-grad-bottom: #081a10;
+    --btn-grad-from: #1a5c38;
+    --btn-grad-to: #0d3b2e;
+    --btn-text: #d4f0e3;
+    --header-from: #061208;
+    --header-to: #0d3b2e;
+    --arc-label: #4cc494;
+    --arc-day: #4cc494;
+    --arc-sun: #4cc494;
+    --arc-marker: #4cc494;
+    --arc-label-color: #8abfa0;
+    --gold: #4cc494;
+    --papyrus-bg: #081a10;
+    --papyrus-light: #0c2016;
+    --papyrus-dark: #061208;
+    --papyrus-text: #d4f0e3;
+    --papyrus-text-secondary: #8abfa0;
+    --papyrus-border: rgba(30,100,60,0.25);
+    --papyrus-card: rgba(12,32,22,0.7);
+    --papyrus-section: rgba(16,38,26,0.5);
+}
+
+/* ─── الأزرق (ocean) — فاتح ─── */
+[data-palette="ocean"] {
+    --tex-spot-r: 50; --tex-spot-g: 100; --tex-spot-b: 140;
+    --tex-fiber: rgba(30,80,120,0.04);
+    --tex-fiber-v: rgba(30,80,120,0.02);
+    --tex-grad-top: #d0e6f5;
+    --tex-grad-mid1: #bdd9ee;
+    --tex-grad-mid2: #aacce6;
+    --tex-grad-bottom: #98c0de;
+    --btn-grad-from: #2a6080;
+    --btn-grad-to: #1a4660;
+    --btn-text: #e6f2fa;
+    --header-from: #1a3a54;
+    --header-to: #2a6080;
+    --arc-label: #1a4660;
+    --arc-day: #2a6080;
+    --arc-sun: #2a6080;
+    --arc-marker: #1a4660;
+    --arc-label-color: #1a4660;
+    --gold: #2a6080;
+    --papyrus-bg: #d0e6f5;
+    --papyrus-light: #e6f2fa;
+    --papyrus-dark: #98c0de;
+    --papyrus-text: #0d2a40;
+    --papyrus-text-secondary: #1a4660;
+    --papyrus-border: rgba(30,80,120,0.25);
+    --papyrus-card: rgba(215,235,248,0.7);
+    --papyrus-section: rgba(195,225,242,0.5);
+}
+/* ─── الأزرق (ocean) — غامق ─── */
+[data-theme="dark"][data-palette="ocean"] {
+    --tex-spot-r: 20; --tex-spot-g: 50; --tex-spot-b: 80;
+    --tex-fiber: rgba(30,80,120,0.05);
+    --tex-fiber-v: rgba(30,80,120,0.03);
+    --tex-grad-top: #08141e;
+    --tex-grad-mid1: #0c1a26;
+    --tex-grad-mid2: #10202e;
+    --tex-grad-bottom: #08141e;
+    --btn-grad-from: #1a4660;
+    --btn-grad-to: #0d2a40;
+    --btn-text: #d0e6f5;
+    --header-from: #060e16;
+    --header-to: #0d2a40;
+    --arc-label: #5eb8e8;
+    --arc-day: #5eb8e8;
+    --arc-sun: #5eb8e8;
+    --arc-marker: #5eb8e8;
+    --arc-label-color: #80b0d0;
+    --gold: #5eb8e8;
+    --papyrus-bg: #08141e;
+    --papyrus-light: #0c1a26;
+    --papyrus-dark: #060e16;
+    --papyrus-text: #d0e6f5;
+    --papyrus-text-secondary: #80b0d0;
+    --papyrus-border: rgba(30,80,120,0.25);
+    --papyrus-card: rgba(12,26,38,0.7);
+    --papyrus-section: rgba(16,32,46,0.5);
+}
+
+/* ─── البنفسجي (amethyst) — فاتح ─── */
+[data-palette="amethyst"] {
+    --tex-spot-r: 110; --tex-spot-g: 60; --tex-spot-b: 140;
+    --tex-fiber: rgba(90,50,120,0.04);
+    --tex-fiber-v: rgba(90,50,120,0.02);
+    --tex-grad-top: #e8d5f5;
+    --tex-grad-mid1: #ddc5ee;
+    --tex-grad-mid2: #d2b5e6;
+    --tex-grad-bottom: #c6a5de;
+    --btn-grad-from: #6b3a8a;
+    --btn-grad-to: #4e2868;
+    --btn-text: #f3e8fa;
+    --header-from: #3a1e5a;
+    --header-to: #6b3a8a;
+    --arc-label: #4e2868;
+    --arc-day: #6b3a8a;
+    --arc-sun: #6b3a8a;
+    --arc-marker: #4e2868;
+    --arc-label-color: #4e2868;
+    --gold: #6b3a8a;
+    --papyrus-bg: #e8d5f5;
+    --papyrus-light: #f3e8fa;
+    --papyrus-dark: #c6a5de;
+    --papyrus-text: #2a1040;
+    --papyrus-text-secondary: #4e2868;
+    --papyrus-border: rgba(90,50,120,0.25);
+    --papyrus-card: rgba(240,225,250,0.7);
+    --papyrus-section: rgba(230,210,245,0.5);
+}
+/* ─── البنفسجي (amethyst) — غامق ─── */
+[data-theme="dark"][data-palette="amethyst"] {
+    --tex-spot-r: 60; --tex-spot-g: 30; --tex-spot-b: 80;
+    --tex-fiber: rgba(90,50,120,0.05);
+    --tex-fiber-v: rgba(90,50,120,0.03);
+    --tex-grad-top: #14081e;
+    --tex-grad-mid1: #1a0e26;
+    --tex-grad-mid2: #20142e;
+    --tex-grad-bottom: #14081e;
+    --btn-grad-from: #4e2868;
+    --btn-grad-to: #3a1e5a;
+    --btn-text: #e8d5f5;
+    --header-from: #0e0616;
+    --header-to: #2a1040;
+    --arc-label: #b880e0;
+    --arc-day: #b880e0;
+    --arc-sun: #b880e0;
+    --arc-marker: #b880e0;
+    --arc-label-color: #b090c8;
+    --gold: #b880e0;
+    --papyrus-bg: #14081e;
+    --papyrus-light: #1a0e26;
+    --papyrus-dark: #0e0616;
+    --papyrus-text: #e8d5f5;
+    --papyrus-text-secondary: #b090c8;
+    --papyrus-border: rgba(90,50,120,0.25);
+    --papyrus-card: rgba(26,14,38,0.7);
+    --papyrus-section: rgba(32,20,46,0.5);
+}
+
+/* ─── الذهبي (gold) — فاتح ─── */
+[data-palette="gold"] {
+    --tex-spot-r: 170; --tex-spot-g: 130; --tex-spot-b: 30;
+    --tex-fiber: rgba(140,110,20,0.04);
+    --tex-fiber-v: rgba(140,110,20,0.02);
+    --tex-grad-top: #f5e8c0;
+    --tex-grad-mid1: #f0deb0;
+    --tex-grad-mid2: #ebd4a0;
+    --tex-grad-bottom: #e0c890;
+    --btn-grad-from: #a07818;
+    --btn-grad-to: #7a5a10;
+    --btn-text: #fdf8e8;
+    --header-from: #5a4010;
+    --header-to: #a07818;
+    --arc-label: #7a5a10;
+    --arc-day: #a07818;
+    --arc-sun: #a07818;
+    --arc-marker: #7a5a10;
+    --arc-label-color: #7a5a10;
+    --gold: #a07818;
+    --papyrus-bg: #f5e8c0;
+    --papyrus-light: #fdf8e8;
+    --papyrus-dark: #e0c890;
+    --papyrus-text: #3a2a08;
+    --papyrus-text-secondary: #6b5020;
+    --papyrus-border: rgba(140,110,20,0.25);
+    --papyrus-card: rgba(250,242,220,0.7);
+    --papyrus-section: rgba(242,232,200,0.5);
+}
+/* ─── الذهبي (gold) — غامق ─── */
+[data-theme="dark"][data-palette="gold"] {
+    --tex-spot-r: 90; --tex-spot-g: 70; --tex-spot-b: 15;
+    --tex-fiber: rgba(140,110,20,0.05);
+    --tex-fiber-v: rgba(140,110,20,0.03);
+    --tex-grad-top: #1a1408;
+    --tex-grad-mid1: #201a0c;
+    --tex-grad-mid2: #262010;
+    --tex-grad-bottom: #1a1408;
+    --btn-grad-from: #7a5a10;
+    --btn-grad-to: #5a4010;
+    --btn-text: #f5e8c0;
+    --header-from: #121006;
+    --header-to: #3a2a08;
+    --arc-label: #e6c040;
+    --arc-day: #e6c040;
+    --arc-sun: #e6c040;
+    --arc-marker: #e6c040;
+    --arc-label-color: #c0a868;
+    --gold: #e6c040;
+    --papyrus-bg: #1a1408;
+    --papyrus-light: #201a0c;
+    --papyrus-dark: #121006;
+    --papyrus-text: #f5e8c0;
+    --papyrus-text-secondary: #c0a868;
+    --papyrus-border: rgba(140,110,20,0.25);
+    --papyrus-card: rgba(32,26,12,0.7);
+    --papyrus-section: rgba(38,32,16,0.5);
+}
+
+/* ─── الأحمر (ruby) — فاتح ─── */
+[data-palette="ruby"] {
+    --tex-spot-r: 150; --tex-spot-g: 60; --tex-spot-b: 60;
+    --tex-fiber: rgba(120,40,40,0.04);
+    --tex-fiber-v: rgba(120,40,40,0.02);
+    --tex-grad-top: #f5d5d5;
+    --tex-grad-mid1: #eec5c5;
+    --tex-grad-mid2: #e6b5b5;
+    --tex-grad-bottom: #dea5a5;
+    --btn-grad-from: #8a3a3a;
+    --btn-grad-to: #6a2828;
+    --btn-text: #fae8e8;
+    --header-from: #4a1e1e;
+    --header-to: #8a3a3a;
+    --arc-label: #6a2828;
+    --arc-day: #8a3a3a;
+    --arc-sun: #8a3a3a;
+    --arc-marker: #6a2828;
+    --arc-label-color: #6a2828;
+    --gold: #8a3a3a;
+    --papyrus-bg: #f5d5d5;
+    --papyrus-light: #fae8e8;
+    --papyrus-dark: #dea5a5;
+    --papyrus-text: #3a1010;
+    --papyrus-text-secondary: #6a2828;
+    --papyrus-border: rgba(120,40,40,0.25);
+    --papyrus-card: rgba(248,225,225,0.7);
+    --papyrus-section: rgba(240,210,210,0.5);
+}
+/* ─── الأحمر (ruby) — غامق ─── */
+[data-theme="dark"][data-palette="ruby"] {
+    --tex-spot-r: 80; --tex-spot-g: 30; --tex-spot-b: 30;
+    --tex-fiber: rgba(120,40,40,0.05);
+    --tex-fiber-v: rgba(120,40,40,0.03);
+    --tex-grad-top: #1e0808;
+    --tex-grad-mid1: #260e0e;
+    --tex-grad-mid2: #2e1414;
+    --tex-grad-bottom: #1e0808;
+    --btn-grad-from: #6a2828;
+    --btn-grad-to: #4a1e1e;
+    --btn-text: #f5d5d5;
+    --header-from: #160606;
+    --header-to: #3a1010;
+    --arc-label: #e07070;
+    --arc-day: #e07070;
+    --arc-sun: #e07070;
+    --arc-marker: #e07070;
+    --arc-label-color: #c89090;
+    --gold: #e07070;
+    --papyrus-bg: #1e0808;
+    --papyrus-light: #260e0e;
+    --papyrus-dark: #160606;
+    --papyrus-text: #f5d5d5;
+    --papyrus-text-secondary: #c89090;
+    --papyrus-border: rgba(120,40,40,0.25);
+    --papyrus-card: rgba(38,14,14,0.7);
+    --papyrus-section: rgba(46,20,20,0.5);
+}
+
+/* ─── الأبيض (snow) — فاتح ─── */
+[data-palette="snow"] {
+    --tex-spot-r: 200; --tex-spot-g: 200; --tex-spot-b: 200;
+    --tex-fiber: rgba(180,180,180,0.03);
+    --tex-fiber-v: rgba(180,180,180,0.015);
+    --tex-grad-top: #f8f8f8;
+    --tex-grad-mid1: #f2f2f2;
+    --tex-grad-mid2: #eeeeee;
+    --tex-grad-bottom: #e8e8e8;
+    --btn-grad-from: #444444;
+    --btn-grad-to: #2a2a2a;
+    --btn-text: #f5f5f5;
+    --header-from: #333333;
+    --header-to: #555555;
+    --arc-label: #444444;
+    --arc-day: #555555;
+    --arc-sun: #555555;
+    --arc-marker: #444444;
+    --arc-label-color: #444444;
+    --gold: #555555;
+    --papyrus-bg: #f8f8f8;
+    --papyrus-light: #ffffff;
+    --papyrus-dark: #e0e0e0;
+    --papyrus-text: #1a1a1a;
+    --papyrus-text-secondary: #555555;
+    --papyrus-border: rgba(0,0,0,0.12);
+    --papyrus-card: rgba(255,255,255,0.8);
+    --papyrus-section: rgba(245,245,245,0.6);
+}
+/* ─── الأبيض (snow) — غامق ─── */
+[data-theme="dark"][data-palette="snow"] {
+    --tex-spot-r: 50; --tex-spot-g: 50; --tex-spot-b: 50;
+    --tex-fiber: rgba(100,100,100,0.04);
+    --tex-fiber-v: rgba(100,100,100,0.02);
+    --tex-grad-top: #1a1a1a;
+    --tex-grad-mid1: #1e1e1e;
+    --tex-grad-mid2: #222222;
+    --tex-grad-bottom: #1a1a1a;
+    --btn-grad-from: #555555;
+    --btn-grad-to: #3a3a3a;
+    --btn-text: #f0f0f0;
+    --header-from: #111111;
+    --header-to: #2a2a2a;
+    --arc-label: #b0b0b0;
+    --arc-day: #b0b0b0;
+    --arc-sun: #b0b0b0;
+    --arc-marker: #b0b0b0;
+    --arc-label-color: #909090;
+    --gold: #b0b0b0;
+    --papyrus-bg: #1a1a1a;
+    --papyrus-light: #222222;
+    --papyrus-dark: #111111;
+    --papyrus-text: #e8e8e8;
+    --papyrus-text-secondary: #909090;
+    --papyrus-border: rgba(255,255,255,0.1);
+    --papyrus-card: rgba(30,30,30,0.8);
+    --papyrus-section: rgba(35,35,35,0.6);
+}
+
+/* ─── الأسود (noir) — فاتح ─── */
+[data-palette="noir"] {
+    --tex-spot-r: 80; --tex-spot-g: 80; --tex-spot-b: 80;
+    --tex-fiber: rgba(60,60,60,0.04);
+    --tex-fiber-v: rgba(60,60,60,0.02);
+    --tex-grad-top: #d8d8d8;
+    --tex-grad-mid1: #cccccc;
+    --tex-grad-mid2: #c0c0c0;
+    --tex-grad-bottom: #b8b8b8;
+    --btn-grad-from: #222222;
+    --btn-grad-to: #111111;
+    --btn-text: #f0f0f0;
+    --header-from: #1a1a1a;
+    --header-to: #333333;
+    --arc-label: #333333;
+    --arc-day: #333333;
+    --arc-sun: #333333;
+    --arc-marker: #222222;
+    --arc-label-color: #333333;
+    --gold: #333333;
+    --papyrus-bg: #d8d8d8;
+    --papyrus-light: #e8e8e8;
+    --papyrus-dark: #b0b0b0;
+    --papyrus-text: #111111;
+    --papyrus-text-secondary: #444444;
+    --papyrus-border: rgba(0,0,0,0.15);
+    --papyrus-card: rgba(230,230,230,0.7);
+    --papyrus-section: rgba(215,215,215,0.5);
+}
+/* ─── الأسود (noir) — غامق ─── */
+[data-theme="dark"][data-palette="noir"] {
+    --tex-spot-r: 30; --tex-spot-g: 30; --tex-spot-b: 30;
+    --tex-fiber: rgba(80,80,80,0.04);
+    --tex-fiber-v: rgba(80,80,80,0.02);
+    --tex-grad-top: #0a0a0a;
+    --tex-grad-mid1: #0e0e0e;
+    --tex-grad-mid2: #121212;
+    --tex-grad-bottom: #0a0a0a;
+    --btn-grad-from: #3a3a3a;
+    --btn-grad-to: #222222;
+    --btn-text: #e0e0e0;
+    --header-from: #050505;
+    --header-to: #1a1a1a;
+    --arc-label: #a0a0a0;
+    --arc-day: #a0a0a0;
+    --arc-sun: #a0a0a0;
+    --arc-marker: #a0a0a0;
+    --arc-label-color: #808080;
+    --gold: #a0a0a0;
+    --papyrus-bg: #0a0a0a;
+    --papyrus-light: #121212;
+    --papyrus-dark: #050505;
+    --papyrus-text: #d8d8d8;
+    --papyrus-text-secondary: #808080;
+    --papyrus-border: rgba(255,255,255,0.08);
+    --papyrus-card: rgba(18,18,18,0.8);
+    --papyrus-section: rgba(22,22,22,0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Palette Popup
+   ═══════════════════════════════════════════════════════════ */
+.dv-palette-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 28px;
+    background: var(--btn-grad-from);
+    color: var(--btn-text);
+    border: none;
+    border-radius: var(--radius-xl);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.dv-palette-btn:active {
+    opacity: 0.8;
+}
+.palette-popup {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--papyrus-card);
+    border-top: 2px solid var(--papyrus-border);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px 28px;
+    z-index: 1000;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+.palette-popup.open {
+    transform: translateY(0);
+}
+[data-theme="dark"] .palette-popup {
+    background: rgba(30,24,14,0.95);
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+}
+.palette-popup-title {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--papyrus-text);
+    margin-bottom: 16px;
+}
+.palette-swatches {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.palette-swatch {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.palette-swatch:active {
+    transform: scale(0.9);
+}
+.palette-swatch.active {
+    border-color: var(--papyrus-text);
+    transform: scale(1.1);
+}
+.palette-swatch.active::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 900;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.palette-swatch-label {
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--papyrus-text-secondary);
+    margin-top: 4px;
+}
+.palette-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.palette-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+.palette-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* ═══ Clickable Anwa Cards ═══ */
+/* ═══════════════════════════════════════════════════════ */
+.dv-anwa-clickable {
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+}
+.dv-anwa-clickable:active {
+    transform: scale(0.95);
+}
+.dv-anwa-clickable::after {
+    content: '←';
+    display: block;
+    font-size: 0.55rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-top: 2px;
+    opacity: 0.5;
+}
+[dir="ltr"] .dv-anwa-clickable::after { content: '→'; }
+.anwa-clickable {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.anwa-clickable:active {
+    background: var(--papyrus-section, rgba(139,90,43,0.08));
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* ═══ Anwa Detail View ═══ */
+/* ═══════════════════════════════════════════════════════ */
+.anwa-detail-view {
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse 80px 60px at 15% 20%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 100px 70px at 75% 15%, rgba(var(--tex-spot-r),var(--tex-spot-g),var(--tex-spot-b),0.08) 0%, transparent 70%),
+        linear-gradient(180deg, var(--tex-grad-top) 0%, var(--tex-grad-mid1) 30%, var(--tex-grad-mid2) 60%, var(--tex-grad-bottom) 100%);
+}
+
+.anwa-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px 0;
+    border-bottom: 2px solid var(--papyrus-border, rgba(139,90,43,0.25));
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: inherit;
+}
+
+.anwa-detail-back-btn {
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+    color: var(--btn-text);
+    border: none;
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-family: var(--font-arabic);
+    font-size: 0.85rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.anwa-detail-title {
+    font-family: var(--font-display, var(--font-arabic));
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--papyrus-text, #4a3520);
+    margin: 0;
+}
+[data-theme="dark"] .anwa-detail-title { color: var(--text-primary, #f5edd8); }
+
+.anwa-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.anwa-detail-item {
+    background: var(--papyrus-card, rgba(255,248,235,0.6));
+    border: 1px solid var(--papyrus-border, rgba(139,90,43,0.25));
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+[data-theme="dark"] .anwa-detail-item {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.anwa-detail-item.current {
+    border-color: var(--gold, #d4a017);
+    border-width: 2px;
+    background: rgba(212, 160, 23, 0.08);
+    box-shadow: 0 0 12px rgba(212, 160, 23, 0.15);
+}
+[data-theme="dark"] .anwa-detail-item.current {
+    background: rgba(212, 160, 23, 0.12);
+    border-color: var(--gold, #d4a017);
+}
+
+.anwa-detail-item-compact { padding: 8px 14px; }
+
+.anwa-detail-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.anwa-detail-item-num {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--papyrus-border, rgba(139,90,43,0.25));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--papyrus-text, #4a3520);
+    flex-shrink: 0;
+}
+[data-theme="dark"] .anwa-detail-item-num {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-primary, #f5edd8);
+}
+.anwa-detail-item.current .anwa-detail-item-num {
+    background: var(--gold, #d4a017);
+    color: #fff;
+}
+
+.anwa-detail-item-name {
+    font-family: var(--font-display, var(--font-arabic));
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--papyrus-text, #4a3520);
+}
+[data-theme="dark"] .anwa-detail-item-name { color: var(--text-primary, #f5edd8); }
+
+.anwa-detail-badge {
+    margin-inline-start: auto;
+    background: var(--gold, #d4a017);
+    color: #fff;
+    font-size: 0.68rem;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.anwa-badge-off {
+    background: var(--papyrus-border, rgba(139,90,43,0.25));
+    color: var(--papyrus-text-secondary, #a09080);
+}
+[data-theme="dark"] .anwa-badge-off {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+}
+
+.anwa-detail-item-dates {
+    font-size: 0.78rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-bottom: 2px;
+}
+
+.anwa-detail-item-weather {
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--papyrus-text-secondary, #a09080);
+    border-top: 1px solid var(--papyrus-border, rgba(139,90,43,0.15));
+    padding-top: 6px;
+    margin-top: 4px;
+}
+
+.anwa-detail-item-related {
+    font-size: 0.78rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-top: 4px;
+}
+
+/* ── Durr System ── */
+.anwa-detail-suhail {
+    text-align: center;
+    padding: 16px;
+    background: var(--papyrus-card, rgba(255,248,235,0.6));
+    border-radius: 12px;
+    border: 1px solid var(--papyrus-border, rgba(139,90,43,0.25));
+    margin-bottom: 12px;
+}
+[data-theme="dark"] .anwa-detail-suhail {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+.anwa-detail-suhail-label {
+    font-size: 0.85rem;
+    color: var(--papyrus-text-secondary, #a09080);
+}
+.anwa-detail-suhail-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--gold, #d4a017);
+    display: block;
+    line-height: 1.2;
+}
+.anwa-detail-suhail-sub {
+    font-size: 0.8rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-top: 4px;
+}
+
+.anwa-detail-mia {
+    margin-bottom: 12px;
+    background: var(--papyrus-card, rgba(255,248,235,0.6));
+    border-radius: 12px;
+    border: 1px solid var(--papyrus-border, rgba(139,90,43,0.25));
+    overflow: hidden;
+}
+[data-theme="dark"] .anwa-detail-mia {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+.anwa-detail-mia.current-mia {
+    border-color: var(--gold, #d4a017);
+    border-width: 2px;
+}
+
+.anwa-detail-mia-header {
+    background: linear-gradient(135deg, var(--header-from, #f5edd8), var(--header-to, #e8d9b8));
+    color: var(--papyrus-text, #4a3520);
+    padding: 10px 16px;
+    font-family: var(--font-display, var(--font-arabic));
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+[data-theme="dark"] .anwa-detail-mia-header {
+    color: var(--btn-text, #f5edd8);
+}
+
+.anwa-detail-durr-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    padding: 8px;
+}
+
+.anwa-detail-durr {
+    padding: 8px;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--papyrus-text, #4a3520);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+[data-theme="dark"] .anwa-detail-durr { color: var(--text-primary, #f5edd8); }
+.anwa-detail-durr.current {
+    background: rgba(212, 160, 23, 0.15);
+    font-weight: 700;
+    border: 1.5px solid var(--gold, #d4a017);
+}
+
+.anwa-detail-durr-name { font-weight: 600; }
+
+/* ── Wind Compass ── */
+.anwa-detail-compass {
+    margin: 12px auto;
+    max-width: 300px;
+}
+.wind-compass-svg {
+    width: 100%;
+    height: auto;
+}
+
+.anwa-detail-section-title {
+    font-family: var(--font-display, var(--font-arabic));
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--papyrus-text, #4a3520);
+    margin: 16px 0 8px;
+}
+[data-theme="dark"] .anwa-detail-section-title { color: var(--text-primary, #f5edd8); }
+
+/* ─── دائرة الدرور (Durur Circle) ─── */
+
+.durur-more-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border: 2px solid var(--gold, #c49440);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(196,148,64,0.1), rgba(196,148,64,0.05));
+    color: var(--gold, #c49440);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: var(--font-arabic);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.durur-more-btn:active {
+    transform: scale(0.97);
+}
+.durur-more-btn:hover {
+    background: linear-gradient(135deg, rgba(196,148,64,0.18), rgba(196,148,64,0.08));
+    box-shadow: 0 2px 8px rgba(196,148,64,0.2);
+}
+[data-theme="dark"] .durur-more-btn {
+    border-color: rgba(196,148,64,0.5);
+    background: linear-gradient(135deg, rgba(196,148,64,0.15), rgba(196,148,64,0.05));
+    color: #e8c170;
+}
+
+.anwa-detail-view:has(.durur-circle-container) {
+    max-width: 800px;
+}
+.durur-circle-container {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 8px 0;
+}
+.durur-circle-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+.durur-circle-svg text {
+    pointer-events: none;
+    user-select: none;
+    font-family: var(--font-arabic, 'Calibri', sans-serif);
+}
+[data-theme="dark"] .durur-circle-svg text.durur-text {
+    fill: var(--text-primary, #f5edd8);
+}
+
+.durur-segment {
+    cursor: pointer;
+    transition: filter 0.15s, opacity 0.15s;
+}
+.durur-segment:hover {
+    filter: brightness(1.15);
+}
+.durur-segment-active {
+    filter: brightness(1.3) !important;
+    stroke: var(--gold, #c49440) !important;
+    stroke-width: 4 !important;
+}
+
+.today-needle {
+    pointer-events: none;
+}
+
+/* Info panel */
+.durur-info-panel {
+    margin: 12px 0;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--papyrus-card, #faf4e8);
+    border: 1px solid var(--papyrus-border, #d4c8a0);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--papyrus-text, #3a2f20);
+    text-align: center;
+}
+[data-theme="dark"] .durur-info-panel {
+    background: rgba(30,24,14,0.6);
+    border-color: rgba(139,90,43,0.2);
+    color: var(--text-primary, #f5edd8);
+}
+.durur-info-dates {
+    font-size: 0.78rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+}
+[data-theme="dark"] .durur-info-dates {
+    color: var(--text-secondary, #b0a890);
+}
+.durur-info-desc {
+    font-size: 0.8rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    display: block;
+    margin-top: 4px;
+}
+[data-theme="dark"] .durur-info-desc {
+    color: var(--text-secondary, #b0a890);
+}
+
+/* Fish / Crops / Wildlife lists below circle */
+.durur-list-section {
+    margin: 16px 0 8px;
+}
+.durur-list-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--papyrus-text, #3a2f20);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--papyrus-border, #d4c8a0);
+}
+[data-theme="dark"] .durur-list-title {
+    color: var(--text-primary, #f5edd8);
+    border-bottom-color: rgba(255,255,255,0.06);
+}
+.durur-list-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.durur-list-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    background: rgba(0,0,0,0.04);
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    border: 1px solid var(--papyrus-border, #d4c8a0);
+}
+.durur-list-tag.in-season {
+    background: rgba(196,148,64,0.15);
+    color: var(--gold, #9a7a20);
+    border-color: var(--gold, #c49440);
+    font-weight: 700;
+}
+[data-theme="dark"] .durur-list-tag {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary, #b0a890);
+    border-color: rgba(139,90,43,0.2);
+}
+[data-theme="dark"] .durur-list-tag.in-season {
+    background: rgba(196,148,64,0.2);
+    color: #e8c170;
+    border-color: rgba(196,148,64,0.5);
+}
+
+.durur-source {
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 0.72rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    text-align: center;
+    border-top: 1px solid var(--papyrus-border, #d4c8a0);
+}
+[data-theme="dark"] .durur-source {
+    color: var(--text-secondary, #b0a890);
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+/* ─── بطاقات الإثراء (كتاب الدرور والطوالع) ─── */
+.durur-enrich-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--papyrus-border, #d4c8a0);
+}
+.durur-enrich-section:empty {
+    display: none;
+}
+[data-theme="dark"] .durur-enrich-section {
+    border-top-color: rgba(255,255,255,0.08);
+}
+
+.dv-enrich-card {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--papyrus-card, rgba(255,248,235,0.7));
+    border: 1px solid var(--papyrus-border, rgba(139,90,43,0.2));
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.dv-enrich-card:active {
+    transform: scale(0.985);
+}
+[data-theme="dark"] .dv-enrich-card {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+}
+
+.dv-enrich-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(212,160,23,0.1);
+}
+[data-theme="dark"] .dv-enrich-icon {
+    background: rgba(212,160,23,0.15);
+}
+
+.dv-enrich-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dv-enrich-title {
+    font-family: var(--font-display, var(--font-arabic));
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--papyrus-text, #4a3520);
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+[data-theme="dark"] .dv-enrich-title {
+    color: var(--text-primary, #f5edd8);
+}
+
+.dv-enrich-desc {
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: var(--papyrus-text-secondary, #7a6e5a);
+}
+[data-theme="dark"] .dv-enrich-desc {
+    color: var(--text-secondary, #b0a890);
+}
+
+/* ── المثل ── */
+.dv-enrich-quote {
+    font-family: var(--font-display, var(--font-arabic));
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gold, #c49440);
+    line-height: 1.8;
+    margin: 4px 0;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(212,160,23,0.06);
+    border-inline-start: 3px solid var(--gold, #c49440);
+}
+[data-theme="dark"] .dv-enrich-quote {
+    color: #e8c170;
+    background: rgba(212,160,23,0.1);
+}
+
+.dv-enrich-quote-sub {
+    font-size: 0.78rem;
+    color: var(--papyrus-text-secondary, #7a6e5a);
+    font-style: italic;
+    margin-top: 4px;
+    padding-inline-start: 14px;
+}
+[data-theme="dark"] .dv-enrich-quote-sub {
+    color: var(--text-secondary, #b0a890);
+}
+
+/* ── المواسم ── */
+.dv-enrich-season-item {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--papyrus-text-secondary, #7a6e5a);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(139,90,43,0.08);
+}
+.dv-enrich-season-item:last-child {
+    border-bottom: none;
+}
+[data-theme="dark"] .dv-enrich-season-item {
+    color: var(--text-secondary, #b0a890);
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.dv-enrich-season-icon {
+    margin-inline-end: 4px;
+}
+
+/* ── الأحداث الفلكية ── */
+.dv-enrich-astro-item {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--papyrus-text, #4a3520);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(139,90,43,0.08);
+}
+.dv-enrich-astro-item:last-child {
+    border-bottom: none;
+}
+[data-theme="dark"] .dv-enrich-astro-item {
+    color: var(--text-primary, #f5edd8);
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.dv-enrich-astro-desc {
+    font-size: 0.78rem;
+    color: var(--papyrus-text-secondary, #7a6e5a);
+}
+[data-theme="dark"] .dv-enrich-astro-desc {
+    color: var(--text-secondary, #b0a890);
+}
+
+/* ── هجرة الطيور ── */
+.dv-enrich-bird-item {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--papyrus-text-secondary, #7a6e5a);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(139,90,43,0.08);
+}
+.dv-enrich-bird-item:last-child {
+    border-bottom: none;
+}
+[data-theme="dark"] .dv-enrich-bird-item {
+    color: var(--text-secondary, #b0a890);
+    border-bottom-color: rgba(255,255,255,0.05);
+}
+
+/* ── ألوان البطاقات المختلفة ── */
+.dv-enrich-durr .dv-enrich-icon { background: rgba(196,148,64,0.12); }
+.dv-enrich-seasons .dv-enrich-icon { background: rgba(76,175,80,0.12); }
+.dv-enrich-proverb .dv-enrich-icon { background: rgba(255,152,0,0.12); }
+.dv-enrich-astro .dv-enrich-icon { background: rgba(63,81,181,0.12); }
+.dv-enrich-birds .dv-enrich-icon { background: rgba(0,150,136,0.12); }
+.dv-enrich-thuraya .dv-enrich-icon { background: rgba(156,39,176,0.12); }
+
+[data-theme="dark"] .dv-enrich-durr .dv-enrich-icon { background: rgba(196,148,64,0.2); }
+[data-theme="dark"] .dv-enrich-seasons .dv-enrich-icon { background: rgba(76,175,80,0.2); }
+[data-theme="dark"] .dv-enrich-proverb .dv-enrich-icon { background: rgba(255,152,0,0.2); }
+[data-theme="dark"] .dv-enrich-astro .dv-enrich-icon { background: rgba(63,81,181,0.2); }
+[data-theme="dark"] .dv-enrich-birds .dv-enrich-icon { background: rgba(0,150,136,0.2); }
+[data-theme="dark"] .dv-enrich-thuraya .dv-enrich-icon { background: rgba(156,39,176,0.2); }

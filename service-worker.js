@@ -3,13 +3,14 @@
  * Cache-first strategy for offline support
  */
 
-const CACHE_NAME = 'hijri-calendar-v2.7';
+const CACHE_NAME = 'hijri-calendar-v4.62';
 const CORE_ASSETS = [
     './',
     './index.html',
     './style.css',
     './hijri.js',
     './prayer-times.js',
+    './ai-client.js',
     './app.js',
     './manifest.json',
     './icon-192.svg',

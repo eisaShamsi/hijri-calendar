@@ -16,6 +16,98 @@
 
 <div class="container">
 
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ═══ واجهة اليوم (الشاشة الرئيسية) ═══ -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="day-view" class="day-view">
+        <!-- أسهم التنقل بين الأيام -->
+        <button class="dv-nav-arrow dv-nav-next" id="dv-nav-next" aria-label="اليوم التالي">&#x276F;</button>
+        <button class="dv-nav-arrow dv-nav-prev" id="dv-nav-prev" aria-label="اليوم السابق">&#x276E;</button>
+
+        <!-- تبديل اللغة + المظهر -->
+        <div class="dv-top-controls">
+            <button class="dv-theme-btn" id="dv-theme-toggle">&#x1F319;</button>
+            <div class="dv-lang-toggle">
+                <button class="dv-lang-btn active" id="dv-lang-ar">عربي</button>
+                <button class="dv-lang-btn" id="dv-lang-en">E</button>
+            </div>
+        </div>
+
+        <!-- بطاقة اليوم -->
+        <div class="dv-card">
+            <div class="dv-day-name" id="dv-day-name"></div>
+            <div class="dv-dates">
+                <div class="dv-date-col dv-greg">
+                    <div class="dv-date-num" id="dv-greg-day"></div>
+                    <div class="dv-date-month" id="dv-greg-month"></div>
+                    <div class="dv-date-year" id="dv-greg-year"></div>
+                </div>
+                <div class="dv-date-center">
+                    <div class="dv-location" id="dv-location"></div>
+                    <div class="dv-event" id="dv-event"></div>
+                </div>
+                <div class="dv-date-col dv-hijri">
+                    <div class="dv-date-num" id="dv-hijri-day"></div>
+                    <div class="dv-date-month" id="dv-hijri-month"></div>
+                    <div class="dv-date-year" id="dv-hijri-year"></div>
+                </div>
+            </div>
+            <div class="dv-arc-section" id="dv-arc-section"></div>
+            <div class="dv-moon-container" id="dv-moon-container"></div>
+            <div class="dv-tide-section" id="dv-tide-section"></div>
+            <div class="dv-section dv-weather-section" id="dv-weather-section"></div>
+            <div class="dv-section dv-anwa-section" id="dv-anwa-section"></div>
+            <!-- AI section removed -->
+        </div>
+
+        <button class="dv-share-btn" id="dv-share-btn">مشاركة</button>
+        <button class="dv-palette-btn" id="dv-palette-btn">ألوان</button>
+        <button class="dv-today-btn" id="dv-today-btn" style="display:none">اليوم</button>
+        <button class="dv-back-btn" id="dv-back-btn">التقويم الشهري</button>
+
+        <!-- Palette popup -->
+        <div class="palette-overlay" id="palette-overlay"></div>
+        <div class="palette-popup" id="palette-popup">
+            <div class="palette-popup-title" id="palette-popup-title">ألوان</div>
+            <div class="palette-swatches" id="palette-swatches"></div>
+        </div>
+
+        <div class="dv-credits">
+            <div class="dv-credits-name">عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة</div>
+            <div class="dv-credits-version">الإصدار 2.0</div>
+            <div class="dv-credits-tech">صُمم بواسطة Claude Code (Opus 4.6)</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ═══ شاشة المشاركة ═══ -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="share-view" class="share-view" style="display:none">
+        <div class="share-header">
+            <button class="share-close-btn" id="share-close-btn">✕</button>
+            <h2 class="share-title">مشاركة</h2>
+        </div>
+
+        <!-- اختيار الثيم -->
+        <div class="share-themes" id="share-themes"></div>
+
+        <!-- معاينة الصورة -->
+        <div class="share-preview-container">
+            <img class="share-preview-img" id="share-preview-img" alt="">
+        </div>
+
+        <!-- أزرار المشاركة -->
+        <div class="share-actions">
+            <button class="share-action-btn share-action-primary" id="share-action-share">مشاركة</button>
+            <button class="share-action-btn share-action-secondary" id="share-action-copy">نسخ</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ═══ واجهة التقويم (الشاشة الثانوية) ═══ -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="calendar-view" class="calendar-view" style="display:none">
+
     <!-- ═══ الرأس ═══ -->
     <header class="header">
         <span class="header-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em" fill="currentColor"><defs><mask id="hm"><rect width="100" height="100" fill="white"/><circle cx="62" cy="45" r="38" fill="black"/></mask></defs><circle cx="50" cy="50" r="45" mask="url(#hm)"/></svg></span>
@@ -252,6 +344,15 @@
                     <input type="number" id="prayer-elevation" step="1" value="0">
                 </div>
             </div>
+            <!-- تنسيق الوقت -->
+            <div class="prayer-settings-row notify-row">
+                <div class="tool-group">
+                    <label class="tool-label" id="lbl-timeformat">
+                        <input type="checkbox" id="timeformat-toggle">
+                        <span id="timeformat-lbl">تنسيق ١٢ ساعة (ص/م)</span>
+                    </label>
+                </div>
+            </div>
             <!-- إعدادات الإشعارات -->
             <div class="prayer-settings-row notify-row">
                 <div class="tool-group">
@@ -288,7 +389,7 @@
     </div>
 
     <!-- ═══ بطاقة الأنواء والمواسم ═══ -->
-    <div class="anwa-card" id="anwa-card">
+    <div class="anwa-card" id="anwa-card" style="display:none">
         <div class="anwa-header">
             <span class="anwa-icon">☆</span>
             <span id="anwa-card-title">الأنواء والمواسم</span>
@@ -297,10 +398,6 @@
             <div class="anwa-item">
                 <span class="anwa-label" id="anwa-tale3-lbl">الطالع</span>
                 <span class="anwa-value" id="anwa-tale3">—</span>
-            </div>
-            <div class="anwa-item">
-                <span class="anwa-label" id="anwa-zodiac-lbl">البرج</span>
-                <span class="anwa-value" id="anwa-zodiac">—</span>
             </div>
             <div class="anwa-item">
                 <span class="anwa-label" id="anwa-season-lbl">الموسم</span>
@@ -317,6 +414,22 @@
             <div class="anwa-item">
                 <span class="anwa-label" id="anwa-mia-lbl">المائة</span>
                 <span class="anwa-value" id="anwa-mia">—</span>
+            </div>
+            <div class="anwa-item">
+                <span class="anwa-label" id="anwa-wind-lbl">الرياح</span>
+                <span class="anwa-value" id="anwa-wind">—</span>
+            </div>
+            <div class="anwa-item">
+                <span class="anwa-label" id="anwa-fish-lbl">الأسماك</span>
+                <span class="anwa-value" id="anwa-fish">—</span>
+            </div>
+            <div class="anwa-item">
+                <span class="anwa-label" id="anwa-crops-lbl">المحاصيل</span>
+                <span class="anwa-value" id="anwa-crops">—</span>
+            </div>
+            <div class="anwa-item">
+                <span class="anwa-label" id="anwa-wildlife-lbl">الحياة الفطرية</span>
+                <span class="anwa-value" id="anwa-wildlife">—</span>
             </div>
         </div>
         <div class="moon-phase-section" id="moon-phase-section">
@@ -355,7 +468,7 @@
     </div>
 
     <!-- ═══ الأذكار ═══ -->
-    <div class="adhkar-card" id="adhkar-card">
+    <div class="adhkar-card" id="adhkar-card" style="display:none">
         <div class="adhkar-header" id="adhkar-toggle">
             <span class="adhkar-icon">📿</span>
             <span id="adhkar-title">الأذكار</span>
@@ -426,6 +539,11 @@
         <p id="about-p4"></p>
     </div>
 
+    <!-- ═══ زر العودة ═══ -->
+    <div class="cv-back-container">
+        <button class="dv-today-btn" id="cv-back-btn">الواجهة الرئيسة</button>
+    </div>
+
     <!-- ═══ التذييل ═══ -->
     <footer class="site-footer">
         <div id="footer-credit"></div>
@@ -436,11 +554,25 @@
         </button>
     </footer>
 
+    </div><!-- /calendar-view -->
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ═══ واجهة تفاصيل الأنواء ═══ -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="anwa-detail-view" class="anwa-detail-view" style="display:none">
+        <div class="anwa-detail-header">
+            <button class="anwa-detail-back-btn" id="anwa-detail-back">رجوع</button>
+            <h2 class="anwa-detail-title" id="anwa-detail-title"></h2>
+        </div>
+        <div class="anwa-detail-content" id="anwa-detail-content"></div>
+    </div>
+
 </div>
 
 <script src="capacitor.js"></script>
 <script src="hijri.js"></script>
 <script src="prayer-times.js"></script>
+<script src="ai-client.js"></script>
 <script src="app.js"></script>
 
 </body>

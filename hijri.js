@@ -80,14 +80,14 @@ const HijriCalendar = (() => {
             aboutP2: 'السنوات الكبيسة في الدورة: <strong>2، 5، 7، 10، 13، 15، 18، 21، 24، 26، 29</strong>',
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
-            footer: 'إعداد عيسى بن راشد الشامسي — دولة الإمارات العربية المتحدة',
+            footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
             version: 'الإصدار 2.0',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
             zodiacLabel: 'البرج',
             seasonLabel: 'الموسم',
-            durrLabel: 'الدّر',
+            durrLabel: 'الدر',
             suhailLabel: 'سهيل',
             moonPhaseLabel: 'طور القمر',
             moonAgeDays: 'يوم',
@@ -143,13 +143,63 @@ const HijriCalendar = (() => {
             // المشاركة
             shareTitle: 'مشاركة', shareCopied: 'تم نسخ النص!', shareError: 'تعذرت المشاركة',
             sharePrayerTitle: 'مشاركة المواقيت',
+            shareBtn: 'مشاركة', shareContentDate: 'تاريخ فقط', shareContentPrayer: 'صلوات', shareContentFull: 'كامل',
+            shareCopyBtn: 'نسخ', shareActionShare: 'مشاركة',
+            shareThemeBasit: 'بسيط', shareThemeIslami: 'إسلامي', shareThemeArabi: 'عربي كلاسيكي',
+            shareThemeMashr: 'المشربية', shareThemeQubba: 'القبة', shareThemeMakh: 'المخطوطة',
+            creditsName: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
+            creditsVersion: 'الإصدار 2.0', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
             // قوس الشمس
             sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
+            arabicTime: 'الساعة العربية', arabicTimeNow: 'الساعة العربية الآن',
+            timeFormat12h: 'تنسيق ١٢ ساعة (ص/م)', timeAM: 'ص', timePM: 'م',
             // الأذكار
             adhkarTitle: 'الأذكار', adhkarMorning: 'أذكار الصباح', adhkarEvening: 'أذكار المساء',
             adhkarCount: 'مرات', adhkarSource: 'المصدر', adhkarDone: 'تمت',
             // التصدير PDF
             exportPDF: 'طباعة PDF',
+            // واجهة اليوم
+            share: 'مشاركة',
+            today: 'اليوم',
+            backToCalendar: 'التقويم الشهري',
+            backToDayView: 'الواجهة الرئيسة',
+            palette: 'الألوان',
+            palettePapyrus: 'البردي', paletteEmerald: 'الأخضر', paletteOcean: 'الأزرق',
+            paletteAmethyst: 'البنفسجي', paletteGold: 'الذهبي', paletteRuby: 'الأحمر',
+            paletteSnow: 'الأبيض', paletteNoir: 'الأسود',
+            weatherTitle: 'حالة الطقس',
+            anwaSeasons: 'الدرور والأنواء والمواسم',
+            // عناصر الأنواء الإضافية
+            windLabel: 'الرياح', fishLabel: 'الأسماك', cropsLabel: 'المحاصيل', wildlifeLabel: 'الحياة الفطرية',
+            // صفحات التفاصيل
+            anwaDetailBack: 'رجوع', anwaCurrent: 'الحالي', anwaDates: 'الفترة',
+            anwaAllStars: 'الطوالع الثمانية والعشرون', anwaAllSeasons: 'المواسم', anwaAllDurr: 'نظام الدرور',
+            anwaWindCompass: 'بوصلة الرياح', anwaSeasonalWinds: 'الرياح الموسمية',
+            anwaSeaStrikes: 'الضربات البحرية',
+            anwaAllFish: 'الأسماك الموسمية', anwaAllCrops: 'المحاصيل والفواكه', anwaAllWildlife: 'الحياة الفطرية',
+            anwaSuhailDay: 'يوم سهيل', anwaInSeason: 'في الموسم', anwaOutSeason: 'خارج الموسم',
+            anwaSource: 'المصدر: كتاب الدرور والطوالع — مركز جامع الشيخ زايد الكبير',
+            dururCircleTitle: 'دائرة الدرور والأنواء',
+            dururCircleMore: 'دائرة الدرور والأنواء',
+            dururZodiac: 'البرج',
+            tideMovements: 'حركات المد والجزر',
+            tideHigh: 'مد', tideLow: 'جزر',
+            tideSpring: 'مد عالٍ', tideNeap: 'مد منخفض', tideRising: 'مد متزايد', tideFalling: 'مد متناقص',
+            weatherFeels: 'الإحساس', weatherHumidity: 'الرطوبة', weatherWind: 'الرياح', weatherKmh: 'كم/س',
+            weatherPrecip: 'هطول', weatherMm: 'مم', weatherHigh: 'العظمى', weatherLow: 'الصغرى',
+            weatherRainChance: 'احتمال أمطار', weatherUV: 'الأشعة فوق البنفسجية',
+            locationBased: 'بحسب موقع المستخدم',
+            // المحتوى الذكي (AI)
+            aiSectionTitle: 'تأمل اليوم',
+            aiVerse: 'آية',
+            aiReflection: 'تأمل',
+            aiHadith: 'حديث',
+            aiWisdom: 'حكمة',
+            aiHistory: 'في مثل هذا اليوم',
+            aiLoading: 'جارٍ التحميل...',
+            aiError: 'تعذر تحميل المحتوى',
+            aiOffline: 'المحتوى غير متوفر بدون اتصال',
+            aiSource: 'المصدر',
         },
         en: {
             title: 'Hijri Calendar',
@@ -172,7 +222,7 @@ const HijriCalendar = (() => {
             aboutP2: 'Leap years in the cycle: <strong>2, 5, 7, 10, 13, 15, 18, 21, 24, 26, 29</strong>',
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
-            footer: 'By Eisa bin Rashid Al Shamsi — United Arab Emirates',
+            footer: 'Eisa Rashid ALSHAMSI - UAE',
             version: 'Version 2.0',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
@@ -235,13 +285,63 @@ const HijriCalendar = (() => {
             // Share
             shareTitle: 'Share', shareCopied: 'Text copied!', shareError: 'Could not share',
             sharePrayerTitle: 'Share Prayer Times',
+            shareBtn: 'Share', shareContentDate: 'Date Only', shareContentPrayer: 'Prayers', shareContentFull: 'Full',
+            shareCopyBtn: 'Copy', shareActionShare: 'Share',
+            shareThemeBasit: 'Simple', shareThemeIslami: 'Islamic', shareThemeArabi: 'Classic Arabic',
+            shareThemeMashr: 'Mashrabiya', shareThemeQubba: 'Dome', shareThemeMakh: 'Manuscript',
+            creditsName: 'Eisa Rashid ALSHAMSI - UAE',
+            creditsVersion: 'Version 2.0', creditsTech: 'Designed with Claude Code (Opus 4.6)',
             // Sun arc
             sunArcDay: 'Day Length', sunArcNight: 'Night Length',
+            arabicTime: 'Arabic Hour', arabicTimeNow: 'Arabic Hour Now',
+            timeFormat12h: '12-hour format (AM/PM)', timeAM: 'AM', timePM: 'PM',
             // Adhkar
             adhkarTitle: 'Adhkar', adhkarMorning: 'Morning Adhkar', adhkarEvening: 'Evening Adhkar',
             adhkarCount: 'times', adhkarSource: 'Source', adhkarDone: 'Done',
             // PDF Export
             exportPDF: 'Print PDF',
+            // Day View
+            share: 'Share',
+            today: 'Today',
+            backToCalendar: 'Monthly Calendar',
+            backToDayView: 'Main View',
+            palette: 'Colors',
+            palettePapyrus: 'Papyrus', paletteEmerald: 'Emerald', paletteOcean: 'Ocean',
+            paletteAmethyst: 'Amethyst', paletteGold: 'Gold', paletteRuby: 'Ruby',
+            paletteSnow: 'Snow', paletteNoir: 'Noir',
+            weatherTitle: 'Weather',
+            anwaSeasons: 'Seasons & Stars',
+            // Extra anwa elements
+            windLabel: 'Winds', fishLabel: 'Fish', cropsLabel: 'Crops', wildlifeLabel: 'Wildlife',
+            // Detail pages
+            anwaDetailBack: 'Back', anwaCurrent: 'Current', anwaDates: 'Period',
+            anwaAllStars: 'The 28 Lunar Mansions', anwaAllSeasons: 'Seasons', anwaAllDurr: 'Durr System',
+            anwaWindCompass: 'Wind Compass', anwaSeasonalWinds: 'Seasonal Winds',
+            anwaSeaStrikes: 'Sea Strikes',
+            anwaAllFish: 'Seasonal Fish', anwaAllCrops: 'Crops & Fruits', anwaAllWildlife: 'Wildlife & Plants',
+            anwaSuhailDay: 'Suhail Day', anwaInSeason: 'In season', anwaOutSeason: 'Off season',
+            anwaSource: 'Source: Duroor & Tawalie Book — Sheikh Zayed Grand Mosque Center',
+            dururCircleTitle: 'Durur & Anwa Circle',
+            dururCircleMore: 'Durur & Anwa Circle',
+            dururZodiac: 'Zodiac',
+            tideMovements: 'Tide Movements',
+            tideHigh: 'high', tideLow: 'low',
+            tideSpring: 'Spring tide', tideNeap: 'Neap tide', tideRising: 'Rising tide', tideFalling: 'Falling tide',
+            weatherFeels: 'Feels', weatherHumidity: 'Humidity', weatherWind: 'Wind', weatherKmh: 'km/h',
+            weatherPrecip: 'Precip', weatherMm: 'mm', weatherHigh: 'High', weatherLow: 'Low',
+            weatherRainChance: 'Rain chance', weatherUV: 'UV',
+            locationBased: 'Based on your location',
+            // AI Content
+            aiSectionTitle: 'Daily Reflection',
+            aiVerse: 'Verse',
+            aiReflection: 'Reflection',
+            aiHadith: 'Hadith',
+            aiWisdom: 'Wisdom',
+            aiHistory: 'On This Day',
+            aiLoading: 'Loading...',
+            aiError: 'Could not load content',
+            aiOffline: 'Content unavailable offline',
+            aiSource: 'Source',
         }
     };
 
@@ -289,6 +389,13 @@ const HijriCalendar = (() => {
         return { ...ev, name: currentLang === 'en' ? ev.nameEn : ev.nameAr };
     }
 
+    // ══════════════════════════════════════════════════════════════
+    // ⚠️  بيانات دائرة الدرور — مُقفلة (LOCKED v4.58)
+    //     لا يجوز تعديل الأسماء أو التواريخ أو الترتيب
+    //     المرجع: DURUR_CIRCLE_SPEC.md
+    //     المصدر: كتاب الدرور والطوالع — مركز جامع الشيخ زايد الكبير
+    // ══════════════════════════════════════════════════════════════
+
     // ─── الطوالع (منازل القمر) — 28 منزلة ─────────────────────
     // كل منزلة 13 يوماً، تبدأ الدورة من 11 أغسطس
     // التواريخ: [شهر_بداية, يوم_بداية, شهر_نهاية, يوم_نهاية]
@@ -312,8 +419,8 @@ const HijriCalendar = (() => {
           weatherAr: 'أول نجوم الوسم الماطر، يعتدل الجو نهاراً ويبرد ليلاً، وتتوافد السحب من الشمال والشمال الغربي، وأمطاره محمودة تسِم الأرض بالخضرة وينبت منها الفقع.',
           weatherEn: 'First star of the Wasm rainy season. Weather moderates by day and cools at night. Clouds come from the north/northwest. Its praised rains green the earth and truffles begin growing.' },
         { ar: 'السماك', en: 'Al-Simak', from: [10,29], to: [11,10],
-          weatherAr: 'تزداد برودة الجو ليلاً مع اعتدال النهار، وتهب الرياح الجنوبية المثيرة للغبار، والرياح متقلبة الاتجاه، وتشيع الأمراض الموسمية بسبب التقلبات الجوية.',
-          weatherEn: 'Nighttime cold increases noticeably while daytime stays moderate. Dusty southerly winds blow with variable directions. Seasonal illnesses spread due to weather fluctuations.' },
+          weatherAr: 'تزداد برودة الجو ليلاً مع اعتدال النهار، وتهب الرياح الجنوبية المثيرة للغبار، والرياح متقلبة الاتجاه، وتشيع الأمراض الموسمية بسبب التقلبات الجوية. وتقع فيه ضربة الأحيمر البحرية (1-10 نوفمبر) مع سقوط نجم قلب العقرب.',
+          weatherEn: 'Nighttime cold increases noticeably while daytime stays moderate. Dusty southerly winds blow with variable directions. Seasonal illnesses spread due to weather fluctuations. Ahimar sea strike occurs (Nov 1-10) with the setting of Antares (Qalb al-Aqrab).' },
         { ar: 'الغفر', en: 'Al-Ghafr', from: [11,11], to: [11,23],
           weatherAr: 'آخر نجوم الوسم، يسكن بحر العرب ويهيج الخليج العربي، وتزداد برودة الليل أكثر من ذي قبل مع اعتدال النهار.',
           weatherEn: 'Last Wasm star. The Arabian Sea calms while the Gulf becomes agitated. Night cold increases further while daytime stays moderate.' },
@@ -321,8 +428,8 @@ const HijriCalendar = (() => {
           weatherAr: 'بداية مظاهر الشتاء، تزداد برودة الليل بشكل ملحوظ وتشتد الرياح الباردة، ويكثر هبوب العواصف وسقوط الأمطار، مع زيادة طول الليل.',
           weatherEn: 'Winter signs appear. Night cold increases notably with strong cold winds. Storms and rainfall become more frequent as nights grow longer.' },
         { ar: 'الإكليل', en: 'Al-Iklil', from: [12,7], to: [12,19],
-          weatherAr: 'أول نجوم مربعانية الشتاء، تكثر الأمطار والغيوم ويشتد البرد، وتستمر فرصة ضربة الأحيمر وهي رياح قوية غير منتظمة يهيج معها البحر.',
-          weatherEn: 'First star of winter Marbainiya (40-day cold). Rain and clouds increase, cold intensifies. Ahimar storm risk continues — strong irregular winds agitating the seas.' },
+          weatherAr: 'أول نجوم مربعانية الشتاء، تكثر الأمطار والغيوم ويشتد البرد، وتصادف فرصة ضربة الكوي وهي رياح قوية غير منتظمة يهيج معها البحر.',
+          weatherEn: 'First star of winter Marbainiya (40-day cold). Rain and clouds increase, cold intensifies. Kawi storm risk coincides — strong irregular winds agitating the seas.' },
         { ar: 'القلب', en: 'Al-Qalb', from: [12,20], to: [1,1],
           weatherAr: 'ثاني نجوم المربعانية، دخول البرد الحقيقي وغاية طول الليل (الانقلاب الشتوي)، وتهب رياح الشمال الباردة ويتشكل الصقيع مع كثرة الضباب.',
           weatherEn: 'True winter cold arrives with the longest nights (winter solstice). Cold north winds blow, frost may form, and fog is frequent.' },
@@ -379,7 +486,7 @@ const HijriCalendar = (() => {
           weatherEn: 'Scorching heat with moist Kaus winds creates exhausting humidity. Summer cumulus clouds (Rawayih) form over mountains, sometimes bringing thunderstorms.' },
     ];
 
-    // ─── الأبراج الشمسية — 12 برجاً ─────────────────────────
+    // ─── الأبراج الشمسية — 12 برجاً ⚠️ مُقفل ──────────────
     const ZODIAC = [
         { ar: 'الأسد', en: 'Leo', symbol: '♌', from: [7,23], to: [8,22] },
         { ar: 'السنبلة', en: 'Virgo', symbol: '♍', from: [8,23], to: [9,22] },
@@ -395,36 +502,533 @@ const HijriCalendar = (() => {
         { ar: 'السرطان', en: 'Cancer', symbol: '♋', from: [6,21], to: [7,22] },
     ];
 
-    // ─── المواسم العربية ──────────────────────────────────────
+    // ─── المواسم العربية ⚠️ مُقفل ─────────────────────────────
     const SEASONS = [
-        { ar: 'الكليبين', en: 'Al-Kulaibin', from: [8,11], to: [8,23] },
-        { ar: 'الصفري', en: 'Al-Safari', from: [8,24], to: [10,15] },
-        { ar: 'الوسم', en: 'Al-Wasm', from: [10,16], to: [12,6] },
-        { ar: 'مربعانية الشتاء', en: 'Winter Murabba\'aniya', from: [12,7], to: [1,14] },
-        { ar: 'برد البطين (الشبط)', en: 'Bard al-Butain (Shabat)', from: [1,15], to: [2,9] },
-        { ar: 'العقارب', en: "Al-Aqarib", from: [2,10], to: [3,20] },
-        { ar: 'الحميمين', en: 'Al-Humaimain', from: [3,21], to: [4,15] },
-        { ar: 'الذراعين', en: 'Al-Dhira\'ain', from: [4,16], to: [5,11] },
-        { ar: 'كنة الثريا', en: 'Kannat al-Thuraya', from: [4,28], to: [6,6] },
-        { ar: 'الثريا', en: 'Al-Thuraya', from: [6,7], to: [6,19] },
-        { ar: 'التويبع', en: 'Al-Tuwaiba\'', from: [6,20], to: [7,2] },
-        { ar: 'الجوزاء الأولى (الهقعة)', en: 'Jawza I (Al-Haq\'a)', from: [7,3], to: [7,15] },
-        { ar: 'الجوزاء الثانية (الهنعة)', en: 'Jawza II (Al-Han\'a)', from: [7,16], to: [7,28] },
-        { ar: 'المرزم', en: 'Al-Mirzam', from: [7,29], to: [8,10] },
+        { ar: 'الكليبين', en: 'Late Summer Heat', from: [8,11], to: [8,23] },
+        { ar: 'الصفري', en: 'Early Autumn', from: [8,24], to: [10,15] },
+        { ar: 'الوسم', en: 'Rain Season', from: [10,16], to: [12,6] },
+        { ar: 'مربعانية الشتاء', en: 'Deep Winter (40 days)', from: [12,7], to: [1,14] },
+        { ar: 'برد البطين (الشبط)', en: 'Harsh Cold', from: [1,15], to: [2,9] },
+        { ar: 'العقارب', en: 'Sting Cold', from: [2,10], to: [3,20] },
+        { ar: 'الحميمين', en: 'Warming Days', from: [3,21], to: [4,15] },
+        { ar: 'الذراعين', en: 'Spring Warmth', from: [4,16], to: [5,11] },
+        { ar: 'كنة الثريا', en: 'Pleiades Heat', from: [4,28], to: [6,6] },
+        { ar: 'الثريا', en: 'Pleiades Peak', from: [6,7], to: [6,19] },
+        { ar: 'التويبع', en: 'Rising Heat', from: [6,20], to: [7,2] },
+        { ar: 'الجوزاء الأولى (الهقعة)', en: 'Orion Heat I', from: [7,3], to: [7,15] },
+        { ar: 'الجوزاء الثانية (الهنعة)', en: 'Orion Heat II', from: [7,16], to: [7,28] },
+        { ar: 'المرزم', en: 'Peak Summer', from: [7,29], to: [8,10] },
     ];
 
-    // ─── الدرور — 36 درّاً ───────────────────────────────────
+    // ─── الدرور — 37 درّاً ⚠️ مُقفل ──────────────────────────
     // يبدأ الحساب من 15 أغسطس (طلوع سهيل)
     // 4 مئات: الصفري (100 يوم)، الشتاء (100 يوم)، الصيف (100 يوم)، القيظ (65 يوم)
     const DUROR_LABELS = {
-        ar: ['در العشر','در العشرين','در الثلاثين','در الأربعين','در الخمسين',
-             'در الستين','در السبعين','در الثمانين','در التسعين','در المائة'],
-        en: ['Darr 10','Darr 20','Darr 30','Darr 40','Darr 50',
-             'Darr 60','Darr 70','Darr 80','Darr 90','Darr 100']
+        ar: ['العشر','العشرون','الثلاثون','الأربعون','الخمسون',
+             'الستون','السبعون','الثمانون','التسعون','المائة'],
+        en: ['10','20','30','40','50',
+             '60','70','80','90','100']
+    };
+    // أسماء بديلة لدرور معينة حسب المئة — [mia][durrIndex]
+    const DUROR_ALIASES = {
+        ar: { '3-6': 'المساريق' },  // در المساريق — ليست السبعون، بل در مستقل (5 أيام)
+        en: { '3-6': 'Masariq' }
     };
     const DUROR_MIA = {
         ar: ['المائة الأولى (الصفري)','المائة الثانية (الشتاء)','المائة الثالثة (الصيف)','المائة الرابعة (القيظ)'],
         en: ['1st Hundred (Safari)','2nd Hundred (Winter)','3rd Hundred (Summer)','4th Hundred (Qaiz)']
+    };
+
+    // ─── بيانات إثرائية من كتاب الدرور والطوالع ⚠️ مُقفل ────
+    // (مركز جامع الشيخ زايد الكبير)
+    const ANWA_ENRICHMENT = {
+        // بوصلة الرياح — 16 اتجاه
+        windCompass: [
+            { ar: 'الشمال', en: 'Shamal (N)', degree: 0 },
+            { ar: 'النعشي', en: 'Na\'shi (NNE)', degree: 22.5 },
+            { ar: 'الناشي', en: 'Nashi (NE)', degree: 45 },
+            { ar: 'الأزيب', en: 'Aziyab (ENE)', degree: 67.5 },
+            { ar: 'الصبا', en: 'Saba (E)', degree: 90 },
+            { ar: 'السهيلي الشرقي', en: 'Suhaili Sharqi (ESE)', degree: 112.5 },
+            { ar: 'الكوس', en: 'Kaus (SE)', degree: 135 },
+            { ar: 'السهيلي', en: 'Suhaili (SSE)', degree: 157.5 },
+            { ar: 'الجنوب', en: 'Junub (S)', degree: 180 },
+            { ar: 'المريسي', en: 'Murisi (SSW)', degree: 202.5 },
+            { ar: 'الهبوب', en: 'Hubub (SW)', degree: 225 },
+            { ar: 'اليافعي', en: 'Yafi\'i (WSW)', degree: 247.5 },
+            { ar: 'الدبور', en: 'Dabur (W)', degree: 270 },
+            { ar: 'الغربي', en: 'Gharbi (WNW)', degree: 292.5 },
+            { ar: 'الشهيلي', en: 'Shihaili (NW)', degree: 315 },
+            { ar: 'الحصبائي', en: 'Hasba\'i (NNW)', degree: 337.5 },
+        ],
+        // رياح موسمية — من جدول الرياح في كتاب الدرور والطوالع
+        seasonalWinds: [
+            { ar: 'هبايب سهيل', en: 'Cool Breezes', from: [8,15], to: [9,22], desc_ar: 'رياح لطيفة رطبة تلطف الأجواء مع طلوع سهيل', desc_en: 'Pleasant moist breezes that cool the air with Canopus rise' },
+            { ar: 'رياح الكوس', en: 'Monsoon Winds', from: [7,16], to: [9,20], desc_ar: 'رياح موسمية رطبة من بحر العرب، عالية الرطوبة', desc_en: 'Monsoon winds from Arabian Sea, high humidity' },
+            { ar: 'الروايح', en: 'Summer Clouds', from: [7,29], to: [8,15], desc_ar: 'سحب ركامية صيفية قد تصاحبها أمطار رعدية', desc_en: 'Summer cumulus clouds with possible thunderstorms' },
+            { ar: 'رياح الأكيذب', en: 'Cooling Northerlies', from: [10,4], to: [10,31], desc_ar: 'رياح شمالية قوية يسبقها هدوء ولا تلبث طويلاً، تهب على شكل عواصف صغيرة تسرّع انصراف الحر واعتدال الجو', desc_en: 'Strong northerly winds preceded by calm, blowing in short storm bursts that hasten cool weather' },
+            { ar: 'الأزيب', en: 'Moist Southerlies', from: [10,1], to: [11,30], desc_ar: 'رياح جنوبية محملة بالرطوبة وبخار الماء تبشر بالمطر', desc_en: 'Southern winds carrying moisture, heralding rain' },
+            { ar: 'السهيلي', en: 'Southern Breeze', from: [10,1], to: [2,28], desc_ar: 'رياح جنوبية من جهة سهيل، ليست باردة، تبشر بالمطر', desc_en: 'Southern winds from Canopus direction, herald rain' },
+            { ar: 'ضربة الأحيمر', en: 'Red Storm', from: [11,11], to: [12,20], desc_ar: 'رياح قوية غير منتظمة الاتجاه تتزامن مع غيوب الأحيمر (اختفاء نجم قلب العقرب ~40 يوماً)، يهيج معها بحر عُمان والخليج العربي', desc_en: 'Strong irregular winds coinciding with Ahimar disappearance (Antares hidden ~40 days). Oman Sea and Arabian Gulf become agitated.' },
+            { ar: 'العقربي', en: 'Eastern Rains', from: [11,1], to: [12,31], desc_ar: 'رياح شرقية رطبة، إذا هبت شتاءً تتكون السحب الماطرة', desc_en: 'Eastern moist winds that bring rain clouds in winter' },
+            { ar: 'رياح الشمال', en: 'North Winds', from: [11,15], to: [2,28], desc_ar: 'رياح شمالية إلى شمالية غربية باردة شديدة وجافة', desc_en: 'Cold, dry north to NW winds — peak winter' },
+            { ar: 'الياهي', en: 'Bitter Cold Wind', from: [1,1], to: [2,28], desc_ar: 'رياح شمالية من أكثر الرياح برودة وجفافاً', desc_en: 'Northerly winds, among the coldest and driest' },
+            { ar: 'النعشي', en: 'Gulf Churner', from: [2,1], to: [2,28], desc_ar: 'رياح شمالية شرقية يثور معها الخليج ويهيج', desc_en: 'NE winds that churn the Arabian Gulf' },
+            { ar: 'النعايات', en: 'Winter Farewell', from: [2,23], to: [3,12], desc_ar: 'آخر الرياح الباردة — تنعى الشتاء', desc_en: 'Last cold winds — bidding winter farewell' },
+            { ar: 'الصبا (المطلعي)', en: 'Spring Breeze', from: [3,1], to: [4,30], desc_ar: 'نسائم معتدلة ربيعية من الشرق تصاحبها روائح الأزهار', desc_en: 'Pleasant spring easterly breeze with flower scents' },
+            { ar: 'السرايات (المراويح)', en: 'Spring Storms', from: [3,20], to: [4,28], desc_ar: 'اضطرابات جوية ربيعية تشكل سحب ركامية ماطرة بغزارة', desc_en: 'Spring thunderstorms with heavy cumulus rainfall' },
+            { ar: 'الطوز', en: 'Dust Storms', from: [3,1], to: [5,31], desc_ar: 'رياح شمالية غربية جافة وحارة محملة بالغبار والأتربة، مصدرها جنوب العراق وشمال الجزيرة العربية، تقابلها رياح الخماسين في شمال أفريقيا', desc_en: 'Hot dry NW winds laden with dust from southern Iraq and northern Arabia, equivalent to North Africa\'s Khamsin winds' },
+            { ar: 'البوارح', en: 'Dry NW Winds', from: [5,12], to: [7,28], desc_ar: 'رياح شمالية غربية جافة — لا أمطار ولا سحب', desc_en: 'Dry NW winds — no rain, no clouds' },
+            { ar: 'بارح البطين', en: 'Early Dry Wind', from: [5,25], to: [6,6], desc_ar: 'أول البوارح، البارح الصغير', desc_en: 'First phase of dry NW winds' },
+            { ar: 'بارح الثريا', en: 'Peak Dry Wind', from: [6,7], to: [7,2], desc_ar: 'البارح الكبير — أنشط البوارح', desc_en: 'Major dry wind phase — peak activity' },
+            { ar: 'بارح الجوزاء', en: 'Scorching Wind', from: [7,3], to: [7,28], desc_ar: 'بوارح مع السموم — أشد الرياح حراً', desc_en: 'Dry winds with hot gusts — hottest winds' },
+            { ar: 'رياح السموم', en: 'Poison Wind', from: [7,3], to: [8,10], desc_ar: 'رياح صيفية حارة جافة تتجاوز ٥٠ درجة مئوية', desc_en: 'Hot dry summer winds exceeding 50°C' },
+            { ar: 'الغربي', en: 'Western Dust', from: [6,1], to: [6,30], desc_ar: 'رياح غربية دافئة وجافة تثير التراب والغبار', desc_en: 'Warm dry western winds raising dust' },
+            { ar: 'بارح المرزم', en: 'Late Dry Wind', from: [7,29], to: [8,10], desc_ar: 'آخر البوارح، تضعف فيه البوارح وتنشط رياح الكوس', desc_en: 'Last phase of dry winds, Kaws winds begin to dominate' },
+        ],
+        // ضربات بحرية — اضطرابات جوية يتجنبها البحارة
+        seaStrikes: [
+            { ar: 'ضربة الأكيذب', en: 'Akidhib strike', from: [10,10], to: [10,20] },
+            { ar: 'ضربة الأحيمر', en: 'Ahimar strike', from: [11,1], to: [11,10] },
+            { ar: 'ضربة الكوي', en: 'Kawi strike', from: [12,10], to: [12,20] },
+            { ar: 'ضربة الإكليل', en: 'Iklil strike', from: [5,10], to: [5,20] },
+            { ar: 'ضربة الثريا', en: 'Thuraya strike', from: [6,1], to: [6,10] },
+            { ar: 'ضربة الشلي', en: 'Shali strike', from: [6,11], to: [6,20] },
+        ],
+        // أسماك موسمية — من ملخص الدرور في كتاب الدرور والطوالع
+        fish: [
+            { ar: 'الهامور', en: 'Hamour (Grouper)', from: [4,22], to: [8,31] },
+            { ar: 'الكنعد', en: 'Kana\'ad (Kingfish)', from: [3,13], to: [8,31] },
+            { ar: 'الشعري', en: 'Sha\'ri (Emperor)', from: [2,1], to: [5,31] },
+            { ar: 'الصافي', en: 'Safi (Rabbitfish)', from: [11,23], to: [5,31] },
+            { ar: 'الزبيدي', en: 'Zubaidi (Pomfret)', from: [2,1], to: [3,31] },
+            { ar: 'البياح', en: 'Bayah (Mullet)', from: [8,15], to: [5,31] },
+            { ar: 'الجش', en: 'Jesh (Grunt)', from: [4,22], to: [8,31] },
+            { ar: 'القابط', en: 'Qabit (Lizardfish)', from: [11,23], to: [5,31] },
+            { ar: 'الشعم', en: 'Sha\'am (Yellowfin bream)', from: [12,23], to: [4,30] },
+            { ar: 'الكوفر', en: 'Kufar (Yellowtail)', from: [12,23], to: [4,30] },
+            { ar: 'القباقيب', en: 'Gabagib (Crab)', from: [12,23], to: [7,31] },
+            { ar: 'الخبّاط', en: 'Khabbat (Queenfish)', from: [10,14], to: [1,31] },
+            { ar: 'المرجان', en: 'Murjan (Coral fish)', from: [11,23], to: [12,31] },
+            { ar: 'الحلوايوه', en: 'Halwayoh (Sweetlip)', from: [11,23], to: [12,31] },
+            { ar: 'السولي', en: 'Suli (Needlefish)', from: [9,24], to: [11,22] },
+            { ar: 'الشنينوه', en: 'Shninoh (Barracuda)', from: [9,24], to: [11,22] },
+            { ar: 'النيسر', en: 'Naysar (Trevally)', from: [3,3], to: [5,31] },
+            { ar: 'القباب', en: 'Gubab (Barracuda)', from: [6,21], to: [7,31] },
+            { ar: 'الدردمان', en: 'Dardaman (Sardine)', from: [10,14], to: [12,31] },
+            { ar: 'اليريور (القرش)', en: 'Yariur (Shark)', from: [3,13], to: [6,30] },
+        ],
+        // محاصيل وفواكه — من ملخص الدرور في كتاب الدرور والطوالع
+        crops: [
+            { ar: 'الرطب', en: 'Rutab (Fresh Dates)', from: [6,1], to: [9,30] },
+            { ar: 'البرتقال والماندرين', en: 'Oranges & Mandarin', from: [11,23], to: [3,31] },
+            { ar: 'الليمون المحلي', en: 'Local Lemons', from: [9,4], to: [12,31] },
+            { ar: 'المانجو', en: 'Mango', from: [6,21], to: [8,10] },
+            { ar: 'الرمان', en: 'Pomegranate', from: [7,31], to: [10,31] },
+            { ar: 'التين', en: 'Figs', from: [7,31], to: [10,31] },
+            { ar: 'العنب', en: 'Grapes', from: [7,31], to: [10,31] },
+            { ar: 'البطيخ والشمام', en: 'Watermelon & Melon', from: [4,22], to: [7,31] },
+            { ar: 'الطماطم والفلفل', en: 'Tomatoes & Peppers', from: [9,24], to: [4,30] },
+            { ar: 'الخضروات الورقية', en: 'Leafy greens', from: [11,23], to: [3,31] },
+            { ar: 'البقوليات والحبوب', en: 'Legumes & Grains', from: [4,22], to: [5,31] },
+            { ar: 'البرسيم (الجت)', en: 'Alfalfa', from: [8,25], to: [4,30] },
+            { ar: 'الفقع (الكمأة)', en: 'Faq\'a (Desert Truffle)', from: [10,14], to: [3,31] },
+            { ar: 'البامية والملوخية', en: 'Okra & Molokhia', from: [5,1], to: [8,31] },
+        ],
+        // حياة فطرية — من ملخص الدرور في كتاب الدرور والطوالع
+        wildlife: [
+            { ar: 'تزهير السدر', en: 'Sidr tree blooming', from: [9,24], to: [11,22] },
+            { ar: 'تزهير السنط (القرط والسمر)', en: 'Acacia blooming', from: [11,23], to: [4,30] },
+            { ar: 'هجرة الطيور (ش←ج: حبارى، صقور، وز)', en: 'Bird migration south (Houbara, Falcons, Geese)', from: [9,14], to: [1,14] },
+            { ar: 'هجرة الطيور (ج←ش: كرك، وز، سمان)', en: 'Bird migration north (Cranes, Geese, Quail)', from: [2,1], to: [5,31] },
+            { ar: 'موسم القنص', en: 'Falconry/hunting season', from: [11,23], to: [2,28] },
+            { ar: 'ضراب الإبل والخلفات', en: 'Camel mating & calving', from: [10,14], to: [2,28] },
+            { ar: 'خروج الزواحف والهوام', en: 'Reptiles emerge from burrows', from: [3,1], to: [5,31] },
+            { ar: 'تكاثر الأسماك (الحبل)', en: 'Fish spawning season', from: [11,3], to: [1,31] },
+            { ar: 'نمو الفقع والأعشاب البرية', en: 'Truffle & wild herb growth', from: [10,14], to: [3,31] },
+            { ar: 'نشاط النحل وإنتاج العسل', en: 'Bee activity & honey', from: [10,1], to: [3,31] },
+            { ar: 'تكوينات الروايح (سحب ركامية)', en: 'Rawayih cloud formations', from: [7,29], to: [9,15] },
+            { ar: 'الدوامات الغبارية والسراب', en: 'Dust devils & mirage', from: [7,3], to: [8,10] },
+            { ar: 'موسم الغوص عن اللؤلؤ (قديماً)', en: 'Pearl diving season (historic)', from: [6,1], to: [8,10] },
+        ],
+    };
+
+    // ─── أوصاف تفصيلية للدرور الـ 36 — من كتاب الدرور والطوالع ───────────
+    // مفتاح: "mia-durr" حيث mia = 0-3 (صفري/شتاء/صيف/قيظ)، durr = 0-9
+    const DURR_DETAILS = {
+        // ════ المائة الأولى — الصفري (15 أغسطس – 22 نوفمبر) ════
+        '0-0': {
+            dates: [8,15,8,24],
+            ar: 'طلوع سهيل وانكسار الحرارة. هبايب سهيل (نسائم رطبة). حصاد الرطب. بدء زراعة الخريف المبكرة (باذنجان، طماطم، فلفل في مشاتل مظللة). أسماك: البدح، النقرور، البياح. بدء هجرة الدخل والخواضير جنوباً.',
+            en: 'Canopus rises, heat breaks. Suhail breezes begin. Date harvest peaks. Early autumn planting starts (eggplant, tomato, pepper in shaded nurseries). Fish: Badah, Naqrur, Bayah. Dakhel & Khawadeer birds migrate south.'
+        },
+        '0-1': {
+            dates: [8,25,9,3],
+            ar: 'وعكات سهيل (موجات حرارة مع رطوبة عالية). صرام نخل الفرض. زراعة محاصيل علفية وخضروات. أسماك: البياح، الجش.',
+            en: 'Suhail heat waves with high humidity. Fardh date harvest begins. Fodder crops and vegetables planted. Fish: Bayah, Jesh.'
+        },
+        '0-2': {
+            dates: [9,4,9,13],
+            ar: 'حرة الدبس/حرة المساطيح — موجة حر تساعد على تجفيف التمور. هجرة الدخل والسمان والقميري. نضج الليمون.',
+            en: 'Hot spell helps dry dates on platforms. Quail, doves migrate through. Lemons ripen.'
+        },
+        '0-3': {
+            dates: [9,14,9,23],
+            ar: 'الاعتدال الخريفي. برودة الليل. أفضل أوقات الزراعة مع طالع الجبهة. نضج أصناف التمر المتأخرة (الخصاب، الهلالي). تكاثر معظم الأسماك.',
+            en: 'Autumnal equinox. Nights cool. Best planting time with Jabha star. Late date varieties ripen. Most fish species multiply.'
+        },
+        '0-4': {
+            dates: [9,24,10,3],
+            ar: 'تبرد الأجواء فجراً. تشكل الضباب صباحاً. رياح الأكيذب. تزهير أشجار السدر. زراعة البرسيم والشعير. أسماك: الجد، السولي، الشنينوه.',
+            en: 'Dawn cools. Morning fog forms. Akidhib winds blow. Sidr trees bloom. Alfalfa and barley sown. Fish: Jed, Suli, Shninoh.'
+        },
+        '0-5': {
+            dates: [10,4,10,13],
+            ar: 'انكسار الحرارة. رياح الأزيب (جنوبية رطبة). تكاثر الربيان. وصول صقور الشواهين. آخر نجم من بنات نعش (الإكيذب) يطلع.',
+            en: 'Heat breaks further. Aziyab moist southerlies. Shrimp breed. Shaheen falcons arrive. Last star of Ursa Major rises.'
+        },
+        '0-6': {
+            dates: [10,14,10,23],
+            ar: 'بداية موسم الوسم (16 أكتوبر). سبق الوسم — سحب من الشمال تبشر بالمطر. ظهور الفقع والأعشاب البرية. بداية ضراب الإبل. وصول الحبارى.',
+            en: 'Wasm rain season begins (Oct 16). Precursor clouds from north. Truffles and wild herbs sprout. Camel breeding starts. Houbara bustards arrive.'
+        },
+        '0-7': {
+            dates: [10,24,11,2],
+            ar: 'أفضل موسم لنمو النبات. ظهور الفقع والعرايين. تكريب النخل وتقليم الزيتون والحمضيات. زراعة البقوليات والحبوب والبطاطس.',
+            en: 'Best season for plant growth. Truffles appear. Palm pruning, olive and citrus trimming. Legumes, grains, potatoes planted.'
+        },
+        '0-8': {
+            dates: [11,3,11,12],
+            ar: 'ضربة الأحيمر — رياح قوية غير منتظمة. هياج البحر. تكاثر الأسماك (الحبل). هجرة البلابل والصقور.',
+            en: 'Ahimar Storm — irregular strong winds. Rough seas. Fish spawning season (Habl). Bulbuls and falcons migrate.'
+        },
+        '0-9': {
+            dates: [11,13,11,22],
+            ar: 'آخر أيام الصفري. استمرار الوسم. بدء موسم القنص (الصيد بالصقور). الحمضيات تنضج.',
+            en: 'Last days of Safari. Wasm continues. Falconry season begins. Citrus fruits ripen.'
+        },
+        // ════ المائة الثانية — الشتاء (23 نوفمبر – 2 مارس) ════
+        '1-0': {
+            dates: [11,23,12,2],
+            ar: 'بداية الشتاء (تيرماه). سحب من الشمال. طول الليل. أفضل نمو للنباتات. أسماك: المرجان، الصافي، البياح. نضج الحمضيات (البرتقال، الماندرين). زراعة الورقيات.',
+            en: 'Winter begins (Tirmah). Northern clouds. Nights lengthen. Best plant growth. Fish: Murjan, Safi, Bayah. Citrus ripens. Leafy greens planted.'
+        },
+        '1-1': {
+            dates: [12,3,12,12],
+            ar: 'تظهر علامات الشتاء. اشتداد البرد. احتمال أمطار. هياج الخليج بفعل رياح الشمال. حماية خلايا النحل من البرد.',
+            en: 'Winter signs appear. Cold intensifies. Rain likely. Gulf rough from north winds. Protect beehives from cold.'
+        },
+        '1-2': {
+            dates: [12,13,12,22],
+            ar: 'بداية مربعانية الشتاء (7 ديسمبر). الانقلاب الشتوي — أقصر نهار. ظهور الكمأة والطرثوث والحماض. نهاية فترة ضربة الأحيمر.',
+            en: 'Winter Marbʿaniyya begins (Dec 7). Winter solstice — shortest day. Truffles, Tartouth, Hamadh appear. Ahimar storm period ends.'
+        },
+        '1-3': {
+            dates: [12,23,1,1],
+            ar: 'بداية أربعين المريعي — أبرد 40 يوماً. رياح شمالية. سكون النبات الشتوي. لا زراعة. حماية المحاصيل. بدء طول النهار.',
+            en: '40 coldest days begin (Mriʿi). North winds. Plant dormancy. No planting. Protect crops. Days start lengthening.'
+        },
+        '1-4': {
+            dates: [1,2,1,11],
+            ar: 'استمرار المربعانية وأربعين المريعي. أمطار البلي (أمطار المنخفضات الجوية). تزهير الحمضيات. بواكير طلع النخل.',
+            en: 'Marbʿaniyya and Mriʿi continue. Bali rains (depression rains). Citrus blooms. Early palm pollen appears.'
+        },
+        '1-5': {
+            dates: [1,12,1,21],
+            ar: 'برد البطين/الشبط — ذروة البرد والجفاف. ضربة الستين — أقوى رياح شمالية. \"برد الستين مثل السكين\". رياح النعشي والياهي. وفرة العومة (السردين).',
+            en: 'Batein/Shabat cold — peak cold and dryness. Der 60 strike — strongest north winds. "Der 60 cold cuts like a knife." Sardines abundant.'
+        },
+        '1-6': {
+            dates: [1,22,1,31],
+            ar: 'دفوة الطلع — فترة دفء نسبي. ظهور طلع النخل. أفضل وقت لتقليم الورد والحمضيات والتوت.',
+            en: 'Warmth of pollen (Dafwat al-Talʿ). Palm pollen appears. Best time to prune roses, citrus, mulberry.'
+        },
+        '1-7': {
+            dates: [2,1,2,10],
+            ar: 'بداية أربعين العقربي — أمطار غزيرة متوقعة. ضربة الثمانين. أيام بذرة الست (8-13 فبراير) — أفضل 6 أيام لزراعة كل الأشجار.',
+            en: 'Aqrabi Forty begins — heavy rains expected. Der 80 strike. Six Seed Days (Feb 8-13) — best 6 days to plant all trees.'
+        },
+        '1-8': {
+            dates: [2,11,2,20],
+            ar: 'موسم العقارب — البرد ينكسر تدريجياً. جريان النسغ في الأشجار. أمطار البلي مستمرة. هجرة الكرك والوز شمالاً. ظهور الفلامنجو.',
+            en: 'Scorpion season — cold gradually breaks. Sap flows in trees. Bali rains continue. Cranes, geese migrate north. Flamingos appear.'
+        },
+        '1-9': {
+            dates: [2,21,3,2],
+            ar: 'برد العجوز — آخر 8 أيام باردة (25 فبراير - 4 مارس). رياح النعايات — تودع الشتاء. بدء الزراعة الربيعية. تنبيت النخيل (التلقيح). تزهير السنط.',
+            en: 'Old Woman\'s Cold — last 8 cold days (Feb 25-Mar 4). Farewell winds. Spring planting begins. Palm pollination starts. Acacia blooms.'
+        },
+        // ════ المائة الثالثة — الصيف (3 مارس – 10 يونيو) ════
+        '2-0': {
+            dates: [3,3,3,12],
+            ar: 'نهاية أربعين العقربي. آخر رياح النعايات الباردة. ظهور الفلامنجو والنحام الكبير. تلقيح النخيل حسب الصنف.',
+            en: 'Aqrabi Forty ends. Last cold winds. Flamingos and greater flamingos appear. Palm pollination by variety.'
+        },
+        '2-1': {
+            dates: [3,13,3,22],
+            ar: 'أيام الحسوم — تقلبات جوية. الاعتدال الربيعي. بداية السرايات. تكاثر القروش والهامور والكنعد. تقليم العنب والتين. آخر ضراب للإبل.',
+            en: 'Husum days — changeable weather. Vernal equinox. Spring storms begin. Sharks, grouper, kingfish breed. Grape/fig pruning. Last camel breeding.'
+        },
+        '2-2': {
+            dates: [3,23,4,1],
+            ar: 'السرايات/المراويح — عواصف رعدية ربيعية. الحميمين — ارتفاع الحرارة وعواصف ترابية (الطوز). هياج البحر.',
+            en: 'Spring storms/Marawih — thunderstorms. Humaimeen — heat rises with dust storms (Tawz). Rough seas.'
+        },
+        '2-3': {
+            dates: [4,2,4,11],
+            ar: 'استمرار السرايات والحميمين. تقليم أشجار السدر. وفرة القباقيب والنغر.',
+            en: 'Spring storms and Humaimeen continue. Sidr tree pruning. Gabagib (crabs) and Naghr abundant.'
+        },
+        '2-4': {
+            dates: [4,12,4,21],
+            ar: 'يوالت الثريا — اضطرابات قبل غياب الثريا. الذراعين (16 أبريل - 11 مايو) — فترة انتقالية.',
+            en: 'Pre-Pleiades disturbances. Dhira\'ain (Apr 16-May 11) — transitional period between spring and heat.'
+        },
+        '2-5': {
+            dates: [4,22,5,1],
+            ar: 'نهاية السرايات. بداية كنة الثريا (28 أبريل) — 40 يوم اختفاء. حصاد القمح والحبوب. بداية زراعة الصيف (بطيخ، شمام، كوسا).',
+            en: 'Spring storms end. Pleiades concealment begins (Apr 28) — 40 days hidden. Wheat/grain harvest. Summer planting begins.'
+        },
+        '2-6': {
+            dates: [5,2,5,11],
+            ar: 'استمرار كنة الثريا. نقل خلايا النحل لمراعي السمر. التمر في مرحلة الحبابو (بحجم الحمص).',
+            en: 'Pleiades hidden. Beehives moved to Samr trees. Dates at Hababu stage (chickpea-sized).'
+        },
+        '2-7': {
+            dates: [5,12,5,21],
+            ar: 'بداية البوارح — رياح شمالية غربية جافة. حصاد محاصيل الخريف. التمر يأخذ حجمه النهائي ويبدأ بالتلون.',
+            en: 'Bawarih begin — dry NW winds. Autumn crop harvest ends. Dates take final size and begin coloring.'
+        },
+        '2-8': {
+            dates: [5,22,5,31],
+            ar: 'بارح البطين — أول البوارح. لا زراعة ولا نقل شتلات. بشارة الرطب (أول إعلان عن نضج التمر) في ليوا والعين.',
+            en: 'Batein Barih — first dry winds. No planting or transplanting. First ripe date announcement in Liwa and Al Ain.'
+        },
+        '2-9': {
+            dates: [6,1,6,10],
+            ar: 'نهاية كنة الثريا — الثريا تعود للظهور (7 يونيو). بارح الثريا — البارح الكبير، أنشط البوارح. نضج النغال. بداية القيظ.',
+            en: 'Pleiades reappear (Jun 7). Thuraya Barih — Great Barih, strongest dry winds. Naghal dates ripen. Summer heat begins.'
+        },
+        // ════ المائة الرابعة — القيظ (11 يونيو – 14 أغسطس) ════
+        '3-0': {
+            dates: [6,11,6,20],
+            ar: 'بداية القيظ الشديد. بارح الثريا/الدبران — رياح جافة. نضج فواكه الصيف (مانجو، ليمون، بطيخ). لا زراعة مطلقاً.',
+            en: 'Extreme heat begins. Thuraya/Dabaran dry winds. Summer fruits ripen (mango, lemon, watermelon). No planting at all.'
+        },
+        '3-1': {
+            dates: [6,21,6,30],
+            ar: 'الانقلاب الصيفي — أطول نهار. بارح الدبران — عواصف ترابية. ذروة إنتاج التمور في الدولة. زيادة الري.',
+            en: 'Summer solstice — longest day. Dabaran Barih — dust storms. Peak date production nationwide. Increase watering.'
+        },
+        '3-2': {
+            dates: [7,1,7,10],
+            ar: 'بارح الجوزاء. رياح السموم — أشد الرياح حراً (45-50°م). أسماك: الجش، القباب، السولي.',
+            en: 'Jawza Barih. Simoom winds — hottest winds (45-50°C). Fish: Jesh, Gubab, Suli.'
+        },
+        '3-3': {
+            dates: [7,11,7,20],
+            ar: 'استمرار السموم. ذروة جمرة القيظ. بارح الجوزاء يشتد.',
+            en: 'Simoom continues. Peak heat ember (Jamrat al-Qaiz). Jawza Barih intensifies.'
+        },
+        '3-4': {
+            dates: [7,21,7,30],
+            ar: 'نضج التين والرمان والعنب. تجفيف التمور في المساطيح. آخر الدشة (موسم الغوص).',
+            en: 'Figs, pomegranates, grapes ripen. Dates dried on platforms. Last of pearl diving season.'
+        },
+        '3-5': {
+            dates: [7,31,8,9],
+            ar: 'طالع المرزم — جمرة القيظ في ذروتها. الروايح (سحب ركامية صيفية). أسماك: السولي، الشنينوه. بدء هجرة الطيور المبكرة جنوباً.',
+            en: 'Mirzam rising — peak heat ember. Summer cumulus clouds (Rawayih). Fish: Suli, Shninoh. Early bird migration south begins.'
+        },
+        '3-6': {
+            dates: [8,10,8,14],
+            ar: 'در المساريق — تتوغل الرطوبة العالية، وتكون الأجواء مجهدة من ارتفاع الرطوبة مع الحرارة العالية، ويبرد باطن الأرض.',
+            en: 'Dur Al-Masariq — Deep humidity penetrates, exhausting weather from humidity combined with high heat, and the earth\'s interior begins to cool.'
+        },
+    };
+
+    // ─── المواسم الخاصة — فترات مناخية معروفة في الجزيرة العربية ───────
+    const SPECIAL_SEASONS = [
+        { ar: 'موسم الوسم', en: 'Wasm (Rain Season)', from: [10,16], to: [12,6], desc_ar: 'أفضل موسم مطر — رطوبة عالية وتبخر قليل، ينبت الفقع والأعشاب', desc_en: 'Best rain season — high residual moisture, truffles and herbs sprout', icon: '🌧️' },
+        { ar: 'مربعانية الشتاء', en: 'Winter Forty', from: [12,7], to: [1,14], desc_ar: '40 يوماً من البرد الشديد والأمطار', desc_en: '40 days of intense cold and rain', icon: '❄️' },
+        { ar: 'أربعون المريعي', en: 'Coldest Forty', from: [12,23], to: [1,31], desc_ar: 'أبرد 40 يوماً في السنة — سكون النبات', desc_en: 'Coldest 40 days of the year — plant dormancy', icon: '🥶' },
+        { ar: 'برد البطين (الشبط)', en: 'Batein Cold', from: [1,15], to: [2,9], desc_ar: 'ذروة البرد والجفاف — ازيرق الأطراف', desc_en: 'Peak cold and dryness', icon: '🧊' },
+        { ar: 'أربعون العقربي', en: 'Scorpion Forty', from: [2,1], to: [3,12], desc_ar: '40 يوماً من الأمطار الغزيرة المتوقعة', desc_en: '40 days of expected heavy rains', icon: '🌊' },
+        { ar: 'برد العجوز', en: 'Old Woman\'s Cold', from: [2,25], to: [3,4], desc_ar: 'آخر 8 أيام باردة في الشتاء', desc_en: 'Last 8 cold days of winter', icon: '👵' },
+        { ar: 'أيام بذرة الست', en: 'Six Seed Days', from: [2,8], to: [2,13], desc_ar: 'أفضل 6 أيام لزراعة جميع الأشجار والمحاصيل', desc_en: 'Best 6 days for planting all trees and crops', icon: '🌱' },
+        { ar: 'الحميمين', en: 'Humaimeen Heat', from: [3,21], to: [4,15], desc_ar: 'ارتفاع الحرارة وعواصف ترابية ربيعية', desc_en: 'Heat rises with spring dust storms', icon: '🌪️' },
+        { ar: 'السرايات (المراويح)', en: 'Spring Storms', from: [3,20], to: [4,28], desc_ar: 'عواصف رعدية ربيعية عنيفة', desc_en: 'Violent spring thunderstorms', icon: '⛈️' },
+        { ar: 'كنة الثريا', en: 'Pleiades Concealment', from: [4,28], to: [6,6], desc_ar: '40 يوم اختفاء نجم الثريا خلف الشمس', desc_en: '40 days Pleiades hidden behind the sun', icon: '✨' },
+        { ar: 'البوارح', en: 'Dry NW Winds', from: [5,12], to: [7,28], desc_ar: 'رياح شمالية غربية جافة — لا أمطار ولا سحب', desc_en: 'Dry NW winds — no rain, no clouds', icon: '💨' },
+        { ar: 'جمرة القيظ', en: 'Summer Heat Ember', from: [7,3], to: [8,23], desc_ar: 'أشد فترات الحرارة — السموم تتجاوز 50 درجة', desc_en: 'Most extreme heat period — Simoom exceeds 50°C', icon: '🔥' },
+        { ar: 'موسم الكليبين', en: 'Klibin Season', from: [8,11], to: [8,23], desc_ar: 'كتفا الجوزاء — شدة الإجهاد والتعب من الحرارة والرطوبة', desc_en: 'Shoulders of Gemini — extreme heat exhaustion with humidity', icon: '🌡️' },
+        { ar: 'مرخيات القلايد', en: 'Loosened Girths', from: [8,11], to: [9,5], desc_ar: 'ارتخاء أحزمة الإبل من شدة الحر أو ثقل عراجين التمر', desc_en: 'Camel girths loosen from heat or heavy date clusters', icon: '🐪' },
+        { ar: 'دفوة الطلع', en: 'Pollen Warmth', from: [1,22], to: [1,31], desc_ar: 'فترة دفء نسبي — ظهور طلع النخل الذكر', desc_en: 'Warm spell — male palm pollen appears', icon: '🌴' },
+        { ar: 'موسم القنص', en: 'Falconry Season', from: [11,1], to: [2,28], desc_ar: 'موسم الصيد بالصقور — صيد الحبارى والقطا', desc_en: 'Falconry season — hunting Houbara and sandgrouse', icon: '🦅' },
+        { ar: 'موسم غلق البحر', en: 'Sea Closure', from: [6,20], to: [9,15], desc_ar: 'منع الإبحار في المحيط الهندي بسبب عواصف الرياح الموسمية', desc_en: 'No sailing in Indian Ocean due to monsoon storms', icon: '⛵' },
+        { ar: 'أمطار البلي', en: 'Bali Rains', from: [1,2], to: [3,2], desc_ar: 'أمطار المنخفضات الجوية الشتوية', desc_en: 'Winter depression rains', icon: '🌦️' },
+    ];
+
+    // ─── الأحداث الفلكية السنوية ───────────────────────────────────
+    const ASTRO_EVENTS = [
+        { ar: 'طلوع سهيل', en: 'Canopus Rising', date: [8,15], desc_ar: 'ثاني ألمع نجوم السماء — يعلن انكسار الحرارة وبداية السنة السهيلية', desc_en: 'Second brightest star — marks heat break and start of Suhaili year', icon: '⭐' },
+        { ar: 'غروب سهيل (كنة سهيل)', en: 'Canopus Setting', date: [5,15], desc_ar: 'اختفاء سهيل خلف الشمس حتى منتصف أغسطس', desc_en: 'Canopus disappears behind the sun until mid-August', icon: '🌅' },
+        { ar: 'طلوع الثريا', en: 'Pleiades Rising', date: [6,7], desc_ar: 'عودة الثريا للظهور بعد 40 يوم اختفاء — بداية موسم القيظ', desc_en: 'Pleiades reappear after 40-day concealment — summer begins', icon: '✨' },
+        { ar: 'غروب الثريا (كنة الثريا)', en: 'Pleiades Setting', date: [4,28], desc_ar: 'اختفاء الثريا خلف الشمس لمدة 40 يوماً', desc_en: 'Pleiades disappear behind the sun for 40 days', icon: '🌙' },
+        { ar: 'غياب الأحيمر (قلب العقرب)', en: 'Antares Disappearance', date: [11,11], desc_ar: 'اختفاء النجم الأحمر لـ 40 يوماً — مصحوب بعواصف بحرية', desc_en: 'Red star disappears for 40 days — accompanied by sea storms', icon: '🔴' },
+        { ar: 'عودة الأحيمر', en: 'Antares Return', date: [12,20], desc_ar: 'عودة قلب العقرب للظهور فجراً', desc_en: 'Antares reappears at dawn', icon: '🔴' },
+        { ar: 'الاعتدال الربيعي', en: 'Vernal Equinox', date: [3,20], desc_ar: 'تعامد الشمس على خط الاستواء — تساوي الليل والنهار', desc_en: 'Sun crosses equator northward — equal day and night', icon: '🌍' },
+        { ar: 'الانقلاب الصيفي', en: 'Summer Solstice', date: [6,21], desc_ar: 'أطول نهار في السنة — الشمس على مدار السرطان', desc_en: 'Longest day — sun on Tropic of Cancer', icon: '☀️' },
+        { ar: 'الاعتدال الخريفي', en: 'Autumnal Equinox', date: [9,22], desc_ar: 'تعامد الشمس على خط الاستواء — تساوي الليل والنهار', desc_en: 'Sun crosses equator southward — equal day and night', icon: '🍂' },
+        { ar: 'الانقلاب الشتوي', en: 'Winter Solstice', date: [12,21], desc_ar: 'أقصر نهار في السنة — الشمس على مدار الجدي', desc_en: 'Shortest day — sun on Tropic of Capricorn', icon: '🌑' },
+        { ar: 'زخات البرشاويات (شهب)', en: 'Perseids Meteor Shower', date: [8,12], desc_ar: 'أشهر زخة شهب — حوالي 100 شهاب/ساعة', desc_en: 'Famous meteor shower — ~100 meteors/hour', icon: '☄️' },
+        { ar: 'زخات التوأميات (شهب)', en: 'Geminids Meteor Shower', date: [12,14], desc_ar: 'أغزر زخة شهب — حوالي 120 شهاب/ساعة', desc_en: 'Most abundant meteor shower — ~120 meteors/hour', icon: '☄️' },
+    ];
+
+    // ─── أمثال شعبية مرتبطة بالنجوم والمواسم ───────────────────────
+    const FOLK_PROVERBS = [
+        // أمثال سهيل
+        { trigger: 'suhail', ar: 'إذا طلع سهيل، طاب الليل، وامتنع القيل، والم الفصيلَ الويل، ورفع الكيل', en: 'When Canopus rises, night becomes pleasant, siesta ends, young camels are weaned' },
+        { trigger: 'suhail', ar: 'لا طلع سهيل، لا تأمن السيل', en: 'When Canopus rises, beware of floods' },
+        { trigger: 'suhail', ar: 'إذا طلع سهيل، تلمّس التمر بالليل', en: 'When Canopus rises, feel for ripe dates at night' },
+        { trigger: 'suhail', ar: 'أسعد من سهيل طلعته', en: 'Luckiest is the rising of Canopus' },
+        // أمثال الطوالع
+        { trigger: 'jabha', ar: 'لولا الجبهة ما كان للعرب إبل', en: 'Without Jabha\'s rain, Arabs would have no camels' },
+        { trigger: 'jabha', ar: 'إذا طلعت الجبهة، انكسر الحر وامتد الظمأ', en: 'When Jabha rises, heat breaks and thirst extends' },
+        { trigger: 'zubra', ar: 'إذا طلعت الزبرة طاب الزمان، وجني البسر في كل مكان', en: 'When Zubra rises, times are good, dates harvested everywhere' },
+        { trigger: 'sarfa', ar: 'إذا طلعت الصرفة، احتال كل ذي حرفة', en: 'When Sarfa rises, every craftsman prepares' },
+        { trigger: 'awa', ar: 'إذا طلع العواء، ضُرب الخباء، وطاب الهواء وكُره العراء', en: 'When Awa rises, tents are pitched and air improves' },
+        { trigger: 'simak', ar: 'إذا طلع السماك، ذهبت العكاك، وقلّ على الماء اللكاك', en: 'When Simak rises, heat is gone, no crowding at water' },
+        { trigger: 'zabana', ar: 'إذا طلعت الزبانا، أحدثت لكل ذي عيال شأنا', en: 'When Zabana rises, every family has concerns (cold coming)' },
+        { trigger: 'iklil', ar: 'إذا طلع الإكليل هاجت الفحول، وشُمّرت الذيول، وتُخوّفت السيول', en: 'When Iklil rises, bull camels rut, garments hitched up, floods feared' },
+        { trigger: 'naayem', ar: 'إذا طلعت النعائم ابيضّت البهائم من الصقيع الدائم', en: 'When Naaim rises, animals whiten from permanent frost' },
+        { trigger: 'balda', ar: 'إذا طلعت البلدة أولها محرق وآخرها مورق', en: 'When Balda rises, its start burns with cold, its end brings green' },
+        { trigger: 'saad_dhabih', ar: 'إذا طلع سعد الذابح، حمى أهله النابح، ونفع أهله الرائح', en: 'When Saad al-Dhabih rises, dogs guard loyally, shepherds benefit from going out' },
+        { trigger: 'saad_bula', ar: 'إذا طلع سعد بلع، اقتحم الربع، وصار في الأرض لمع', en: 'When Saad Bula rises, young camels grow strong, greenery appears' },
+        { trigger: 'mirzam', ar: 'إذا طلع المرزم مُلئ المحزم', en: 'When Mirzam rises, belts are full (dates abundant)' },
+        { trigger: 'dhiraa', ar: 'إذا طلعت الذراع، ترقرق السراب بكل قاع', en: 'When Dhiraa rises, mirages shimmer in every valley' },
+        { trigger: 'tarfa', ar: 'إذا طلعت الطرفة، بكّرت الخُرفة، وكثُرت الطُرفة', en: 'When Tarfa rises, harvest hastens and gifts abound' },
+        { trigger: 'nathra', ar: 'إذا طلعت النثرة، قنأت البسرة وجُني النخل بكرة', en: 'When Nathra rises, dates darken and palms are harvested early' },
+        // أمثال قران الثريا
+        { trigger: 'qiran', ar: 'قران حادي، برد بادي', en: '1st conjunction: cold is apparent' },
+        { trigger: 'qiran', ar: 'قران تاسع، برد لاسع', en: '9th conjunction: biting cold' },
+        { trigger: 'qiran', ar: 'قران سابع، مجيع وشابع', en: '7th conjunction: hungry and full (pasture varies)' },
+        { trigger: 'qiran', ar: 'قران خامس، ربيع طامس', en: '5th conjunction: spring overflowing' },
+        { trigger: 'qiran', ar: 'قران ثالث، ربيع ذالف', en: '3rd conjunction: spring departing' },
+        // أمثال الدرور
+        { trigger: 'durr_60_winter', ar: 'برد الستين مثل السكين', en: 'Der 60 winter cold cuts like a knife' },
+        { trigger: 'aqrabi', ar: 'العقربي تسقي بر وبحر', en: 'Aqrabi rains water land and sea' },
+        { trigger: 'klibin', ar: 'الكليبين مد ومدين', en: 'Klibin: abundance upon abundance' },
+    ];
+
+    // ─── اقتران الثريا مع القمر — 14 قران سنوي ───────────────────────
+    const THURAYA_CONJUNCTIONS = [
+        { night: 27, ar: 'طالع الثريا', en: 'Thuraya', from: [6,7], to: [6,19], nickname_ar: 'قران أول القيظ', nickname_en: 'First summer conjunction', desc_ar: 'مع طلوع الثريا يبدأ القيظ ويشتد الحر', desc_en: 'With Pleiades rising, summer begins and heat intensifies' },
+        { night: 25, ar: 'طالع الهقعة', en: 'Haq\'a', from: [7,3], to: [7,15], nickname_ar: 'قران وسط القيظ', nickname_en: 'Mid-summer conjunction', desc_ar: 'القيظ وذروة الحر', desc_en: 'Peak summer heat' },
+        { night: 23, ar: 'طالع الذراع/المرزم', en: 'Dhiraa/Mirzam', from: [7,29], to: [8,10], nickname_ar: 'قران آخر القيظ', nickname_en: 'Last summer conjunction', desc_ar: 'القيظ وذروة الحر', desc_en: 'Peak summer heat' },
+        { night: 21, ar: 'طالع الجبهة', en: 'Jabha', from: [9,6], to: [9,19], nickname_ar: 'قران أول الصفري', nickname_en: 'First Safri conjunction', desc_ar: 'ارتفاع نسبة الرطوبة ودرجات الحرارة', desc_en: 'Humidity and temperature rise' },
+        { night: 19, ar: 'طالع الصرفة', en: 'Sarfa', from: [10,3], to: [10,15], nickname_ar: 'قران آخر الصفري', nickname_en: 'Last Safri conjunction', desc_ar: 'مع تغيّر الجو وانصراف الحر', desc_en: 'Weather changes, heat departs' },
+        { night: 17, ar: 'طالع السماك', en: 'Simak', from: [10,29], to: [11,10], nickname_ar: 'قران أول الوسم', nickname_en: 'First Wasm conjunction', desc_ar: 'أفضل أوقات المطر — أمطاره تسم الأرض بالعشب', desc_en: 'Best rain time — rain marks earth with green' },
+        { night: 15, ar: 'طالع الغفر', en: 'Ghafr', from: [11,11], to: [11,23], nickname_ar: 'قران آخر الوسم', nickname_en: 'Last Wasm conjunction', desc_ar: 'أفضل أوقات المطر — أمطاره تسم الأرض بالعشب', desc_en: 'Best rain time — rain marks earth with green' },
+        { night: 13, ar: 'طالع الإكليل', en: 'Iklil', from: [12,7], to: [12,19], nickname_ar: 'قران أول المربعانية (أجرد)', nickname_en: 'First Marbʿaniyya conjunction', desc_ar: 'دخول البرد الحقيقي', desc_en: 'True cold begins' },
+        { night: 11, ar: 'طالع القلب', en: 'Qalb', from: [12,20], to: [1,1], nickname_ar: 'قران حادي — آخر المربعانية', nickname_en: 'Hadi conjunction — End of Marbʿaniyya', desc_ar: 'بدء استشعار البرد — قران حادي، برد بادي', desc_en: 'Cold becomes apparent' },
+        { night: 9, ar: 'طالع النعائم', en: 'Naaim', from: [1,15], to: [1,27], nickname_ar: 'قران تاسع', nickname_en: 'Ninth conjunction', desc_ar: 'يشتد فيه البرد — قران تاسع، برد لاسع', desc_en: 'Cold intensifies — biting cold' },
+        { night: 7, ar: 'طالع سعد الذابح', en: 'Saad Dhabih', from: [2,10], to: [2,22], nickname_ar: 'قران سابع', nickname_en: 'Seventh conjunction', desc_ar: 'تعود خصوبة المرعى — مجيع وشابع', desc_en: 'Pasture fertility returns — hungry and full' },
+        { night: 5, ar: 'طالع سعد السعود', en: 'Saad Suud', from: [3,8], to: [3,20], nickname_ar: 'قران خامس', nickname_en: 'Fifth conjunction', desc_ar: 'الأرض في أوج اخضرارها — ربيع طامس', desc_en: 'Earth at peak green — spring overflowing' },
+        { night: 3, ar: 'طالع المقدم', en: 'Muqaddam', from: [4,3], to: [4,15], nickname_ar: 'قران ثالث', nickname_en: 'Third conjunction', desc_ar: 'مع نهاية الربيع — ربيع ذالف', desc_en: 'Spring ending — spring departing' },
+        { night: 1, ar: 'طالع الرشا', en: 'Risha', from: [4,29], to: [5,11], nickname_ar: 'قران حادي', nickname_en: 'Hadi conjunction', desc_ar: 'على الماء ترادي — كناية عن كثرة طلب الماء من شدة الحر', desc_en: 'Much water seeking — metaphor for intense heat thirst' },
+    ];
+
+    // ─── المعدلات المناخية لكل برج (أبوظبي) ───────────────────────
+    const CLIMATE_DATA = [
+        { zodiac: 0, maxTemp: 43.5, minTemp: 31.3, humidity: 46, rain: 0, maxWind: 46 },    // الأسد
+        { zodiac: 1, maxTemp: 42.1, minTemp: 24.8, humidity: 43, rain: 0, maxWind: 43 },    // السنبلة
+        { zodiac: 2, maxTemp: 37.9, minTemp: 25.6, humidity: 65, rain: 0, maxWind: 39 },    // الميزان
+        { zodiac: 3, maxTemp: 33.0, minTemp: 21.7, humidity: 49, rain: 2.7, maxWind: 65 },  // العقرب
+        { zodiac: 4, maxTemp: 28.5, minTemp: 17.5, humidity: 55, rain: 5.0, maxWind: 55 },  // القوس
+        { zodiac: 5, maxTemp: 24.7, minTemp: 14.4, humidity: 57, rain: 8.5, maxWind: 46 },  // الجدي
+        { zodiac: 6, maxTemp: 25.6, minTemp: 14.6, humidity: 63, rain: 2.5, maxWind: 81 },  // الدلو
+        { zodiac: 7, maxTemp: 26.5, minTemp: 15.8, humidity: 60, rain: 14.0, maxWind: 50 }, // الحوت
+        { zodiac: 8, maxTemp: 33.5, minTemp: 20.9, humidity: 51, rain: 9.7, maxWind: 67 },  // الحمل
+        { zodiac: 9, maxTemp: 39.0, minTemp: 26.0, humidity: 45, rain: 1.0, maxWind: 50 },  // الثور
+        { zodiac: 10, maxTemp: 42.0, minTemp: 29.5, humidity: 55, rain: 0, maxWind: 45 },   // الجوزاء
+        { zodiac: 11, maxTemp: 43.0, minTemp: 30.5, humidity: 50, rain: 0, maxWind: 48 },   // السرطان
+    ];
+
+    // ─── تقويم هجرة الطيور ───────────────────────────────────────
+    const BIRD_MIGRATION = [
+        { ar: 'الدخل والخواضير', en: 'Warblers & Wagtails', from: [8,15], to: [9,30], direction: 'south', desc_ar: 'أولى الطيور المهاجرة جنوباً عبر سماء الإمارات', desc_en: 'First birds migrating south through UAE skies' },
+        { ar: 'السمان والقميري', en: 'Quail & Turtle Dove', from: [9,4], to: [9,30], direction: 'south', desc_ar: 'طيور سمينة تعبر في طوالع الصفري', desc_en: 'Plump birds crossing during Safri mansions' },
+        { ar: 'الحبارى والكروان', en: 'Houbara Bustard & Curlew', from: [10,1], to: [11,30], direction: 'south', desc_ar: 'طيور الصيد المفضلة — وصول موسم القنص', desc_en: 'Prized hunting birds — falconry season arrives' },
+        { ar: 'الشواهين والصقور', en: 'Shaheen & Falcons', from: [10,4], to: [11,15], direction: 'south', desc_ar: 'وصول طيور الصيد الجارحة', desc_en: 'Birds of prey arrive' },
+        { ar: 'القطا والوز والكرك', en: 'Sandgrouse, Geese & Cranes', from: [12,1], to: [1,31], direction: 'south', desc_ar: 'طيور الشتاء الكبيرة', desc_en: 'Large winter birds' },
+        { ar: 'الفلامنجو (النحام)', en: 'Flamingos', from: [2,11], to: [4,30], direction: 'resident', desc_ar: 'يظهر على السواحل والخيران في أواخر الشتاء', desc_en: 'Appears on coasts and creeks in late winter' },
+        { ar: 'الكرك والوز والسمان', en: 'Cranes, Geese & Quail', from: [2,1], to: [3,31], direction: 'north', desc_ar: 'عودة الطيور المهاجرة شمالاً', desc_en: 'Migratory birds returning north' },
+        { ar: 'الدخل والقميري', en: 'Warblers & Doves', from: [3,15], to: [5,15], direction: 'north', desc_ar: 'آخر الطيور المهاجرة عائدة شمالاً', desc_en: 'Last migratory birds heading north' },
+    ];
+
+    // ─── قاموس المصطلحات التراثية ─────────────────────────────────
+    const HERITAGE_GLOSSARY = {
+        ar: {
+            'الدر': 'فترة 10 أيام في حساب الدرور الفلكي',
+            'سهيل': 'نجم كانوبوس — ثاني ألمع نجوم السماء',
+            'منازل القمر': 'الأماكن الـ 28 التي ينزل فيها القمر',
+            'الطالع': 'المنزلة القمرية المرئية عند الفجر',
+            'الوسم': 'موسم المطر الأفضل (أكتوبر-ديسمبر)',
+            'المربعانية': '40 يوم برد شديد في الشتاء',
+            'البوارح': 'رياح شمالية غربية جافة صيفية',
+            'السموم': 'رياح حارة جافة تتجاوز 50 درجة',
+            'الكوس': 'رياح موسمية رطبة من بحر العرب',
+            'الدشة': 'موسم الغوص عن اللؤلؤ',
+            'القفال': 'نهاية موسم الغوص وعودة البحارة',
+            'جمرة القيظ': 'أشد فترات الحرارة (يوليو-أغسطس)',
+            'كنة الثريا': '40 يوم اختفاء الثريا خلف الشمس',
+            'كنة سهيل': 'فترة اختفاء سهيل (مايو-أغسطس)',
+            'الفقع': 'الكمأة — فطر صحراوي ينبت بعد الأمطار',
+            'المساريق': 'در مستقل (5 أيام) — تتوغل الرطوبة العالية ويبرد باطن الأرض',
+            'تنبيت النخيل': 'تلقيح النخل',
+            'التبسيل': 'طبخ وتجفيف البسر (التمر غير الناضج)',
+            'المسطاح': 'أرضية تجفيف التمور',
+            'السكار': 'مصائد أسماك تقليدية',
+            'الحبل': 'موسم تكاثر الأسماك واقترابها من الشاطئ',
+            'تيرماه': 'اسم البحارة لبداية الشتاء',
+            'النيروز العربي': 'رأس السنة العربية القديمة مع طالع الإكليل',
+            'برد العجوز': 'آخر 8 أيام باردة من الشتاء',
+            'بذرة الست': 'أفضل 6 أيام للزراعة (8-13 فبراير)',
+            'دفوة الطلع': 'فترة دفء تحفز ظهور طلع النخل',
+            'وغرات القيظ': 'موجات حر مسماة بأسماء نجوم',
+            'السايورة': 'تيار شاحب بحري خطير في الصيف',
+        },
+        en: {
+            'Durr': '10-day period in the Durur astronomical calendar',
+            'Suhail': 'Canopus star — second brightest in the sky',
+            'Lunar Mansions': 'The 28 stations where the Moon resides',
+            'Tala\'a': 'The lunar mansion visible at dawn',
+            'Wasm': 'Best rain season (October-December)',
+            'Marbʿaniyya': '40 days of intense winter cold',
+            'Bawarih': 'Dry summer NW winds',
+            'Simoom': 'Hot dry winds exceeding 50°C',
+            'Kaws': 'Monsoon winds from Arabian Sea',
+            'Dasha': 'Pearl diving season departure',
+            'Qafal': 'End of pearl diving, sailors return',
+            'Jamrat al-Qaiz': 'Most extreme heat period (Jul-Aug)',
+            'Kunnat al-Thuraya': '40-day Pleiades concealment',
+            'Kunnat Suhail': 'Canopus concealment (May-Aug)',
+            'Faq\'a': 'Desert truffle — grows after rains',
+            'Masariq': '5 adjustment days to complete solar year',
+            'Tanbit': 'Palm pollination',
+            'Tabseel': 'Cooking and drying unripe dates',
+            'Mastah': 'Date drying floor',
+            'Sikkar': 'Traditional fish traps',
+            'Habl': 'Fish spawning season — fish approach shore',
+            'Tirmah': 'Sailor\'s name for winter start',
+            'Arab Nairuz': 'Ancient Arab New Year with Iklil rising',
+            'Cold of Ajuz': 'Last 8 cold days of winter',
+            'Six Seed Days': 'Best 6 planting days (Feb 8-13)',
+            'Dafwat al-Tal\'a': 'Warm spell triggering palm pollen',
+            'Wughrat al-Qaiz': 'Heat waves named after stars',
+            'Sabura': 'Dangerous summer rip current',
+        }
     };
 
     /** حساب يوم سهيل من التاريخ الميلادي (15 أغسطس = يوم 1) */
@@ -498,6 +1102,129 @@ const HijriCalendar = (() => {
                 return { name: currentLang === 'en' ? s.en : s.ar, nameAr: s.ar, nameEn: s.en };
         }
         return null;
+    }
+
+    // ─── بيانات إثرائية: getters ───
+    function getSeasonalWinds(gMonth, gDay) {
+        const lang = currentLang;
+        return ANWA_ENRICHMENT.seasonalWinds.filter(w => _matchRange(gMonth, gDay, w.from, w.to))
+            .map(w => ({ name: lang === 'en' ? w.en : w.ar, from: w.from, to: w.to }));
+    }
+    function getSeasonalFish(gMonth, gDay) {
+        const lang = currentLang;
+        return ANWA_ENRICHMENT.fish.map(f => ({
+            name: lang === 'en' ? f.en : f.ar,
+            inSeason: _matchRange(gMonth, gDay, f.from, f.to),
+            from: f.from, to: f.to
+        }));
+    }
+    function getSeasonalCrops(gMonth, gDay) {
+        const lang = currentLang;
+        return ANWA_ENRICHMENT.crops.map(c => ({
+            name: lang === 'en' ? c.en : c.ar,
+            inSeason: _matchRange(gMonth, gDay, c.from, c.to),
+            from: c.from, to: c.to
+        }));
+    }
+    function getSeasonalWildlife(gMonth, gDay) {
+        const lang = currentLang;
+        return ANWA_ENRICHMENT.wildlife.map(w => ({
+            name: lang === 'en' ? w.en : w.ar,
+            inSeason: _matchRange(gMonth, gDay, w.from, w.to),
+            from: w.from, to: w.to
+        }));
+    }
+
+    /** الحصول على تفاصيل الدر الحالي */
+    function getDurrDetails(gMonth, gDay, gYear) {
+        const d = getDurr(gMonth, gDay, gYear);
+        const sDay = _suhailDay(gMonth, gDay, gYear);
+        let mia;
+        if (sDay <= 100) mia = 0;
+        else if (sDay <= 200) mia = 1;
+        else if (sDay <= 300) mia = 2;
+        else mia = 3;
+        const durrIdx = (mia === 3 && sDay > 360) ? 6 : (Math.ceil((sDay - mia * 100) / 10) - 1);
+        const key = mia + '-' + Math.min(Math.max(durrIdx, 0), (mia === 3 ? 6 : 9));
+        const details = DURR_DETAILS[key];
+        return details ? { ...d, desc_ar: details.ar, desc_en: details.en, dates: details.dates } : d;
+    }
+
+    /** الحصول على المواسم الخاصة النشطة حالياً */
+    function getActiveSeasons(gMonth, gDay) {
+        return SPECIAL_SEASONS.filter(s => _matchRange(gMonth, gDay, s.from, s.to));
+    }
+
+    /** الحصول على الأحداث الفلكية القريبة (خلال 15 يوم) */
+    function getUpcomingAstroEvents(gMonth, gDay) {
+        return ASTRO_EVENTS.filter(e => {
+            const diff = (e.date[0] - gMonth) * 30 + (e.date[1] - gDay);
+            return diff >= -1 && diff <= 15;
+        });
+    }
+
+    /** الحصول على أمثال مناسبة للموسم الحالي */
+    function getSeasonalProverbs(gMonth, gDay, gYear) {
+        const tale3 = getTale3(gMonth, gDay);
+        const durr = getDurr(gMonth, gDay, gYear);
+        const results = [];
+        // أمثال الطوالع
+        const triggers = [];
+        if (tale3) {
+            const n = (tale3.nameEn || tale3.en || '').toLowerCase();
+            if (n.includes('jabha')) triggers.push('jabha');
+            if (n.includes('zubra')) triggers.push('zubra');
+            if (n.includes('sarfa')) triggers.push('sarfa');
+            if (n.includes('awa')) triggers.push('awa');
+            if (n.includes('simak')) triggers.push('simak');
+            if (n.includes('zabana')) triggers.push('zabana');
+            if (n.includes('iklil')) triggers.push('iklil');
+            if (n.includes('naaim') || n.includes('na\'aim')) triggers.push('naayem');
+            if (n.includes('balda')) triggers.push('balda');
+            if (n.includes('dhabih')) triggers.push('saad_dhabih');
+            if (n.includes('bula') || n.includes('bul\'a')) triggers.push('saad_bula');
+            if (n.includes('mirzam')) triggers.push('mirzam');
+            if (n.includes('dhiraa') || n.includes('dhira')) triggers.push('dhiraa');
+            if (n.includes('tarfa')) triggers.push('tarfa');
+            if (n.includes('nathra')) triggers.push('nathra');
+        }
+        // سهيل
+        if (_matchRange(gMonth, gDay, [8,10], [9,30])) triggers.push('suhail');
+        // أمثال القران
+        if (_matchRange(gMonth, gDay, [11,1], [5,15])) triggers.push('qiran');
+        FOLK_PROVERBS.forEach(p => {
+            if (triggers.includes(p.trigger)) results.push(p);
+        });
+        return results;
+    }
+
+    /** الحصول على اقتران الثريا القادم */
+    function getNextThurayaConjunction(gMonth, gDay) {
+        const d = gMonth * 100 + gDay;
+        for (const c of THURAYA_CONJUNCTIONS) {
+            const f = c.from[0] * 100 + c.from[1];
+            if (f >= d) return c;
+        }
+        return THURAYA_CONJUNCTIONS[0]; // wrap around
+    }
+
+    /** الحصول على المعدلات المناخية للبرج الحالي */
+    function getClimateData(gMonth, gDay) {
+        const z = getZodiac(gMonth, gDay);
+        if (!z) return null;
+        const idx = ZODIAC.findIndex(zz => zz.ar === z.nameAr);
+        return idx >= 0 ? CLIMATE_DATA[idx] : null;
+    }
+
+    /** الحصول على الطيور المهاجرة حالياً */
+    function getActiveBirdMigration(gMonth, gDay) {
+        return BIRD_MIGRATION.filter(b => _matchRange(gMonth, gDay, b.from, b.to));
+    }
+
+    /** الحصول على مصطلح من القاموس */
+    function getGlossaryTerm(term) {
+        const lang = currentLang;
+        return HERITAGE_GLOSSARY[lang] ? HERITAGE_GLOSSARY[lang][term] : null;
     }
 
     // ─── أطوار القمر ──────────────────────────────────────────
@@ -690,6 +1417,7 @@ const HijriCalendar = (() => {
 
         return {
             phase: phaseIdx,
+            phaseFraction: phaseFraction,
             name: MOON_PHASES[currentLang][phaseIdx],
             nameAr: MOON_PHASES.ar[phaseIdx],
             nameEn: MOON_PHASES.en[phaseIdx],
@@ -1654,9 +2382,20 @@ const HijriCalendar = (() => {
         // الأنواء والمواسم والأبراج والدرور وأطوار القمر والهلال
         getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getHilalInfo,
 
+        // بيانات إثرائية + مصفوفات مكشوفة
+        TAWALIE, SEASONS, DUROR_LABELS, DUROR_MIA, DUROR_ALIASES, ANWA_ENRICHMENT, ZODIAC,
+        getSeasonalWinds, getSeasonalFish, getSeasonalCrops, getSeasonalWildlife,
+        _matchRange, _suhailDay,
+
+        // بيانات كتاب الدرور والطوالع
+        DURR_DETAILS, SPECIAL_SEASONS, ASTRO_EVENTS, FOLK_PROVERBS,
+        THURAYA_CONJUNCTIONS, CLIMATE_DATA, BIRD_MIGRATION, HERITAGE_GLOSSARY,
+        getDurrDetails, getActiveSeasons, getUpcomingAstroEvents, getSeasonalProverbs,
+        getNextThurayaConjunction, getClimateData, getActiveBirdMigration, getGlossaryTerm,
+
         // مساعدات
         toArabicNumerals,
-        MONTH_NAMES, MONTH_NAMES_EN, DAY_NAMES, GREGORIAN_MONTH_NAMES,
+        MONTH_NAMES, MONTH_NAMES_EN, DAY_NAMES, GREGORIAN_MONTH_NAMES, GREGORIAN_MONTH_NAMES_EN,
         EPOCH_JDN
     };
 })();

@@ -6,6 +6,7 @@
 const App = (() => {
     const H = HijriCalendar;
     const PT = typeof PrayerTimes !== 'undefined' ? PrayerTimes : null;
+    const AI = typeof AIClient !== 'undefined' ? AIClient : null;
     const isNative = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
     let currentYear, currentMonth;
@@ -13,6 +14,7 @@ const App = (() => {
     let _notifyTimers = [];
     let _deferredInstallPrompt = null;
     let _selectedDate = null; // { year, month, day } gregorian — null means today
+    let _arabicClockTimer = null;
 
     // ─── تهيئة ──────────────────────────────────────────────
     function init() {
@@ -30,8 +32,10 @@ const App = (() => {
         setupExport();
         setupAdhkar();
         setupShare();
+        setupShareScreen();
         if (PT) setupPrayerTimes();
         if (PT) setupNotifications();
+        setupDayView();
         applyLabels();
         renderCalendar();
         renderTodayInfo();
@@ -39,6 +43,9 @@ const App = (() => {
         updateModeUI();
         if (PT) renderPrayerTimes();
         registerServiceWorker();
+
+        // Launch into Day View (today)
+        showDayView(null);
     }
 
     // ─── الوضع الداكن ──────────────────────────────────────────
@@ -58,6 +65,9 @@ const App = (() => {
             const next = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
             btn.textContent = next === 'dark' ? '☀️' : '🌙';
+            // Sync day view theme button
+            const dvBtn = document.getElementById('dv-theme-toggle');
+            if (dvBtn) dvBtn.textContent = next === 'dark' ? '☀️' : '🌙';
             try { localStorage.setItem('hijri-theme', next); } catch (e) {}
             // Update meta theme-color
             const meta = document.querySelector('meta[name="theme-color"]');
@@ -142,6 +152,10 @@ const App = (() => {
         document.getElementById('about-p3').innerHTML = H.t('aboutP3');
         document.getElementById('about-p4').innerHTML = H.t('aboutP4');
 
+        // زر العودة للواجهة الرئيسة
+        const cvBackBtn = document.getElementById('cv-back-btn');
+        if (cvBackBtn) cvBackBtn.textContent = H.t('backToDayView');
+
         // التذييل
         document.getElementById('footer-credit').textContent = H.t('footer');
         document.getElementById('footer-version').textContent = H.t('version');
@@ -174,6 +188,8 @@ const App = (() => {
             document.getElementById('lbl-prayer-highlat').textContent = H.t('prayerHighLat');
             document.getElementById('lbl-prayer-elevation').textContent = H.t('prayerElevation');
             document.getElementById('timetable-lbl').textContent = H.t('monthlyTimetable');
+            const tfLbl = document.getElementById('timeformat-lbl');
+            if (tfLbl) tfLbl.textContent = H.t('timeFormat12h');
         }
     }
 
@@ -590,20 +606,18 @@ const App = (() => {
         _renderAnwaLine(now.getMonth() + 1, now.getDate(), now.getFullYear(), 'today-anwa');
     }
 
-    /** عرض سطر الأنواء (الطالع • البرج • الموسم • الدر • القمر) */
+    /** عرض سطر الأنواء (الطالع • الموسم • الدر • القمر) */
     function _renderAnwaLine(gMonth, gDay, gYear, elementId) {
         const el = document.getElementById(elementId);
         if (!el) return;
 
         const tale3 = H.getTale3(gMonth, gDay);
-        const zodiac = H.getZodiac(gMonth, gDay);
         const season = H.getSeason(gMonth, gDay);
         const durr = H.getDurr(gMonth, gDay, gYear);
         const moon = H.getMoonPhase(gYear, gMonth, gDay);
 
         const parts = [];
         if (tale3) parts.push(`${H.t('tale3Label')}: ${tale3.name}`);
-        if (zodiac) parts.push(`${zodiac.symbol} ${zodiac.name}`);
         if (season) parts.push(`${H.t('seasonLabel')}: ${season.name}`);
         if (durr) parts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
         if (moon) parts.push(`${moon.symbol} ${moon.name}`);
@@ -626,7 +640,6 @@ const App = (() => {
         }
 
         const tale3 = H.getTale3(gMonth, gDay);
-        const zodiac = H.getZodiac(gMonth, gDay);
         const season = H.getSeason(gMonth, gDay);
         const durr = H.getDurr(gMonth, gDay, gYear);
 
@@ -634,7 +647,6 @@ const App = (() => {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
         setVal('anwa-tale3', tale3 ? tale3.name : '—');
-        setVal('anwa-zodiac', zodiac ? `${zodiac.symbol} ${zodiac.name}` : '—');
         setVal('anwa-season', season ? season.name : '—');
         setVal('anwa-durr', durr ? durr.durr : '—');
         setVal('anwa-suhail', durr ? durr.suhailDay : '—');
@@ -767,14 +779,43 @@ const App = (() => {
             }
         }
 
+        // العناصر الإثرائية الجديدة
+        const winds = H.getSeasonalWinds(gMonth, gDay);
+        const fish = H.getSeasonalFish(gMonth, gDay).filter(f => f.inSeason);
+        const crops = H.getSeasonalCrops(gMonth, gDay).filter(c => c.inSeason);
+        const wildlife = H.getSeasonalWildlife(gMonth, gDay).filter(w => w.inSeason);
+
+        setVal('anwa-wind', winds.length > 0 ? winds.map(w => w.name).slice(0, 2).join('، ') : '—');
+        setVal('anwa-fish', fish.length > 0 ? fish.map(f => f.name).slice(0, 2).join('، ') : '—');
+        setVal('anwa-crops', crops.length > 0 ? crops.map(c => c.name).slice(0, 2).join('، ') : '—');
+        setVal('anwa-wildlife', wildlife.length > 0 ? wildlife.map(w => w.name).slice(0, 2).join('، ') : '—');
+
         // تحديث العناوين حسب اللغة
         setVal('anwa-card-title', H.t('anwaTitle'));
         setVal('anwa-tale3-lbl', H.t('tale3Label'));
-        setVal('anwa-zodiac-lbl', H.t('zodiacLabel'));
         setVal('anwa-season-lbl', H.t('seasonLabel'));
         setVal('anwa-durr-lbl', H.t('durrLabel'));
         setVal('anwa-suhail-lbl', H.t('suhailLabel'));
         setVal('anwa-mia-lbl', H.getLang() === 'en' ? 'Hundred' : 'المائة');
+        setVal('anwa-wind-lbl', H.t('windLabel'));
+        setVal('anwa-fish-lbl', H.t('fishLabel'));
+        setVal('anwa-crops-lbl', H.t('cropsLabel'));
+        setVal('anwa-wildlife-lbl', H.t('wildlifeLabel'));
+
+        // جعل العناصر قابلة للنقر
+        const anwaGrid = document.getElementById('anwa-grid');
+        if (anwaGrid) {
+            const types = ['tale3', 'season', 'durr', 'suhail', 'mia', 'wind', 'fish', 'crops', 'wildlife'];
+            const clickableTypes = ['tale3', 'season', 'durr', 'wind', 'fish', 'crops', 'wildlife'];
+            const items = anwaGrid.querySelectorAll('.anwa-item');
+            items.forEach((item, i) => {
+                const type = types[i];
+                if (clickableTypes.includes(type)) {
+                    item.classList.add('anwa-clickable');
+                    item.onclick = () => showAnwaDetail(type, { year: gYear, month: gMonth, day: gDay });
+                }
+            });
+        }
     }
 
     // ─── اختيار يوم ─────────────────────────────────────────
@@ -783,14 +824,11 @@ const App = (() => {
         document.querySelectorAll('.calendar-cell.selected').forEach(el => el.classList.remove('selected'));
         e.currentTarget.classList.add('selected');
 
-        // Update prayer times and Anwa card for the selected date
+        // Update prayer times for the selected date
         if (day) {
-            const greg = day.gregorian;
-            const now = new Date();
-            const isToday = greg.year === now.getFullYear() && greg.month === (now.getMonth() + 1) && greg.day === now.getDate();
-            _selectedDate = isToday ? null : { year: greg.year, month: greg.month, day: greg.day };
+            const g = day.gregorian;
+            _selectedDate = { year: g.year, month: g.month, day: g.day };
             if (PT) renderPrayerTimes();
-            renderAnwaCard(isToday ? null : greg);
         }
     }
 
@@ -815,14 +853,12 @@ const App = (() => {
 
         // الأنواء والمواسم
         const tale3 = H.getTale3(greg.month, greg.day);
-        const zodiac = H.getZodiac(greg.month, greg.day);
         const season = H.getSeason(greg.month, greg.day);
         const durr = H.getDurr(greg.month, greg.day, greg.year);
         const moon = H.getMoonPhase(greg.year, greg.month, greg.day);
 
         const anwaParts = [];
         if (tale3) anwaParts.push(tale3.name);
-        if (zodiac) anwaParts.push(`${zodiac.symbol} ${zodiac.name}`);
         if (season) anwaParts.push(season.name);
         if (durr) anwaParts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
         if (moon) anwaParts.push(`${moon.symbol} ${moon.name}`);
@@ -865,6 +901,10 @@ const App = (() => {
         if (s.tz) document.getElementById('prayer-tz').value = s.tz;
         if (s.elevation) document.getElementById('prayer-elevation').value = s.elevation;
 
+        // Time format toggle
+        const tfToggle = document.getElementById('timeformat-toggle');
+        if (tfToggle) tfToggle.checked = s.timeFormat === '12h';
+
         // Settings toggle
         document.getElementById('prayer-settings-toggle').addEventListener('click', () => {
             const panel = document.getElementById('prayer-settings');
@@ -881,9 +921,19 @@ const App = (() => {
                 lng: parseFloat(document.getElementById('prayer-lng').value) || 0,
                 tz: parseFloat(document.getElementById('prayer-tz').value) || 0,
                 elevation: parseFloat(document.getElementById('prayer-elevation').value) || 0,
+                timeFormat: document.getElementById('timeformat-toggle').checked ? '12h' : '24h',
             });
             renderPrayerTimes();
         };
+
+        // Time format toggle change
+        if (tfToggle) {
+            tfToggle.addEventListener('change', () => {
+                saveAndRender();
+                const dvPanel = document.getElementById('day-view-panel');
+                if (dvPanel && dvPanel.style.display !== 'none') showDayView(null);
+            });
+        }
 
         methodSelect.addEventListener('change', saveAndRender);
         document.getElementById('prayer-asr-select').addEventListener('change', saveAndRender);
@@ -893,31 +943,73 @@ const App = (() => {
         document.getElementById('prayer-tz').addEventListener('change', saveAndRender);
         document.getElementById('prayer-elevation').addEventListener('change', saveAndRender);
 
+        // Reverse geocode to get city name in a given language
+        const reverseGeocode = async (lat, lng, lang) => {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=${lang || 'ar'}&addressdetails=1`, {
+                    headers: { 'User-Agent': 'HijriCalendar/2.0' }
+                });
+                if (!res.ok) return { city: '', suburb: '' };
+                const data = await res.json();
+                const addr = data.address || {};
+                // If city equals village (small settlement), prefer county as real city
+                const isVillageCity = addr.city && addr.village && addr.county;
+                const city = isVillageCity ? addr.county : (addr.city || addr.town || addr.county || addr.village || addr.state || data.display_name || '');
+                const neighbourhood = addr.neighbourhood || addr.quarter || '';
+                const suburb = addr.suburb || (isVillageCity ? addr.village : (addr.village && addr.county ? addr.village : '')) || '';
+                return { city, suburb, neighbourhood };
+            } catch (e) { return { city: '', suburb: '' }; }
+        };
+
         // Detect location buttons
         const detectLocation = async () => {
-            const fillLocation = (lat, lng, altitude) => {
+            const fillLocation = async (lat, lng, altitude) => {
                 document.getElementById('prayer-lat').value = Math.round(lat * 100) / 100;
                 document.getElementById('prayer-lng').value = Math.round(lng * 100) / 100;
                 document.getElementById('prayer-tz').value = -new Date().getTimezoneOffset() / 60;
                 if (altitude) {
                     document.getElementById('prayer-elevation').value = Math.round(altitude);
                 }
+                // Reverse geocode for city + suburb in both languages
+                const [ar, en] = await Promise.all([
+                    reverseGeocode(lat, lng, 'ar'),
+                    reverseGeocode(lat, lng, 'en')
+                ]);
+                try {
+                    localStorage.setItem('prayer-loc', JSON.stringify({
+                        lat, lng,
+                        nameAr: ar.city, nameEn: en.city,
+                        suburbAr: ar.suburb, suburbEn: en.suburb,
+                        neighbourhoodAr: ar.neighbourhood, neighbourhoodEn: en.neighbourhood,
+                        name: ar.city || en.city
+                    }));
+                } catch (e) {}
                 saveAndRender();
+                // Re-render day view to update location display
+                if (document.getElementById('day-view').style.display !== 'none') {
+                    renderDayView(_selectedDate);
+                }
             };
             if (isNative()) {
                 try {
                     const { Geolocation } = window.Capacitor.Plugins;
                     const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
-                    fillLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+                    await fillLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
                 } catch (e) { console.warn('Native geolocation failed', e); }
             } else if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    fillLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
+                navigator.geolocation.getCurrentPosition(async pos => {
+                    await fillLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
                 });
             }
         };
         document.getElementById('prayer-detect').addEventListener('click', detectLocation);
         document.getElementById('prayer-detect-main').addEventListener('click', detectLocation);
+
+        // Auto-detect location on first use
+        const currentSettings = PT.getSettings();
+        if (!currentSettings.lat && !currentSettings.lng) {
+            detectLocation();
+        }
 
         // Timetable toggle
         const ttToggle = document.getElementById('timetable-toggle');
@@ -972,12 +1064,16 @@ const App = (() => {
             times = PT.getForToday(isRamadan);
         }
 
-        document.getElementById('p-fajr').textContent = times.fajr;
-        document.getElementById('p-sunrise').textContent = times.sunrise;
-        document.getElementById('p-dhuhr').textContent = times.dhuhr;
-        document.getElementById('p-asr').textContent = times.asr;
-        document.getElementById('p-maghrib').textContent = times.maghrib;
-        document.getElementById('p-isha').textContent = times.isha;
+        const localizeTime = (t) => {
+            if (H.getLang() === 'ar') return t.replace('AM', H.t('timeAM')).replace('PM', H.t('timePM'));
+            return t;
+        };
+        document.getElementById('p-fajr').textContent = localizeTime(times.fajr);
+        document.getElementById('p-sunrise').textContent = localizeTime(times.sunrise);
+        document.getElementById('p-dhuhr').textContent = localizeTime(times.dhuhr);
+        document.getElementById('p-asr').textContent = localizeTime(times.asr);
+        document.getElementById('p-maghrib').textContent = localizeTime(times.maghrib);
+        document.getElementById('p-isha').textContent = localizeTime(times.isha);
 
         // Date indicator for selected date
         const dateIndicator = document.getElementById('prayer-date-indicator');
@@ -1303,6 +1399,77 @@ const App = (() => {
                 _notifyTimers.push(timer);
             }
         }
+
+        // AI smart notifications
+        scheduleAINotifications();
+    }
+
+    async function scheduleAINotifications() {
+        if (!AI) return;
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+        const now = new Date();
+        const days = [];
+        for (let i = 0; i < 3; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+            const jdn = H.gregorianToJDN(d.getFullYear(), d.getMonth() + 1, d.getDate());
+            const hij = H.jdnToHijri(jdn);
+            const dow = H.dayOfWeek(jdn);
+            const event = H.getEvent(hij.month, hij.day);
+            const moon = H.getMoonPhase(d.getFullYear(), d.getMonth() + 1, d.getDate());
+            days.push({
+                gregDate: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
+                dayOfWeek: H.dayName(dow),
+                hijriDay: hij.day,
+                hijriMonthName: H.monthName(hij.month - 1),
+                islamicEvent: event ? event.name : '',
+                moonPhase: moon ? moon.name : '',
+                isNewMoon: moon ? moon.phaseFraction < 0.03 : false
+            });
+        }
+
+        try {
+            const notifications = await AI.fetchSmartNotifications(days);
+            if (!notifications || !notifications.length) return;
+
+            // Schedule today's AI notifications
+            const todayStr = days[0].gregDate;
+            const todayNotifs = notifications.find(n => n.date === todayStr);
+            if (!todayNotifs || !todayNotifs.notifications) return;
+
+            const prayerTimes = PT ? PT.getForToday(false) : null;
+            const timeMap = {};
+            if (prayerTimes && prayerTimes._raw) {
+                timeMap.fajr = prayerTimes._raw.fajr;
+                timeMap.sunrise = prayerTimes._raw.sunrise;
+                timeMap.dhuhr = prayerTimes._raw.dhuhr;
+                timeMap.asr = prayerTimes._raw.asr;
+                timeMap.maghrib = prayerTimes._raw.maghrib;
+                timeMap.isha = prayerTimes._raw.isha;
+                timeMap.morning = 7;    // 7 AM
+                timeMap.evening = 17;   // 5 PM
+            }
+
+            for (const notif of todayNotifs.notifications) {
+                const hour = timeMap[notif.time];
+                if (hour == null) continue;
+                const notifDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                    Math.floor(hour), Math.round((hour % 1) * 60));
+                const delay = notifDate.getTime() - now.getTime();
+                if (delay > 0) {
+                    const timer = setTimeout(() => {
+                        new Notification(H.t('aiSectionTitle'), {
+                            body: notif.text,
+                            icon: 'icon-192.svg',
+                            tag: 'ai-' + notif.time
+                        });
+                    }, delay);
+                    _notifyTimers.push(timer);
+                }
+            }
+        } catch (e) {
+            console.warn('AI notifications scheduling failed:', e.message);
+        }
     }
 
     // ─── رمضان — عداد الليالي ─────────────────────────────────
@@ -1461,6 +1628,14 @@ const App = (() => {
             }
         }
 
+        // Arabic clock inside arc (prayer tab)
+        if (isToday) {
+            const now2 = new Date();
+            const nowDec = now2.getHours() + now2.getMinutes() / 60 + now2.getSeconds() / 3600;
+            const arabicH = nowDec - raw.maghrib + 12;
+            svg += buildClockSVG(CX, CY + 6, 45, arabicH, lang);
+        }
+
         svg += `</svg>`;
 
         // Day/night lengths
@@ -1574,12 +1749,8 @@ const App = (() => {
 
         // Anwa
         const tale3 = H.getTale3(gMonth, gDay);
-        const zodiac = H.getZodiac(gMonth, gDay);
-        if (tale3 || zodiac) {
-            const parts = [];
-            if (tale3) parts.push(`${H.t('tale3Label')}: ${tale3.name}`);
-            if (zodiac) parts.push(`${zodiac.symbol} ${zodiac.name}`);
-            lines.push(`☆ ${parts.join(' • ')}`);
+        if (tale3) {
+            lines.push(`☆ ${H.t('tale3Label')}: ${tale3.name}`);
         }
 
         const text = lines.join('\n');
@@ -1614,6 +1785,325 @@ const App = (() => {
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2000);
+    }
+
+    // ─── شاشة المشاركة (بطاقة مرئية — Canvas → PNG) ─────────
+    const SHARE_THEMES = [
+        { id: 'basit', nameKey: 'shareThemeBasit', bg: ['#0f172a','#064e3b'], bgAngle: 135, cardBg: '#1e293b', cardBorder: 'rgba(255,255,255,0.12)', textPrimary: '#f8fafc', textSecondary: '#94a3b8', accent: '#f59e0b', separator: 'rgba(255,255,255,0.08)', decorate: null },
+        { id: 'islami', nameKey: 'shareThemeIslami', bg: ['#022c22','#064e3b'], bgAngle: 135, cardBg: '#0a3d2e', cardBorder: 'rgba(39,166,120,0.3)', textPrimary: '#d4f0e3', textSecondary: '#6ee7b7', accent: '#fbbf24', separator: 'rgba(39,166,120,0.2)', decorate: null },
+        { id: 'arabi', nameKey: 'shareThemeArabi', bg: ['#2c1810','#4a2c1a'], bgAngle: 135, cardBg: '#3d2517', cardBorder: 'rgba(212,163,64,0.3)', textPrimary: '#fdf3d7', textSecondary: '#d4a340', accent: '#f59e0b', separator: 'rgba(212,163,64,0.15)', decorate: 'arabi' },
+        { id: 'mashrabiya', nameKey: 'shareThemeMashr', bg: ['#1a1a2e','#16213e'], bgAngle: 135, cardBg: '#1e293b', cardBorder: 'rgba(255,255,255,0.15)', textPrimary: '#f8fafc', textSecondary: '#94a3b8', accent: '#f59e0b', separator: 'rgba(255,255,255,0.08)', decorate: 'mashrabiya' },
+        { id: 'qubba', nameKey: 'shareThemeQubba', bg: ['#0f172a','#1e3a5f'], bgAngle: 180, cardBg: '#1e293b', cardBorder: 'rgba(100,200,255,0.15)', textPrimary: '#f8fafc', textSecondary: '#7dd3fc', accent: '#fbbf24', separator: 'rgba(100,200,255,0.1)', decorate: 'qubba' },
+        { id: 'makhtouta', nameKey: 'shareThemeMakh', bg: ['#f5e6c8','#e8d5a8'], bgAngle: 180, cardBg: '#fdf3d7', cardBorder: 'rgba(139,90,43,0.3)', textPrimary: '#3d2517', textSecondary: '#8b5a2b', accent: '#8b5a2b', separator: 'rgba(139,90,43,0.2)', decorate: 'makhtouta' }
+    ];
+
+    let _shareThemeIndex = 0;
+    let _shareBlob = null;
+
+    function collectDayData() {
+        const now = new Date();
+        let gYear, gMonth, gDay;
+        if (_selectedDate) { gYear = _selectedDate.year; gMonth = _selectedDate.month; gDay = _selectedDate.day; }
+        else { gYear = now.getFullYear(); gMonth = now.getMonth() + 1; gDay = now.getDate(); }
+        const jdn = H.gregorianToJDN(gYear, gMonth, gDay);
+        const hijri = H.jdnToHijri(jdn);
+        const dow = H.dayOfWeek(jdn);
+        const isRamadan = hijri.month === 9;
+        let prayers = null;
+        if (PT) {
+            const s = PT.getSettings();
+            if (s.lat || s.lng) prayers = _selectedDate ? PT.getForDate(_selectedDate, isRamadan) : PT.getForToday(isRamadan);
+        }
+        return {
+            dayName: H.dayName(dow),
+            hijriDay: hijri.day, hijriMonth: H.monthName(hijri.month - 1), hijriYear: hijri.year, hijriSuffix: H.t('hSuffix'),
+            gregDay: gDay, gregMonth: H.gregMonthName(gMonth - 1), gregYear: gYear, gregSuffix: H.t('gSuffix'),
+            event: (H.getEvent(hijri.month, hijri.day) || {}).name || null,
+            isRamadan, prayers,
+            tale3: (H.getTale3(gMonth, gDay) || {}).name || null,
+            season: (H.getSeason(gMonth, gDay) || {}).name || null,
+            durr: (H.getDurr(gMonth, gDay, gYear) || {}).durr || null
+        };
+    }
+
+    // ─── Canvas helpers ───
+    function _roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+    }
+
+    function _drawDecoration(ctx, theme, cx, cy, cw, ch) {
+        if (!theme.decorate) return;
+        ctx.save();
+        if (theme.decorate === 'arabi') {
+            ctx.strokeStyle = theme.accent; ctx.globalAlpha = 0.35;
+            ctx.lineWidth = 1; _roundRect(ctx, cx+6, cy+6, cw-12, ch-12, 16); ctx.stroke();
+            ctx.lineWidth = 0.5; _roundRect(ctx, cx+10, cy+10, cw-20, ch-20, 13); ctx.stroke();
+            ctx.globalAlpha = 0.5; ctx.fillStyle = theme.accent;
+            [[cx+16,cy+16],[cx+cw-16,cy+16],[cx+16,cy+ch-16],[cx+cw-16,cy+ch-16]].forEach(([dx,dy]) => {
+                ctx.beginPath(); ctx.arc(dx, dy, 2, 0, Math.PI*2); ctx.fill();
+            });
+        } else if (theme.decorate === 'mashrabiya') {
+            ctx.strokeStyle = theme.accent; ctx.lineWidth = 0.8; ctx.globalAlpha = 0.3;
+            const s = 5, sp = 14;
+            for (let x = cx+sp; x < cx+cw; x += sp) { ctx.beginPath(); ctx.moveTo(x,cy+8-s); ctx.lineTo(x+s,cy+8); ctx.lineTo(x,cy+8+s); ctx.lineTo(x-s,cy+8); ctx.closePath(); ctx.stroke(); }
+            for (let x = cx+sp; x < cx+cw; x += sp) { ctx.beginPath(); ctx.moveTo(x,cy+ch-8-s); ctx.lineTo(x+s,cy+ch-8); ctx.lineTo(x,cy+ch-8+s); ctx.lineTo(x-s,cy+ch-8); ctx.closePath(); ctx.stroke(); }
+            for (let y = cy+sp; y < cy+ch; y += sp) { ctx.beginPath(); ctx.moveTo(cx+8,y-s); ctx.lineTo(cx+8+s,y); ctx.lineTo(cx+8,y+s); ctx.lineTo(cx+8-s,y); ctx.closePath(); ctx.stroke(); }
+            for (let y = cy+sp; y < cy+ch; y += sp) { ctx.beginPath(); ctx.moveTo(cx+cw-8,y-s); ctx.lineTo(cx+cw-8+s,y); ctx.lineTo(cx+cw-8,y+s); ctx.lineTo(cx+cw-8-s,y); ctx.closePath(); ctx.stroke(); }
+        } else if (theme.decorate === 'qubba') {
+            const dw = cw * 0.4, domeX = cx + cw/2;
+            ctx.beginPath(); ctx.moveTo(domeX - dw/2, cy+2); ctx.quadraticCurveTo(domeX, cy-28, domeX + dw/2, cy+2);
+            ctx.fillStyle = theme.accent; ctx.globalAlpha = 0.08; ctx.fill();
+            ctx.strokeStyle = theme.accent; ctx.globalAlpha = 0.3; ctx.lineWidth = 1; ctx.stroke();
+        } else if (theme.decorate === 'makhtouta') {
+            ctx.strokeStyle = theme.accent; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.4;
+            const s = 20, ins = 12;
+            [[cx+cw-ins,cy+ins,-s,s],[cx+ins,cy+ins,s,s],[cx+cw-ins,cy+ch-ins,-s,-s],[cx+ins,cy+ch-ins,s,-s]].forEach(([x,y,dx,dy]) => {
+                ctx.beginPath(); ctx.moveTo(x,y); ctx.quadraticCurveTo(x+dx*0.5,y,x+dx,y+dy*0.3); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x,y); ctx.quadraticCurveTo(x,y+dy*0.5,x+dx*0.3,y+dy); ctx.stroke();
+            });
+        }
+        ctx.restore();
+    }
+
+    async function renderShareCanvas(data, theme) {
+        await document.fonts.ready;
+        const DPR = 2, W = 400, MARGIN = 16, PAD = 20, RAD = 20;
+        const IL = MARGIN + PAD, IR = W - MARGIN - PAD, IW = IR - IL, CX = W / 2;
+        const FONT = "'Cairo', 'Segoe UI', Tahoma, sans-serif";
+
+        // ── Calculate height ──
+        let h = MARGIN + PAD;
+        h += 36; // day name
+        h += 28; // hijri
+        h += 22; // greg
+        if (data.event) h += 26;
+
+        // Prayers
+        const prayerList = [];
+        if (data.prayers) {
+            prayerList.push({ key: 'prayerFajr', val: data.prayers.fajr });
+            prayerList.push({ key: 'prayerSunrise', val: data.prayers.sunrise });
+            prayerList.push({ key: 'prayerDhuhr', val: data.prayers.dhuhr });
+            prayerList.push({ key: 'prayerAsr', val: data.prayers.asr });
+            prayerList.push({ key: 'prayerMaghrib', val: data.prayers.maghrib });
+            prayerList.push({ key: 'prayerIsha', val: data.prayers.isha });
+            h += 16 + 1 + 16 + 20 + prayerList.length * 26;
+        }
+
+        // Anwa
+        const anwaItems = [];
+        if (data.tale3) anwaItems.push({ label: H.t('tale3Label'), value: data.tale3 });
+        if (data.season) anwaItems.push({ label: H.t('seasonLabel'), value: data.season });
+        if (data.durr) anwaItems.push({ label: H.t('durrLabel'), value: data.durr });
+        if (anwaItems.length) h += 16 + 1 + 16 + 20 + 52;
+
+        h += 14 + 14 + 14 + 14 + PAD + MARGIN; // footer (title + name + version + tech) + padding
+        const totalH = h;
+
+        // ── Create canvas ──
+        const canvas = document.createElement('canvas');
+        canvas.width = W * DPR; canvas.height = totalH * DPR;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(DPR, DPR);
+
+        // ── Background gradient ──
+        const a = (theme.bgAngle || 135) * Math.PI / 180;
+        const grad = ctx.createLinearGradient(W/2 - Math.cos(a)*W/2, totalH/2 - Math.sin(a)*totalH/2, W/2 + Math.cos(a)*W/2, totalH/2 + Math.sin(a)*totalH/2);
+        grad.addColorStop(0, theme.bg[0]); grad.addColorStop(1, theme.bg[1]);
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, W, totalH);
+
+        // ── Card ──
+        const cardX = MARGIN, cardY = MARGIN, cardW = W - MARGIN*2, cardH = totalH - MARGIN*2;
+        _roundRect(ctx, cardX, cardY, cardW, cardH, RAD);
+        ctx.fillStyle = theme.cardBg; ctx.fill();
+        ctx.strokeStyle = theme.cardBorder; ctx.lineWidth = 1.5; ctx.stroke();
+
+        // ── Decoration ──
+        _drawDecoration(ctx, theme, cardX, cardY, cardW, cardH);
+
+        // ── Draw content ──
+        let y = MARGIN + PAD;
+        ctx.textBaseline = 'top'; ctx.direction = 'rtl';
+
+        // Day name
+        ctx.font = `800 28px ${FONT}`; ctx.fillStyle = theme.textPrimary; ctx.textAlign = 'center';
+        ctx.fillText(data.dayName, CX, y); y += 36;
+
+        // Hijri
+        ctx.font = `700 18px ${FONT}`; ctx.fillStyle = theme.textPrimary;
+        ctx.fillText(`${data.hijriDay} ${data.hijriMonth} ${data.hijriYear} ${data.hijriSuffix}`, CX, y); y += 28;
+
+        // Gregorian
+        ctx.font = `400 13px ${FONT}`; ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(`${data.gregDay} ${data.gregMonth} ${data.gregYear}${data.gregSuffix}`, CX, y); y += 22;
+
+        // Event
+        if (data.event) {
+            ctx.font = `600 14px ${FONT}`; ctx.fillStyle = theme.accent;
+            ctx.fillText(data.event, CX, y); y += 26;
+        }
+
+        // ── Prayer times ──
+        if (prayerList.length) {
+            y += 16;
+            ctx.strokeStyle = theme.separator; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(IL + 20, y); ctx.lineTo(IR - 20, y); ctx.stroke();
+            y += 16;
+            ctx.font = `700 12px ${FONT}`; ctx.fillStyle = theme.textSecondary; ctx.textAlign = 'center';
+            ctx.fillText(H.t('prayerTitle') || '\u0645\u0648\u0627\u0642\u064a\u062a \u0627\u0644\u0635\u0644\u0627\u0629', CX, y); y += 20;
+
+            ctx.font = `600 14px ${FONT}`;
+            prayerList.forEach(p => {
+                ctx.fillStyle = theme.textPrimary;
+                ctx.textAlign = 'right'; ctx.direction = 'rtl';
+                ctx.fillText(H.t(p.key), IR - 10, y);
+                ctx.textAlign = 'left'; ctx.direction = 'ltr';
+                ctx.fillText(p.val, IL + 10, y);
+                y += 26;
+            });
+        }
+
+        // ── Anwa ──
+        if (anwaItems.length) {
+            y += 16;
+            ctx.strokeStyle = theme.separator; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(IL + 20, y); ctx.lineTo(IR - 20, y); ctx.stroke();
+            y += 16;
+            ctx.font = `700 12px ${FONT}`; ctx.fillStyle = theme.textSecondary; ctx.textAlign = 'center'; ctx.direction = 'rtl';
+            ctx.fillText(H.t('anwaSeasons'), CX, y); y += 20;
+
+            const gap = 8, cnt = anwaItems.length, acW = (IW - gap * (cnt - 1)) / cnt, acH = 44;
+            anwaItems.forEach((item, i) => {
+                const ax = IR - (i + 1) * acW - i * gap;
+                _roundRect(ctx, ax, y, acW, acH, 8);
+                ctx.fillStyle = theme.separator; ctx.fill();
+                ctx.strokeStyle = theme.cardBorder; ctx.lineWidth = 1; ctx.stroke();
+                ctx.font = `400 10px ${FONT}`; ctx.fillStyle = theme.textSecondary; ctx.textAlign = 'center'; ctx.direction = 'rtl';
+                ctx.fillText(item.label, ax + acW/2, y + 6);
+                ctx.font = `700 12px ${FONT}`; ctx.fillStyle = theme.textPrimary;
+                ctx.fillText(item.value, ax + acW/2, y + 24);
+            });
+            y += acH + 8;
+        }
+
+        // ── Footer ──
+        y += 12;
+        ctx.font = `600 10px ${FONT}`; ctx.fillStyle = theme.textSecondary; ctx.textAlign = 'center'; ctx.direction = 'rtl';
+        ctx.globalAlpha = 0.6;
+        ctx.fillText(H.t('title'), CX, y); y += 14;
+        ctx.font = `400 9px ${FONT}`; ctx.globalAlpha = 0.4;
+        ctx.fillText(H.t('creditsName'), CX, y); y += 14;
+        ctx.fillText(H.t('creditsVersion'), CX, y); y += 14;
+        ctx.fillText(H.t('creditsTech'), CX, y);
+        ctx.globalAlpha = 1;
+
+        return new Promise(resolve => canvas.toBlob(blob => resolve(blob), 'image/png'));
+    }
+
+    function setupShareScreen() {
+        const shareBtn = document.getElementById('dv-share-btn');
+        if (shareBtn) shareBtn.addEventListener('click', openShareScreen);
+        const closeBtn = document.getElementById('share-close-btn');
+        if (closeBtn) closeBtn.addEventListener('click', closeShareScreen);
+        const shareAction = document.getElementById('share-action-share');
+        if (shareAction) shareAction.addEventListener('click', doShareAction);
+        const copyAction = document.getElementById('share-action-copy');
+        if (copyAction) copyAction.addEventListener('click', doCopyAction);
+    }
+
+    async function openShareScreen() {
+        document.querySelector('.share-title').textContent = H.t('shareTitle');
+        document.getElementById('share-action-share').textContent = H.t('shareActionShare');
+        document.getElementById('share-action-copy').textContent = H.t('shareCopyBtn');
+        _shareThemeIndex = 0;
+        renderShareThemes();
+        document.getElementById('day-view').style.display = 'none';
+        document.getElementById('share-view').style.display = '';
+        await updateSharePreview();
+    }
+
+    function closeShareScreen() {
+        document.getElementById('share-view').style.display = 'none';
+        document.getElementById('day-view').style.display = '';
+        _shareBlob = null;
+    }
+
+    function renderShareThemes() {
+        const container = document.getElementById('share-themes');
+        container.innerHTML = '';
+        SHARE_THEMES.forEach((theme, idx) => {
+            const card = document.createElement('div');
+            card.className = 'share-theme-card' + (idx === _shareThemeIndex ? ' active' : '');
+            const mini = document.createElement('div');
+            mini.className = 'share-theme-mini';
+            mini.style.background = `linear-gradient(${theme.bgAngle}deg, ${theme.bg[0]}, ${theme.bg[1]})`;
+            const label = document.createElement('div');
+            label.className = 'share-theme-label';
+            label.textContent = H.t(theme.nameKey);
+            card.appendChild(mini); card.appendChild(label);
+            card.addEventListener('click', async () => {
+                _shareThemeIndex = idx;
+                container.querySelectorAll('.share-theme-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                await updateSharePreview();
+            });
+            container.appendChild(card);
+        });
+    }
+
+    async function updateSharePreview() {
+        const data = collectDayData();
+        const theme = SHARE_THEMES[_shareThemeIndex];
+        _shareBlob = await renderShareCanvas(data, theme);
+        const img = document.getElementById('share-preview-img');
+        const url = URL.createObjectURL(_shareBlob);
+        img.onload = () => URL.revokeObjectURL(url);
+        img.src = url;
+    }
+
+    function _downloadBlob(filename, blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    async function doShareAction() {
+        if (!_shareBlob) return;
+        const file = new File([_shareBlob], 'hijri-card.png', { type: 'image/png' });
+        if (isNative()) {
+            try {
+                const { Filesystem, Share } = window.Capacitor.Plugins;
+                const reader = new FileReader();
+                const b64 = await new Promise(r => { reader.onloadend = () => r(reader.result.split(',')[1]); reader.readAsDataURL(_shareBlob); });
+                const res = await Filesystem.writeFile({ path: 'hijri-card.png', data: b64, directory: 'CACHE' });
+                await Share.share({ title: H.t('shareTitle'), url: res.uri });
+                return;
+            } catch (e) {}
+        }
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try { await navigator.share({ title: H.t('shareTitle'), files: [file] }); return; } catch (e) {}
+        }
+        _downloadBlob('hijri-card.png', _shareBlob);
+    }
+
+    async function doCopyAction() {
+        if (!_shareBlob) return;
+        try {
+            if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': _shareBlob })]);
+                _showShareToast(H.t('shareCopied'));
+                return;
+            }
+        } catch (e) {}
+        _downloadBlob('hijri-card.png', _shareBlob);
+        _showShareToast(H.t('shareCopied'));
     }
 
     // ─── الأذكار ─────────────────────────────────────────────
@@ -1773,7 +2263,7 @@ const App = (() => {
 <head><meta charset="UTF-8"><title>${H.t('exportPDF')}</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #333; direction: ${isRTL ? 'rtl' : 'ltr'}; }
+body { font-family: 'Calibri', 'Cairo', 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #333; direction: ${isRTL ? 'rtl' : 'ltr'}; }
 .month-block { page-break-inside: avoid; margin-bottom: 20px; }
 .month-title { background: #14553f; color: #fff; padding: 8px 16px; font-size: 14pt; font-weight: 700; }
 table { width: 100%; border-collapse: collapse; }
@@ -1841,6 +2331,2148 @@ tr:nth-child(even) { background: #fafafa; }
                 });
             }
         });
+    }
+
+    // ─── واجهة اليوم (الشاشة الرئيسية) ──────────────────────
+
+    function renderMoonSVG(phaseFraction, size) {
+        size = size || 90;
+        const canvas = document.createElement('canvas');
+        canvas.width = size * 2;  // 2x for retina
+        canvas.height = size * 2;
+        const ctx = canvas.getContext('2d');
+        const S = size * 2;       // work in 2x space
+        const R = S / 2 - 2;     // disc radius
+        const cx = S / 2;
+        const cy = S / 2;
+        const f = ((phaseFraction % 1) + 1) % 1;
+
+        // --- Procedural lunar surface noise (seeded, deterministic) ---
+        function hash(x, y) {
+            let h = x * 374761393 + y * 668265263;
+            h = (h ^ (h >> 13)) * 1274126177;
+            return ((h ^ (h >> 16)) & 0x7fffffff) / 0x7fffffff;
+        }
+        function smoothNoise(px, py, scale) {
+            const sx = px / scale, sy = py / scale;
+            const ix = Math.floor(sx), iy = Math.floor(sy);
+            const fx = sx - ix, fy = sy - iy;
+            const a = hash(ix, iy), b = hash(ix + 1, iy);
+            const c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
+            const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+            return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+        }
+        function lunarNoise(px, py) {
+            return smoothNoise(px, py, 40) * 0.5 +
+                   smoothNoise(px, py, 18) * 0.3 +
+                   smoothNoise(px, py, 7) * 0.2;
+        }
+
+        // --- Mare (dark sea) regions — approximate real lunar maria positions ---
+        // Positions normalized to [-1,1] from center, mapped to visible face
+        const maria = [
+            { x: -0.15, y: -0.25, rx: 0.28, ry: 0.22, d: 0.35 }, // Mare Imbrium
+            { x:  0.20, y: -0.15, rx: 0.20, ry: 0.30, d: 0.30 }, // Mare Serenitatis
+            { x:  0.30, y:  0.10, rx: 0.22, ry: 0.25, d: 0.28 }, // Mare Tranquillitatis
+            { x: -0.05, y:  0.15, rx: 0.15, ry: 0.12, d: 0.25 }, // Mare Nubium
+            { x: -0.35, y: -0.05, rx: 0.15, ry: 0.20, d: 0.22 }, // Oceanus Procellarum (part)
+            { x: -0.25, y:  0.30, rx: 0.12, ry: 0.10, d: 0.20 }, // Mare Humorum
+            { x:  0.15, y:  0.30, rx: 0.18, ry: 0.15, d: 0.22 }, // Mare Fecunditatis
+            { x:  0.35, y: -0.30, rx: 0.10, ry: 0.12, d: 0.18 }, // Mare Crisium
+        ];
+
+        // --- Illumination geometry (Lambertian lighting for curved crescent) ---
+        // Sun direction in viewer frame, parameterized by phase fraction f:
+        // f=0 (new moon): sun behind moon → sunDir = (0, 0, -1)
+        // f=0.25 (Q1):    sun to right   → sunDir = (1, 0, 0)
+        // f=0.5 (full):   sun behind us  → sunDir = (0, 0, 1)
+        // f=0.75 (Q3):    sun to left    → sunDir = (-1, 0, 0)
+        const theta = Math.PI * 2 * f;
+        // Tilt the sun direction ~20° downward to match real crescent appearance
+        // at tropical/subtropical latitudes (UAE ~25°N). This makes the crescent
+        // horns point more upward and the lit edge tilt toward the bottom.
+        const tilt = 20 * Math.PI / 180; // 20° tilt for tropical latitude appearance
+        const rawSunX = Math.sin(theta);
+        const rawSunZ = -Math.cos(theta);
+        // Rotate sun direction around z-axis by tilt angle:
+        // new sunX = rawSunX * cos(tilt) - 0 * sin(tilt)  [y component is 0]
+        // new sunY = rawSunX * sin(tilt) + 0 * cos(tilt)  [creates y from x]
+        const sunX = rawSunX * Math.cos(tilt);
+        const sunY = rawSunX * Math.sin(tilt);
+        const sunZ = rawSunZ;
+
+        // --- Render pixel by pixel ---
+        const imgData = ctx.createImageData(S, S);
+        const data = imgData.data;
+
+        for (let py = 0; py < S; py++) {
+            for (let px = 0; px < S; px++) {
+                const dx = px - cx, dy = py - cy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const idx = (py * S + px) * 4;
+
+                if (dist > R + 0.5) {
+                    data[idx] = data[idx + 1] = data[idx + 2] = 0;
+                    data[idx + 3] = 0; // transparent outside
+                    continue;
+                }
+
+                // Anti-alias edge
+                const edgeAlpha = Math.min(1, Math.max(0, R + 0.5 - dist));
+
+                // 3D sphere coordinates (normalized)
+                const nx = dx / R;  // -1 to 1
+                const ny = dy / R;  // -1 to 1
+                const nz2 = 1 - nx * nx - ny * ny;
+                if (nz2 < 0) {
+                    data[idx + 3] = 0;
+                    continue;
+                }
+                const nz = Math.sqrt(nz2); // z-component (facing viewer)
+
+                // --- Surface base color (highland) ---
+                const noise = lunarNoise(px + 500, py + 500);
+                let baseR = 220 + noise * 30 - 15;
+                let baseG = 215 + noise * 25 - 12;
+                let baseB = 200 + noise * 20 - 10;
+
+                // --- Apply mare darkening ---
+                let mareInfluence = 0;
+                for (const m of maria) {
+                    const mdx = nx - m.x, mdy = ny - m.y;
+                    const ellDist = Math.sqrt((mdx * mdx) / (m.rx * m.rx) + (mdy * mdy) / (m.ry * m.ry));
+                    if (ellDist < 1.5) {
+                        const falloff = Math.max(0, 1 - ellDist);
+                        mareInfluence = Math.max(mareInfluence, falloff * m.d);
+                    }
+                }
+                // Mare areas are darker and slightly bluer
+                const mareFactor = 1 - mareInfluence * 0.6;
+                baseR *= mareFactor;
+                baseG *= mareFactor;
+                baseB *= mareFactor * 1.02; // slight blue tint
+
+                // --- Small craters (procedural) ---
+                const craterNoise = smoothNoise(px + 200, py + 200, 12);
+                if (craterNoise > 0.75) {
+                    const craterDarken = (craterNoise - 0.75) * 2;
+                    baseR -= craterDarken * 25;
+                    baseG -= craterDarken * 22;
+                    baseB -= craterDarken * 20;
+                }
+
+                // --- Limb darkening (3D sphere effect) ---
+                const limbFactor = 0.7 + 0.3 * nz;
+                baseR *= limbFactor;
+                baseG *= limbFactor;
+                baseB *= limbFactor;
+
+                // --- Lambertian illumination (dot product with sun direction) ---
+                // Creates natural curved crescent shape from sphere geometry
+                // Includes tilt for realistic tropical latitude appearance
+                const dotSun = nx * sunX + ny * sunY + nz * sunZ;
+
+                // Sharp terminator with very thin penumbra for realism
+                const penumbra = 0.015;
+                let illum = dotSun / (2 * penumbra) + 0.5;
+                illum = Math.max(0, Math.min(1, illum));
+
+                // --- Earthshine on dark side ---
+                const earthshine = 0.04;
+                const darkR = baseR * earthshine * 0.8;
+                const darkG = baseG * earthshine * 0.9;
+                const darkB = baseB * earthshine * 1.2;
+
+                // --- Final color: blend lit surface with dark + earthshine ---
+                let finalR = baseR * illum + darkR * (1 - illum);
+                let finalG = baseG * illum + darkG * (1 - illum);
+                let finalB = baseB * illum + darkB * (1 - illum);
+
+                // Clamp
+                data[idx]     = Math.max(0, Math.min(255, Math.round(finalR)));
+                data[idx + 1] = Math.max(0, Math.min(255, Math.round(finalG)));
+                data[idx + 2] = Math.max(0, Math.min(255, Math.round(finalB)));
+                data[idx + 3] = Math.round(edgeAlpha * 255);
+            }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+
+        // Return as img tag with data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        return `<img src="${dataUrl}" width="${size}" height="${size}" alt="moon" style="display:block;margin:auto;border-radius:50%;">`;
+    }
+
+    function renderDayViewArc(times, isToday) {
+        const container = document.getElementById('dv-arc-section');
+        if (!container) return;
+        if (!times || !times._raw || times._raw.fajr === null || times._raw.isha === null) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const raw = times._raw;
+        const fajr = raw.fajr, sunrise = raw.sunrise, dhuhr = raw.dhuhr;
+        const asr = raw.asr, maghrib = raw.maghrib, isha = raw.isha;
+        const span = isha - fajr;
+        if (span <= 0) { container.innerHTML = ''; return; }
+
+        const R = 100;
+        const PAD_TOP = 50;
+        const PAD_SIDE = 80;
+        const PAD_BOTTOM = 70;
+        const W = 2 * R + 2 * PAD_SIDE;
+        const CX = W / 2;
+        const CY = PAD_TOP + R;
+        const TOTAL_H = CY + PAD_BOTTOM;
+        const lang = H.getLang();
+        const isRTL = lang === 'ar';
+
+        const timeToAngle = isRTL
+            ? (t => ((t - fajr) / span) * Math.PI)
+            : (t => Math.PI - ((t - fajr) / span) * Math.PI);
+        const angleToXY = (a, r) => ({ x: CX + (r || R) * Math.cos(a), y: CY - (r || R) * Math.sin(a) });
+
+        // Format time for display (e.g., "0533" or "1233")
+        const fmtTime = (decimalHrs) => {
+            const h = Math.floor(decimalHrs);
+            const m = Math.round((decimalHrs - h) * 60);
+            const hh = String(h).padStart(2, '0');
+            const mm = String(m).padStart(2, '0');
+            return lang === 'ar' ? H.toArabicNumerals(hh) + H.toArabicNumerals(mm) : hh + mm;
+        };
+
+        const prayers = [
+            { key: 'fajr', t: fajr, label: H.t('prayerFajr'), time: fmtTime(fajr) },
+            { key: 'sunrise', t: sunrise, label: H.t('prayerSunrise'), time: fmtTime(sunrise) },
+            { key: 'dhuhr', t: dhuhr, label: H.t('prayerDhuhr'), time: fmtTime(dhuhr) },
+            { key: 'asr', t: asr, label: H.t('prayerAsr'), time: fmtTime(asr) },
+            { key: 'maghrib', t: maghrib, label: H.t('prayerMaghrib'), time: fmtTime(maghrib) },
+            { key: 'isha', t: isha, label: H.t('prayerIsha'), time: fmtTime(isha) },
+        ];
+
+        const sunriseAngle = timeToAngle(sunrise);
+        const maghribAngle = timeToAngle(maghrib);
+        const sunriseP = angleToXY(sunriseAngle);
+        const maghribP = angleToXY(maghribAngle);
+
+        let svg = `<svg viewBox="0 0 ${W} ${TOTAL_H}" class="sun-arc-svg dv-arc-svg" xmlns="http://www.w3.org/2000/svg">`;
+
+        // Night arc
+        svg += `<path d="M ${CX - R} ${CY} A ${R} ${R} 0 1 1 ${CX + R} ${CY}" fill="none" stroke="var(--arc-night)" stroke-width="5" stroke-linecap="round"/>`;
+
+        // Day arc
+        const angleDiff = Math.abs(sunriseAngle - maghribAngle);
+        const dayLargeFlag = angleDiff > Math.PI ? 1 : 0;
+        const sweepFlag = isRTL ? 0 : 1;
+        svg += `<path d="M ${sunriseP.x} ${sunriseP.y} A ${R} ${R} 0 ${dayLargeFlag} ${sweepFlag} ${maghribP.x} ${maghribP.y}" fill="none" stroke="var(--arc-day)" stroke-width="5" stroke-linecap="round"/>`;
+
+        // Prayer markers + labels with times
+        prayers.forEach(p => {
+            if (p.t === null) return;
+            const a = timeToAngle(p.t);
+            const pt = angleToXY(a);
+            const isDawn = p.key === 'fajr' || p.key === 'isha';
+            svg += `<circle cx="${pt.x}" cy="${pt.y}" r="${isDawn ? 5 : 4}" fill="${isDawn ? 'var(--arc-marker)' : 'var(--arc-day)'}"/>`;
+
+            const labelR = R + 32;
+            const lp = angleToXY(a, labelR);
+            const tickEnd = angleToXY(a, R + 12);
+            svg += `<line x1="${pt.x}" y1="${pt.y}" x2="${tickEnd.x}" y2="${tickEnd.y}" stroke="var(--arc-marker)" stroke-width="1.5" opacity="0.4"/>`;
+
+            let anchor = 'middle';
+            let dx = 0;
+            const cosA = Math.cos(a);
+            if (cosA > 0.3) { anchor = isRTL ? 'end' : 'start'; dx = 6; }
+            else if (cosA < -0.3) { anchor = isRTL ? 'start' : 'end'; dx = -6; }
+
+            // Two-line label: name + time
+            svg += `<text x="${lp.x + dx}" y="${lp.y}" text-anchor="${anchor}" class="arc-label" font-size="10">${p.label}</text>`;
+            svg += `<text x="${lp.x + dx}" y="${lp.y + 13}" text-anchor="${anchor}" class="arc-label arc-time" font-size="10" font-weight="700">${p.time}</text>`;
+        });
+
+        // Sun dot
+        if (isToday) {
+            const now = new Date();
+            const nowH = now.getHours() + now.getMinutes() / 60;
+            if (nowH >= fajr && nowH <= isha) {
+                const sunAngle = timeToAngle(nowH);
+                const sunPt = angleToXY(sunAngle);
+                svg += `<circle cx="${sunPt.x}" cy="${sunPt.y}" r="8" fill="var(--arc-sun)"/>`;
+                svg += `<circle cx="${sunPt.x}" cy="${sunPt.y}" r="12" fill="none" stroke="var(--arc-sun)" stroke-width="1.5" opacity="0.4"/>`;
+            }
+        }
+
+        // ─── Arabic Clock inside the arc ───────────────────
+        if (isToday) {
+            const now2 = new Date();
+            const nowDec = now2.getHours() + now2.getMinutes() / 60 + now2.getSeconds() / 3600;
+            const arabicH = nowDec - raw.maghrib + 12;
+            const cR = 65; // clock radius — fills inside arc
+            svg += buildClockSVG(CX, CY + 8, cR, arabicH, lang);
+        }
+
+        svg += `</svg>`;
+
+        // Day/night lengths below clock
+        const dayLen = maghrib - sunrise;
+        const nightLen = 24 - dayLen;
+        const fmtLen = (hrs) => {
+            const h = Math.floor(hrs), m = Math.round((hrs - h) * 60);
+            return lang === 'ar'
+                ? `${H.toArabicNumerals(h)}:${H.toArabicNumerals(String(m).padStart(2, '0'))}`
+                : `${h}:${String(m).padStart(2, '0')}`;
+        };
+
+        svg += `<div class="dv-arc-info">`;
+        svg += `<span>☀️ ${H.t('sunArcDay')}: ${fmtLen(dayLen)}</span>`;
+        svg += `<span>🌙 ${H.t('sunArcNight')}: ${fmtLen(nightLen)}</span>`;
+        svg += `</div>`;
+
+        container.innerHTML = svg;
+
+        // Start quartz tick for second hand
+        if (isToday) {
+            _arabicClockTimer && clearInterval(_arabicClockTimer);
+            const secEl = document.getElementById('arabic-clock-sec');
+            if (secEl) {
+                const clockCX = CX, clockCY = CY + 8, sL = 65 * 0.72, sT = 12;
+                _arabicClockTimer = setInterval(() => {
+                    const s = new Date().getSeconds();
+                    const a = (s / 60) * 360 - 90;
+                    const r = a * Math.PI / 180;
+                    secEl.setAttribute('x1', clockCX - sT * Math.cos(r));
+                    secEl.setAttribute('y1', clockCY - sT * Math.sin(r));
+                    secEl.setAttribute('x2', clockCX + sL * Math.cos(r));
+                    secEl.setAttribute('y2', clockCY + sL * Math.sin(r));
+                }, 1000);
+            }
+        }
+    }
+
+    // ─── الساعة العربية التناظرية (SVG group) ─────────────
+    function buildClockSVG(cx, cy, R, arabicDecimalHours, lang) {
+        const toRad = (deg) => deg * Math.PI / 180;
+        const h24 = ((arabicDecimalHours % 24) + 24) % 24;
+        const h12 = h24 % 12;
+        const mins = Math.round((h24 - Math.floor(h24)) * 60) % 60;
+        const minuteAngle = (mins / 60) * 360 - 90;
+        const hourAngle = (h12 / 12) * 360 + (mins / 60) * 30 - 90;
+        const arabicNums = lang === 'ar'
+            ? ['١٢', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠', '١١']
+            : ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+
+        let g = `<g class="arabic-clock-group">`;
+
+        // Rings — silver dial (مينا فضية)
+        g += `<circle cx="${cx}" cy="${cy}" r="${R + 3}" fill="none" stroke="var(--gold, #f4a940)" stroke-width="0.8" opacity="0.3"/>`;
+        g += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="linear-gradient(#d0d0d0,#b0b0b0)" stroke="var(--gold, #f4a940)" stroke-width="2"/>`;
+        // SVG doesn't support fill gradient inline — use a defs-based radial gradient
+        g += `<defs><radialGradient id="clockDial"><stop offset="0%" stop-color="#e0e0e0"/><stop offset="100%" stop-color="#b8b8b8"/></radialGradient></defs>`;
+        g += `<circle cx="${cx}" cy="${cy}" r="${R - 1}" fill="url(#clockDial)"/>`;
+        g += `<circle cx="${cx}" cy="${cy}" r="${R - 1.5}" fill="none" stroke="var(--gold, #f4a940)" stroke-width="0.4" opacity="0.3"/>`;
+
+        // Hour markers + numerals — black on silver
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * 360 - 90;
+            const rad = toRad(angle);
+            const isMajor = i % 3 === 0;
+            const innerR = isMajor ? R - 10 : R - 6;
+            const outerR = R - 2;
+            g += `<line x1="${cx + innerR * Math.cos(rad)}" y1="${cy + innerR * Math.sin(rad)}" x2="${cx + outerR * Math.cos(rad)}" y2="${cy + outerR * Math.sin(rad)}" stroke="#1a1a1a" stroke-width="${isMajor ? 1.8 : 0.8}" stroke-linecap="round" opacity="${isMajor ? 1 : 0.6}"/>`;
+            const labelR = R - 17;
+            const x = cx + labelR * Math.cos(rad);
+            const y = cy + labelR * Math.sin(rad);
+            g += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" fill="#1a1a1a" font-size="${isMajor ? 11 : 9}" font-weight="${isMajor ? 700 : 500}" opacity="${isMajor ? 1 : 0.7}">${arabicNums[i]}</text>`;
+        }
+
+        // Inner decorative ring
+        g += `<circle cx="${cx}" cy="${cy}" r="${R - 27}" fill="none" stroke="#1a1a1a" stroke-width="0.4" opacity="0.12" stroke-dasharray="1.5 4"/>`;
+
+        // Label — black
+        g += `<text x="${cx}" y="${cy + 28}" text-anchor="middle" fill="#333" font-size="11" font-weight="600" opacity="0.7">${H.t('arabicTime')}</text>`;
+
+        // Hour hand — black
+        const hourLen = R * 0.48;
+        const hourRad = toRad(hourAngle);
+        g += `<line x1="${cx - 8 * Math.cos(hourRad)}" y1="${cy - 8 * Math.sin(hourRad)}" x2="${cx + hourLen * Math.cos(hourRad)}" y2="${cy + hourLen * Math.sin(hourRad)}" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>`;
+
+        // Minute hand — black
+        const minLen = R * 0.68;
+        const minRad = toRad(minuteAngle);
+        g += `<line x1="${cx - 10 * Math.cos(minRad)}" y1="${cy - 10 * Math.sin(minRad)}" x2="${cx + minLen * Math.cos(minRad)}" y2="${cy + minLen * Math.sin(minRad)}" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>`;
+
+        // Second hand — black
+        const now3 = new Date();
+        const secs = now3.getSeconds();
+        const secAngle = (secs / 60) * 360 - 90;
+        const secLen = R * 0.72;
+        const secRad = toRad(secAngle);
+        g += `<line id="arabic-clock-sec" x1="${cx - 12 * Math.cos(secRad)}" y1="${cy - 12 * Math.sin(secRad)}" x2="${cx + secLen * Math.cos(secRad)}" y2="${cy + secLen * Math.sin(secRad)}" stroke="#1a1a1a" stroke-width="0.8" stroke-linecap="round" opacity="0.85"/>`;
+
+        // Center dot — gold bezel with black center
+        g += `<circle cx="${cx}" cy="${cy}" r="4" fill="var(--gold, #f4a940)"/>`;
+        g += `<circle cx="${cx}" cy="${cy}" r="2" fill="#1a1a1a"/>`;
+
+        g += `</g>`;
+        return g;
+    }
+
+    // ─── Live Weather (Open-Meteo) ─────────────────────────
+    async function fetchLiveWeather(gYear, gMonth, gDay, isToday) {
+        const el = document.getElementById('dv-weather-live');
+        if (!el) return;
+
+        let lat = 0, lng = 0;
+        try {
+            if (PT) {
+                const s = PT.getSettings();
+                lat = s.lat; lng = s.lng;
+            }
+        } catch (e) {}
+        if (!lat && !lng) { el.innerHTML = ''; return; }
+
+        const lang = H.getLang();
+        const dateStr = `${gYear}-${String(gMonth).padStart(2, '0')}-${String(gDay).padStart(2, '0')}`;
+
+        // Check localStorage cache
+        const cacheKey = `weather_${dateStr}_${Math.round(lat*10)}_${Math.round(lng*10)}`;
+        try {
+            const cached = JSON.parse(localStorage.getItem(cacheKey));
+            if (cached && Date.now() - cached.ts < 3600000) {
+                renderWeatherData(el, cached.data, lang);
+                return;
+            }
+        } catch (e) {}
+
+        try {
+            const url = isToday
+                ? `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=1`
+                : `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,uv_index_max&timezone=auto&start_date=${dateStr}&end_date=${dateStr}`;
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            try { localStorage.setItem(cacheKey, JSON.stringify({ data, ts: Date.now() })); } catch (e) {}
+            renderWeatherData(el, data, lang);
+        } catch (err) {
+            el.innerHTML = '';
+        }
+    }
+
+    function renderWeatherData(el, data, lang) {
+        const weatherIcons = {
+            0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+            45: '🌫️', 48: '🌫️',
+            51: '🌦️', 53: '🌦️', 55: '🌧️',
+            56: '🌨️', 57: '🌨️',
+            61: '🌧️', 63: '🌧️', 65: '🌧️',
+            66: '🌨️', 67: '🌨️',
+            71: '❄️', 73: '❄️', 75: '❄️', 77: '❄️',
+            80: '🌦️', 81: '🌧️', 82: '🌧️',
+            85: '🌨️', 86: '🌨️',
+            95: '⛈️', 96: '⛈️', 99: '⛈️'
+        };
+        const weatherDesc = {
+            ar: { 0: 'صافٍ', 1: 'صافٍ غالبًا', 2: 'غائم جزئيًّا', 3: 'غائم', 45: 'ضباب', 48: 'ضباب متجمد', 51: 'رذاذ خفيف', 53: 'رذاذ', 55: 'رذاذ كثيف', 61: 'مطر خفيف', 63: 'مطر', 65: 'مطر غزير', 71: 'ثلج خفيف', 73: 'ثلج', 75: 'ثلج كثيف', 80: 'زخات مطر', 81: 'زخات مطر', 82: 'زخات غزيرة', 85: 'زخات ثلج', 95: 'عاصفة رعدية', 96: 'عاصفة رعدية مع بَرَد' },
+            en: { 0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Overcast', 45: 'Fog', 48: 'Rime fog', 51: 'Light drizzle', 53: 'Drizzle', 55: 'Dense drizzle', 61: 'Light rain', 63: 'Rain', 65: 'Heavy rain', 71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 80: 'Rain showers', 81: 'Rain showers', 82: 'Heavy showers', 85: 'Snow showers', 95: 'Thunderstorm', 96: 'Thunderstorm with hail' }
+        };
+
+        let html = '<div class="dv-weather-grid">';
+
+        if (data.current) {
+            const c = data.current;
+            const icon = weatherIcons[c.weather_code] || '🌡️';
+            const desc = (weatherDesc[lang] || weatherDesc.ar)[c.weather_code] || '';
+            html += `<div class="dv-weather-current">`;
+            html += `<span class="dv-weather-icon">${icon}</span>`;
+            html += `<span class="dv-weather-temp">${Math.round(c.temperature_2m)}°</span>`;
+            html += `<span class="dv-weather-desc">${desc}</span>`;
+            html += `</div>`;
+
+            html += `<div class="dv-weather-details">`;
+            html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherFeels')}</span><span>${Math.round(c.apparent_temperature)}°</span></div>`;
+            html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherHumidity')}</span><span>${c.relative_humidity_2m}%</span></div>`;
+            html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherWind')}</span><span>${Math.round(c.wind_speed_10m)} ${H.t('weatherKmh')}</span></div>`;
+            if (c.precipitation > 0) {
+                html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherPrecip')}</span><span>${c.precipitation} ${H.t('weatherMm')}</span></div>`;
+            }
+            html += `</div>`;
+        }
+
+        if (data.daily) {
+            const d = data.daily;
+            const maxT = d.temperature_2m_max ? Math.round(d.temperature_2m_max[0]) : null;
+            const minT = d.temperature_2m_min ? Math.round(d.temperature_2m_min[0]) : null;
+            const precip = d.precipitation_probability_max ? d.precipitation_probability_max[0] : null;
+            const uv = d.uv_index_max ? Math.round(d.uv_index_max[0]) : null;
+            const wCode = d.weather_code ? d.weather_code[0] : null;
+
+            if (!data.current && wCode !== null) {
+                const icon = weatherIcons[wCode] || '🌡️';
+                const desc = (weatherDesc[lang] || weatherDesc.ar)[wCode] || '';
+                html += `<div class="dv-weather-current">`;
+                html += `<span class="dv-weather-icon">${icon}</span>`;
+                if (maxT !== null) html += `<span class="dv-weather-temp">${maxT}° / ${minT}°</span>`;
+                html += `<span class="dv-weather-desc">${desc}</span>`;
+                html += `</div>`;
+            }
+
+            html += `<div class="dv-weather-details">`;
+            if (data.current && maxT !== null) {
+                html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherHigh')}</span><span>${maxT}°</span></div>`;
+                html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherLow')}</span><span>${minT}°</span></div>`;
+            }
+            if (precip !== null && precip > 0) {
+                html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherRainChance')}</span><span>${precip}%</span></div>`;
+            }
+            if (uv !== null) {
+                html += `<div class="dv-weather-detail"><span class="dv-weather-detail-label">${H.t('weatherUV')}</span><span>${uv}</span></div>`;
+            }
+            html += `</div>`;
+        }
+
+        html += '</div>';
+        el.innerHTML = html;
+    }
+
+    // ─── AI Section ──────────────────────────────────────────
+    function renderAISection(hijri, gYear, gMonth, gDay, dow) {
+        const el = document.getElementById('dv-ai-section');
+        if (!el || !AI) { if (el) el.style.display = 'none'; return; }
+
+        // Show skeleton loading
+        el.style.display = '';
+        el.innerHTML = `
+            <div class="dv-ai-title">✦ ${H.t('aiSectionTitle')}</div>
+            <div class="dv-ai-skeleton">
+                <div class="dv-ai-card"><div class="dv-ai-card-label">${H.t('aiVerse')}</div></div>
+                <div class="dv-ai-card"><div class="dv-ai-card-label">${H.t('aiHadith')}</div></div>
+                <div class="dv-ai-card"><div class="dv-ai-card-label">${H.t('aiWisdom')}</div></div>
+            </div>`;
+
+        // Build context
+        const tale3 = H.getTale3(gMonth, gDay);
+        const season = H.getSeason(gMonth, gDay);
+        const moon = H.getMoonPhase(gYear, gMonth, gDay);
+        const event = H.getEvent(hijri.month, hijri.day);
+        let locCity = '';
+        try {
+            const loc = JSON.parse(localStorage.getItem('prayer-loc'));
+            if (loc && loc.name) locCity = loc.name;
+        } catch (e) {}
+
+        const ctx = {
+            hijriDay: hijri.day,
+            hijriMonth: hijri.month,
+            hijriMonthName: H.monthName(hijri.month - 1),
+            hijriYear: hijri.year,
+            gregDay: gDay,
+            gregMonthName: H.gregMonthName(gMonth - 1),
+            gregYear: gYear,
+            dayOfWeek: H.dayName(dow),
+            islamicEvent: event ? event.name : '',
+            moonPhase: moon ? moon.name : '',
+            anwaMansion: tale3 ? tale3.name : '',
+            anwaSeason: season ? season.name : '',
+            locationCity: locCity
+        };
+
+        AI.fetchDailyContent(ctx).then(data => {
+            if (!data || (!data.verse && !data.reflection && !data.hadith)) {
+                el.innerHTML = `<div class="dv-ai-title">✦ ${H.t('aiSectionTitle')}</div>
+                    <div class="dv-ai-error">${H.t('aiOffline')}</div>`;
+                return;
+            }
+            let html = `<div class="dv-ai-title">✦ ${H.t('aiSectionTitle')}</div>`;
+
+            // Verse + reflection
+            if (data.verse && data.verse.text) {
+                html += `<div class="dv-ai-card">
+                    <div class="dv-ai-card-label">${H.t('aiVerse')}</div>
+                    <div class="dv-ai-card-text">﴿${data.verse.text}﴾</div>
+                    <div class="dv-ai-card-source">${data.verse.surah || ''} ${data.verse.number ? '— ' + data.verse.number : ''}</div>
+                </div>`;
+            }
+            if (data.reflection) {
+                html += `<div class="dv-ai-card">
+                    <div class="dv-ai-card-label">${H.t('aiReflection')}</div>
+                    <div class="dv-ai-card-text">${data.reflection}</div>
+                </div>`;
+            }
+
+            // Hadith
+            if (data.hadith && data.hadith.text) {
+                html += `<div class="dv-ai-card">
+                    <div class="dv-ai-card-label">${H.t('aiHadith')}</div>
+                    <div class="dv-ai-card-text">«${data.hadith.text}»</div>
+                    <div class="dv-ai-card-source">${data.hadith.source || ''}</div>
+                </div>`;
+            }
+
+            // Wisdom
+            if (data.wisdom) {
+                html += `<div class="dv-ai-card">
+                    <div class="dv-ai-card-label">${H.t('aiWisdom')}</div>
+                    <div class="dv-ai-card-text">${data.wisdom}</div>
+                </div>`;
+            }
+
+            // Historical event
+            if (data.historicalEvent) {
+                html += `<div class="dv-ai-card">
+                    <div class="dv-ai-card-label">${H.t('aiHistory')}</div>
+                    <div class="dv-ai-card-text">${data.historicalEvent}</div>
+                </div>`;
+            }
+
+            el.innerHTML = html;
+        }).catch(() => {
+            el.innerHTML = `<div class="dv-ai-title">✦ ${H.t('aiSectionTitle')}</div>
+                <div class="dv-ai-error">${H.t('aiError')}</div>`;
+        });
+    }
+
+    function renderDayView(gregDate) {
+        const dayView = document.getElementById('day-view');
+        if (!dayView) return;
+
+        const lang = H.getLang();
+        const now = new Date();
+        let gYear, gMonth, gDay, isToday;
+
+        if (gregDate) {
+            gYear = gregDate.year; gMonth = gregDate.month; gDay = gregDate.day;
+            isToday = gYear === now.getFullYear() && gMonth === (now.getMonth() + 1) && gDay === now.getDate();
+        } else {
+            gYear = now.getFullYear(); gMonth = now.getMonth() + 1; gDay = now.getDate();
+            isToday = true;
+        }
+
+        // Show/hide "Today" button
+        const dvTodayBtn = document.getElementById('dv-today-btn');
+        if (dvTodayBtn) {
+            dvTodayBtn.style.display = isToday ? 'none' : '';
+            dvTodayBtn.textContent = H.t('today');
+        }
+
+        const jdn = H.gregorianToJDN(gYear, gMonth, gDay);
+        const hijri = H.jdnToHijri(jdn);
+        const dow = H.dayOfWeek(jdn);
+
+        // Day name
+        document.getElementById('dv-day-name').textContent = H.dayName(dow);
+
+        // Hijri date
+        document.getElementById('dv-hijri-day').textContent = lang === 'ar' ? H.toArabicNumerals(hijri.day) : hijri.day;
+        document.getElementById('dv-hijri-month').textContent = H.monthName(hijri.month - 1);
+        document.getElementById('dv-hijri-year').textContent = lang === 'ar' ? H.toArabicNumerals(hijri.year) : hijri.year;
+
+        // Gregorian date
+        document.getElementById('dv-greg-day').textContent = lang === 'ar' ? H.toArabicNumerals(gDay) : gDay;
+        document.getElementById('dv-greg-month').textContent = H.gregMonthName(gMonth - 1);
+        document.getElementById('dv-greg-year').textContent = lang === 'ar' ? H.toArabicNumerals(gYear) : gYear;
+
+        // Event
+        const event = H.getEvent(hijri.month, hijri.day);
+        const eventEl = document.getElementById('dv-event');
+        if (event) {
+            eventEl.textContent = event.name;
+            eventEl.style.display = '';
+        } else {
+            eventEl.style.display = 'none';
+        }
+
+        // Location — show city name + neighbourhood/suburb
+        const locEl = document.getElementById('dv-location');
+        let locCity = '', locArea = '';
+        try {
+            const loc = JSON.parse(localStorage.getItem('prayer-loc'));
+            if (loc) {
+                locCity = (lang === 'ar' ? loc.nameAr : loc.nameEn) || loc.name || '';
+                // Combine suburb + neighbourhood (e.g. "مويلح، القرائن")
+                const nh = lang === 'ar' ? loc.neighbourhoodAr : loc.neighbourhoodEn;
+                const sb = lang === 'ar' ? loc.suburbAr : loc.suburbEn;
+                locArea = [sb, nh].filter(Boolean).join('، ');
+                // If we have coords but missing the current language name, fetch it
+                if (!locCity && loc.lat && loc.lng) {
+                    locCity = H.t('locationBased');
+                    (async () => {
+                        try {
+                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lng}&format=json&accept-language=${lang}&addressdetails=1`, {
+                                headers: { 'User-Agent': 'HijriCalendar/2.0' }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                const addr = data.address || {};
+                                const isVillageCity = addr.city && addr.village && addr.county;
+                                const city = isVillageCity ? addr.county : (addr.city || addr.town || addr.county || addr.village || addr.state || '');
+                                const neighbourhood = addr.neighbourhood || addr.quarter || '';
+                                const suburb = addr.suburb || (isVillageCity ? addr.village : (addr.village && addr.county ? addr.village : '')) || '';
+                                if (city) {
+                                    loc[lang === 'ar' ? 'nameAr' : 'nameEn'] = city;
+                                    loc[lang === 'ar' ? 'suburbAr' : 'suburbEn'] = suburb;
+                                    loc[lang === 'ar' ? 'neighbourhoodAr' : 'neighbourhoodEn'] = neighbourhood;
+                                    localStorage.setItem('prayer-loc', JSON.stringify(loc));
+                                    const area = [suburb, neighbourhood].filter(Boolean).join('، ');
+                                    locEl.innerHTML = city + (area ? '<br><span class="dv-suburb">' + area + '</span>' : '');
+                                }
+                            }
+                        } catch (e) {}
+                    })();
+                }
+            }
+        } catch (e) {}
+        if (locCity) {
+            locEl.innerHTML = locCity + (locArea ? '<br><span class="dv-suburb">' + locArea + '</span>' : '');
+        } else {
+            locEl.textContent = H.t('locationBased');
+        }
+
+        // Prayer times & sun arc
+        let times = null;
+        if (PT) {
+            try {
+                const isRamadan = hijri.month === 9;
+                if (isToday) {
+                    times = PT.getForToday(isRamadan);
+                } else {
+                    times = PT.getForDate({ year: gYear, month: gMonth, day: gDay }, isRamadan);
+                }
+            } catch (e) {}
+        }
+        renderDayViewArc(times, isToday);
+
+        // Moon phase
+        const moonContainer = document.getElementById('dv-moon-container');
+        const moon = H.getMoonPhase(gYear, gMonth, gDay);
+        if (moon) {
+            let moonHtml = `<div class="dv-moon-face">${renderMoonSVG(moon.phaseFraction, 90)}</div>`;
+            moonHtml += `<div class="dv-moon-label">${moon.name}</div>`;
+            moonContainer.innerHTML = moonHtml;
+        }
+
+        // Tide
+        const tideEl = document.getElementById('dv-tide-section');
+        if (moon && moon.tide && moon.tide.events && moon.tide.events.length > 0) {
+            const tideTypes = { spring: H.t('tideSpring'), neap: H.t('tideNeap'), rising: H.t('tideRising'), falling: H.t('tideFalling') };
+            const tideName = tideTypes[moon.tide.type] || moon.tide.type;
+            let tideHtml = `<div class="dv-section-title">${H.t('tideMovements')}</div>`;
+            tideHtml += `<div class="dv-tide-events">`;
+            moon.tide.events.forEach(e => {
+                const label = e.type === 'high' ? H.t('tideHigh') : H.t('tideLow');
+                tideHtml += `<span class="dv-tide-item${e.type === 'high' ? ' dv-tide-high' : ''}">${label} ${e.time}</span>`;
+            });
+            tideHtml += `</div>`;
+            tideEl.innerHTML = tideHtml;
+            tideEl.style.display = '';
+        } else {
+            tideEl.style.display = 'none';
+        }
+
+        // Weather — live data only
+        const weatherEl = document.getElementById('dv-weather-section');
+        const tale3 = H.getTale3(gMonth, gDay);
+        weatherEl.style.display = '';
+        let weatherHtml = `<div class="dv-section-title">${H.t('weatherTitle')}</div>`;
+        weatherHtml += `<div class="dv-weather-live" id="dv-weather-live"></div>`;
+        weatherEl.innerHTML = weatherHtml;
+        fetchLiveWeather(gYear, gMonth, gDay, isToday);
+
+        // Anwa summary + Anwa weather description
+        const anwaEl = document.getElementById('dv-anwa-section');
+        const season = H.getSeason(gMonth, gDay);
+        const durr = H.getDurr(gMonth, gDay, gYear);
+        const winds = H.getSeasonalWinds(gMonth, gDay);
+        const fishList = H.getSeasonalFish(gMonth, gDay).filter(f => f.inSeason);
+        const cropsList = H.getSeasonalCrops(gMonth, gDay).filter(c => c.inSeason);
+        const wildlifeList = H.getSeasonalWildlife(gMonth, gDay).filter(w => w.inSeason);
+
+        let anwaHtml = `<div class="dv-section-title">${H.t('anwaSeasons')}</div><div class="dv-anwa-grid">`;
+        if (tale3) anwaHtml += `<div class="dv-anwa-card dv-anwa-clickable" data-anwa-type="tale3"><div class="dv-anwa-label">${H.t('tale3Label')}</div><div class="dv-anwa-value">${tale3.name}</div></div>`;
+        if (season) anwaHtml += `<div class="dv-anwa-card dv-anwa-clickable" data-anwa-type="season"><div class="dv-anwa-label">${H.t('seasonLabel')}</div><div class="dv-anwa-value">${season.name}</div></div>`;
+        if (durr) anwaHtml += `<div class="dv-anwa-card dv-anwa-clickable" data-anwa-type="durr"><div class="dv-anwa-label">${H.t('durrLabel')}</div><div class="dv-anwa-value">${durr.durr}</div></div>`;
+        anwaHtml += `</div>`;
+        // زر دائرة الدرور
+        anwaHtml += `<button class="durur-more-btn dv-anwa-clickable" data-anwa-type="durur-circle">☆ ${H.t('dururCircleMore')}</button>`;
+        if (tale3 && tale3.weather) {
+            anwaHtml += `<div class="dv-anwa-weather">${tale3.weather}</div>`;
+        }
+        anwaEl.innerHTML = anwaHtml;
+
+        // Click handlers for anwa cards
+        anwaEl.querySelectorAll('.dv-anwa-clickable').forEach(card => {
+            card.addEventListener('click', () => {
+                showAnwaDetail(card.dataset.anwaType, { year: gYear, month: gMonth, day: gDay });
+            });
+        });
+
+        // بطاقات الإثراء انتقلت إلى داخل دائرة الدرور (_renderDururCircle)
+
+        // AI content
+        renderAISection(hijri, gYear, gMonth, gDay, dow);
+
+        // Back button label
+        document.getElementById('dv-back-btn').textContent = H.t('backToCalendar');
+
+        // Language toggle active state
+        const curLang = H.getLang();
+        const langArBtn = document.getElementById('dv-lang-ar');
+        const langEnBtn = document.getElementById('dv-lang-en');
+        if (langArBtn) langArBtn.classList.toggle('active', curLang === 'ar');
+        if (langEnBtn) langEnBtn.classList.toggle('active', curLang === 'en');
+
+        // Share & back button labels
+        document.getElementById('dv-share-btn').textContent = H.t('share');
+        const paletteBtn = document.getElementById('dv-palette-btn');
+        if (paletteBtn) paletteBtn.textContent = H.t('palette');
+
+        // Credits
+        const creditsName = document.querySelector('.dv-credits-name');
+        if (creditsName) creditsName.textContent = H.t('creditsName');
+        const creditsVer = document.querySelector('.dv-credits-version');
+        if (creditsVer) creditsVer.textContent = H.t('creditsVersion');
+        const creditsTech = document.querySelector('.dv-credits-tech');
+        if (creditsTech) creditsTech.textContent = H.t('creditsTech');
+    }
+
+    function showDayView(gregDate) {
+        // Set _selectedDate
+        if (gregDate) {
+            const now = new Date();
+            const isToday = gregDate.year === now.getFullYear() && gregDate.month === (now.getMonth() + 1) && gregDate.day === now.getDate();
+            _selectedDate = isToday ? null : gregDate;
+        } else {
+            _selectedDate = null;
+        }
+
+        renderDayView(gregDate);
+        document.getElementById('day-view').style.display = '';
+        document.getElementById('calendar-view').style.display = 'none';
+    }
+
+    function showCalendarView() {
+        document.getElementById('day-view').style.display = 'none';
+        document.getElementById('calendar-view').style.display = '';
+        // Refresh calendar view state
+        renderCalendar();
+        renderTodayInfo();
+        renderAnwaCard(_selectedDate);
+        if (PT) renderPrayerTimes();
+    }
+
+    function getDayViewDate() {
+        // Return the current Day View date as {year, month, day}
+        if (_selectedDate) return _selectedDate;
+        const now = new Date();
+        return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+    }
+
+    function navigateDayView(offset) {
+        const cur = getDayViewDate();
+        const d = new Date(cur.year, cur.month - 1, cur.day + offset);
+        showDayView({ year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() });
+    }
+
+    // ─── Anwa Detail View ───
+    let _anwaDetailOrigin = 'day'; // 'day' or 'calendar'
+
+    function showAnwaDetail(type, gregDate) {
+        const { year: gYear, month: gMonth, day: gDay } = gregDate;
+        const lang = H.getLang();
+        const container = document.getElementById('anwa-detail-content');
+        const titleEl = document.getElementById('anwa-detail-title');
+        const backBtn = document.getElementById('anwa-detail-back');
+        backBtn.textContent = H.t('anwaDetailBack');
+
+        let html = '';
+        if (type === 'tale3') {
+            titleEl.textContent = H.t('anwaAllStars');
+            html = _renderTale3Detail(gMonth, gDay, gYear, lang);
+        } else if (type === 'season') {
+            titleEl.textContent = H.t('anwaAllSeasons');
+            html = _renderSeasonDetail(gMonth, gDay, lang);
+        } else if (type === 'durr') {
+            titleEl.textContent = H.t('anwaAllDurr');
+            html = _renderDurrDetail(gMonth, gDay, gYear, lang);
+        } else if (type === 'wind') {
+            titleEl.textContent = H.t('anwaWindCompass');
+            html = _renderWindDetail(gMonth, gDay, lang);
+        } else if (type === 'fish') {
+            titleEl.textContent = H.t('anwaAllFish');
+            html = _renderListDetail('fish', gMonth, gDay, lang);
+        } else if (type === 'crops') {
+            titleEl.textContent = H.t('anwaAllCrops');
+            html = _renderListDetail('crops', gMonth, gDay, lang);
+        } else if (type === 'wildlife') {
+            titleEl.textContent = H.t('anwaAllWildlife');
+            html = _renderListDetail('wildlife', gMonth, gDay, lang);
+        } else if (type === 'durur-circle') {
+            titleEl.textContent = H.t('dururCircleTitle');
+            html = _renderDururCircle(gMonth, gDay, gYear, lang);
+        }
+
+        container.innerHTML = html;
+
+        // Determine origin (day-view or calendar-view)
+        const dvVisible = document.getElementById('day-view').style.display !== 'none';
+        _anwaDetailOrigin = dvVisible ? 'day' : 'calendar';
+
+        document.getElementById('day-view').style.display = 'none';
+        document.getElementById('calendar-view').style.display = 'none';
+        document.getElementById('anwa-detail-view').style.display = '';
+
+        // Setup durur circle interactivity after DOM insertion
+        if (type === 'durur-circle') {
+            setTimeout(() => _setupDururCircleEvents(container), 50);
+        }
+
+        // Scroll to current item
+        const current = container.querySelector('.anwa-detail-item.current');
+        if (current) {
+            setTimeout(() => current.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+        }
+    }
+
+    function closeAnwaDetail() {
+        document.getElementById('anwa-detail-view').style.display = 'none';
+        if (_anwaDetailOrigin === 'calendar') {
+            document.getElementById('calendar-view').style.display = '';
+        } else {
+            document.getElementById('day-view').style.display = '';
+        }
+    }
+
+    function _fmtDateRange(from, to, lang) {
+        const mNames = lang === 'en'
+            ? ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            : ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+        return `${from[1]} ${mNames[from[0]]} — ${to[1]} ${mNames[to[0]]}`;
+    }
+
+    function _renderTale3Detail(gMonth, gDay, gYear, lang) {
+        const allStars = H.TAWALIE;
+        const currentTale3 = H.getTale3(gMonth, gDay);
+        let html = '<div class="anwa-detail-list">';
+        allStars.forEach((star, i) => {
+            const name = lang === 'en' ? star.en : star.ar;
+            const weather = lang === 'en' ? star.weatherEn : star.weatherAr;
+            const isCurrent = currentTale3 && currentTale3.nameAr === star.ar;
+            html += `<div class="anwa-detail-item${isCurrent ? ' current' : ''}">`;
+            html += `<div class="anwa-detail-item-header">`;
+            html += `<span class="anwa-detail-item-num">${i + 1}</span>`;
+            html += `<span class="anwa-detail-item-name">${name}</span>`;
+            if (isCurrent) html += `<span class="anwa-detail-badge">${H.t('anwaCurrent')}</span>`;
+            html += `</div>`;
+            html += `<div class="anwa-detail-item-dates">${H.t('anwaDates')}: ${_fmtDateRange(star.from, star.to, lang)}</div>`;
+            html += `<div class="anwa-detail-item-weather">${weather}</div>`;
+            html += `</div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function _renderSeasonDetail(gMonth, gDay, lang) {
+        const allSeasons = H.SEASONS;
+        const currentSeason = H.getSeason(gMonth, gDay);
+        let html = '<div class="anwa-detail-list">';
+        allSeasons.forEach((season, i) => {
+            const name = lang === 'en' ? season.en : season.ar;
+            const isCurrent = currentSeason && currentSeason.nameAr === season.ar;
+            // Find related tawalie
+            const relatedStars = H.TAWALIE.filter(t => {
+                const tMid = t.from[0] * 100 + Math.floor((t.from[1] + t.to[1]) / 2);
+                return H._matchRange(t.from[0], t.from[1], season.from, season.to) ||
+                       H._matchRange(t.to[0], t.to[1], season.from, season.to);
+            });
+            html += `<div class="anwa-detail-item${isCurrent ? ' current' : ''}">`;
+            html += `<div class="anwa-detail-item-header">`;
+            html += `<span class="anwa-detail-item-num">${i + 1}</span>`;
+            html += `<span class="anwa-detail-item-name">${name}</span>`;
+            if (isCurrent) html += `<span class="anwa-detail-badge">${H.t('anwaCurrent')}</span>`;
+            html += `</div>`;
+            html += `<div class="anwa-detail-item-dates">${H.t('anwaDates')}: ${_fmtDateRange(season.from, season.to, lang)}</div>`;
+            if (relatedStars.length > 0) {
+                html += `<div class="anwa-detail-item-related">${H.t('tale3Label')}: ${relatedStars.map(s => lang === 'en' ? s.en : s.ar).join('، ')}</div>`;
+            }
+            html += `</div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function _renderDurrDetail(gMonth, gDay, gYear, lang) {
+        const currentDurr = H.getDurr(gMonth, gDay, gYear);
+        const miaNames = H.DUROR_MIA[lang];
+        const durrNames = H.DUROR_LABELS[lang];
+        let html = '';
+
+        // Suhail day counter
+        html += `<div class="anwa-detail-suhail">`;
+        html += `<div class="anwa-detail-suhail-label">${H.t('anwaSuhailDay')}</div>`;
+        html += `<div class="anwa-detail-suhail-value">${currentDurr.suhailDay}</div>`;
+        html += `<div class="anwa-detail-suhail-sub">${currentDurr.mia}</div>`;
+        html += `</div>`;
+
+        // 4 hundreds
+        miaNames.forEach((miaName, miaIdx) => {
+            const isMiaCurrent = currentDurr.mia === miaName;
+            const maxDurrs = miaIdx === 3 ? 7 : 10;
+            html += `<div class="anwa-detail-mia${isMiaCurrent ? ' current-mia' : ''}">`;
+            html += `<div class="anwa-detail-mia-header">${miaName}</div>`;
+            html += `<div class="anwa-detail-durr-grid">`;
+            for (let d = 0; d < maxDurrs; d++) {
+                const durrName = durrNames[d] || `در ${(d + 1) * 10}`;
+                const isDurrCurrent = isMiaCurrent && currentDurr.durr === durrNames[d];
+                html += `<div class="anwa-detail-durr${isDurrCurrent ? ' current' : ''}">`;
+                html += `<span class="anwa-detail-durr-name">${durrName}</span>`;
+                if (isDurrCurrent) html += `<span class="anwa-detail-badge">${H.t('anwaCurrent')}</span>`;
+                html += `</div>`;
+            }
+            html += `</div></div>`;
+        });
+        return html;
+    }
+
+    function _renderWindDetail(gMonth, gDay, lang) {
+        const compass = H.ANWA_ENRICHMENT.windCompass;
+        const seasonal = H.ANWA_ENRICHMENT.seasonalWinds;
+        const currentWinds = H.getSeasonalWinds(gMonth, gDay);
+        let html = '';
+
+        // Wind compass SVG
+        html += `<div class="anwa-detail-compass">`;
+        html += `<svg viewBox="-160 -160 320 320" class="wind-compass-svg">`;
+        // Outer circle
+        html += `<circle cx="0" cy="0" r="140" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+        html += `<circle cx="0" cy="0" r="70" fill="none" stroke="var(--papyrus-border)" stroke-width="0.5" stroke-dasharray="4,4"/>`;
+        // Lines and labels for 16 directions
+        compass.forEach(w => {
+            const rad = (w.degree - 90) * Math.PI / 180;
+            const x1 = Math.cos(rad) * 130;
+            const y1 = Math.sin(rad) * 130;
+            const x2 = Math.cos(rad) * 145;
+            const y2 = Math.sin(rad) * 145;
+            const tx = Math.cos(rad) * 110;
+            const ty = Math.sin(rad) * 110;
+            const name = lang === 'en' ? w.en.split('(')[0].trim() : w.ar.split('(').pop().replace(')', '').trim() || w.ar;
+            const shortName = lang === 'en' ? w.en.split('(')[0].trim() : w.ar.replace(/.*\(|\).*/g, '') || w.ar.split(' ')[0];
+            html += `<line x1="0" y1="0" x2="${x1}" y2="${y1}" stroke="var(--papyrus-border)" stroke-width="0.5"/>`;
+            html += `<circle cx="${x2}" cy="${y2}" r="3" fill="var(--gold, #d4a017)"/>`;
+            const fontSize = w.degree % 90 === 0 ? 9 : 7;
+            html += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" fill="var(--papyrus-text)" font-family="var(--font-arabic)">${shortName}</text>`;
+        });
+        // Center dot
+        html += `<circle cx="0" cy="0" r="4" fill="var(--gold, #d4a017)"/>`;
+        html += `</svg></div>`;
+
+        // Full compass list
+        html += `<div class="anwa-detail-list">`;
+        compass.forEach(w => {
+            const name = lang === 'en' ? w.en : w.ar;
+            html += `<div class="anwa-detail-item anwa-detail-item-compact">`;
+            html += `<div class="anwa-detail-item-header">`;
+            html += `<span class="anwa-detail-item-num">${w.degree}°</span>`;
+            html += `<span class="anwa-detail-item-name">${name}</span>`;
+            html += `</div></div>`;
+        });
+        html += `</div>`;
+
+        // Seasonal winds
+        html += `<div class="anwa-detail-section-title">${H.t('anwaSeasonalWinds')}</div>`;
+        html += `<div class="anwa-detail-list">`;
+        seasonal.forEach(w => {
+            const name = lang === 'en' ? w.en : w.ar;
+            const isCurrent = H._matchRange(gMonth, gDay, w.from, w.to);
+            html += `<div class="anwa-detail-item${isCurrent ? ' current' : ''}">`;
+            html += `<div class="anwa-detail-item-header">`;
+            html += `<span class="anwa-detail-item-name">${name}</span>`;
+            if (isCurrent) html += `<span class="anwa-detail-badge">${H.t('anwaCurrent')}</span>`;
+            html += `</div>`;
+            html += `<div class="anwa-detail-item-dates">${_fmtDateRange(w.from, w.to, lang)}</div>`;
+            html += `</div>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    function _renderListDetail(category, gMonth, gDay, lang) {
+        const items = category === 'fish' ? H.getSeasonalFish(gMonth, gDay)
+                    : category === 'crops' ? H.getSeasonalCrops(gMonth, gDay)
+                    : H.getSeasonalWildlife(gMonth, gDay);
+        const rawItems = H.ANWA_ENRICHMENT[category];
+        let html = '<div class="anwa-detail-list">';
+        items.forEach((item, i) => {
+            const raw = rawItems[i];
+            html += `<div class="anwa-detail-item${item.inSeason ? ' current' : ''}">`;
+            html += `<div class="anwa-detail-item-header">`;
+            html += `<span class="anwa-detail-item-num">${i + 1}</span>`;
+            html += `<span class="anwa-detail-item-name">${item.name}</span>`;
+            if (item.inSeason) html += `<span class="anwa-detail-badge">${H.t('anwaInSeason')}</span>`;
+            else html += `<span class="anwa-detail-badge anwa-badge-off">${H.t('anwaOutSeason')}</span>`;
+            html += `</div>`;
+            html += `<div class="anwa-detail-item-dates">${_fmtDateRange(raw.from, raw.to, lang)}</div>`;
+            html += `</div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    // ─── دائرة الدرور والأنواء (Durur Circle) ───
+
+    // ألوان الحلقات
+    const _RING_COLORS = {
+        mia: ['#c4956a', '#6b9dba', '#7ab87a', '#c75050'], // صفري، شتاء، صيف، قيظ
+        miaDark: ['#8a6540', '#4a7090', '#508050', '#904040'],
+        zodiac: ['#e8c170', '#d4a855', '#c49440', '#b8842e', '#a87420', '#c49440',
+                 '#e8c170', '#d4a855', '#c49440', '#b8842e', '#a87420', '#c49440'],
+        zodiacDark: ['#6a5530', '#605028', '#584825', '#504020', '#483818', '#504020',
+                     '#6a5530', '#605028', '#584825', '#504020', '#483818', '#504020'],
+        star: '#f5edd5', starDark: '#2a2418',
+        starCurrent: '#f0d890', starCurrentDark: '#4a3d20',
+        // ألوان الدرور — متدرجة حسب المائة (الفصل)
+        durrMia: [
+            // المائة الأولى (صفري) — تدرجات برتقالي/ترابي
+            ['#d4a878','#d0a470','#cca068','#c89c60','#c49858','#c09450','#bc9048','#b88c40','#b48838','#b08430'],
+            // المائة الثانية (شتاء) — تدرجات أزرق
+            ['#82b0cc','#7cacc8','#76a8c4','#70a4c0','#6aa0bc','#649cb8','#5e98b4','#5894b0','#5290ac','#4c8ca8'],
+            // المائة الثالثة (صيف) — تدرجات أخضر
+            ['#8cc898','#86c490','#80c088','#7abc80','#74b878','#6eb470','#68b068','#62ac60','#5ca858','#56a450'],
+            // المائة الرابعة (قيظ) — تدرجات أحمر (7 فقط)
+            ['#d06868','#cc6060','#c85858','#c45050','#c04848','#bc4040','#b83838']
+        ],
+        durrMiaDark: [
+            ['#6a5030','#664c2c','#624828','#5e4424','#5a4020','#563c1c','#523818','#4e3414','#4a3010','#462c0c'],
+            ['#3a6080','#38607c','#365e78','#345c74','#325a70','#30586c','#2e5668','#2c5464','#2a5260','#28505c'],
+            ['#3a6840','#38643c','#366038','#345c34','#325830','#30542c','#2e5028','#2c4c24','#2a4820','#28441c'],
+            ['#703838','#6c3434','#683030','#642c2c','#602828','#5c2424','#582020']
+        ],
+        durrCurrent: '#d4a855', durrCurrentDark: '#6a5530',
+        wind: '#a8c0d4', windDark: '#2a3848',
+        windCurrent: '#5a8fad', windCurrentDark: '#3a5a7a',
+        seasonSummer: '#e8c4a0', seasonSummerDark: '#6a5030',
+        seasonAutumn: '#d4b896', seasonAutumnDark: '#5a4428',
+        seasonWinter: '#a8c8dc', seasonWinterDark: '#3a5a7a',
+        seasonSpring: '#a8d4a8', seasonSpringDark: '#3a6840',
+        seasonCurrent: '#f0d890', seasonCurrentDark: '#5a4a20',
+        outer: '#f0ebe0', outerDark: '#1e1c18',
+    };
+
+    function _dateToAngle(month, day) {
+        const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        const doy = DOY[month - 1] + day;
+        // 20 يونيو = أعلى الدائرة (0°)، الاتجاه عكس عقارب الساعة (كالصورة المرجعية)
+        const JUN20 = 171;
+        const offset = ((JUN20 - doy) % 365 + 365) % 365;
+        return (offset / 365) * 360;
+    }
+    // زاوية نهاية اليوم (= بداية اليوم التالي) — لسد الفجوات بين القطاعات المتجاورة
+    function _dateToAngleEnd(month, day) {
+        const d = new Date(2025, month - 1, day + 1);
+        return _dateToAngle(d.getMonth() + 1, d.getDate());
+    }
+
+    // تغميق لون لإنتاج لون إطار مميز
+    function _darkenColor(hex, amount = 0.25) {
+        const c = hex.replace('#', '');
+        const r = Math.max(0, Math.round(parseInt(c.substring(0, 2), 16) * (1 - amount)));
+        const g = Math.max(0, Math.round(parseInt(c.substring(2, 4), 16) * (1 - amount)));
+        const b = Math.max(0, Math.round(parseInt(c.substring(4, 6), 16) * (1 - amount)));
+        return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+    }
+
+    function _arcPath(startDeg, endDeg, innerR, outerR, cx, cy) {
+        const toRad = d => (d - 90) * Math.PI / 180;
+        const s = toRad(startDeg), e = toRad(endDeg);
+        const large = (endDeg - startDeg) > 180 ? 1 : 0;
+        const ox1 = cx + outerR * Math.cos(s), oy1 = cy + outerR * Math.sin(s);
+        const ox2 = cx + outerR * Math.cos(e), oy2 = cy + outerR * Math.sin(e);
+        const ix2 = cx + innerR * Math.cos(e), iy2 = cy + innerR * Math.sin(e);
+        const ix1 = cx + innerR * Math.cos(s), iy1 = cy + innerR * Math.sin(s);
+        return `M${ox1},${oy1} A${outerR},${outerR} 0 ${large} 1 ${ox2},${oy2} L${ix2},${iy2} A${innerR},${innerR} 0 ${large} 0 ${ix1},${iy1}Z`;
+    }
+
+    function _radialText(text, midDeg, radius, cx, cy, fontSize, bold, extraClass, extraAttrs) {
+        const rad = (midDeg - 90) * Math.PI / 180;
+        const x = cx + radius * Math.cos(rad);
+        const y = cy + radius * Math.sin(rad);
+        let rot = midDeg;
+        if (midDeg > 90 && midDeg < 270) rot += 180;
+        const fw = bold ? ' font-weight="700"' : '';
+        const cls = extraClass ? `durur-text ${extraClass}` : 'durur-text';
+        const attrs = extraAttrs ? ` ${extraAttrs}` : '';
+        return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}"${fw} fill="var(--papyrus-text)" font-family="Calibri, sans-serif" transform="rotate(${rot},${x},${y})" class="${cls}"${attrs}>${text}</text>`;
+    }
+
+    // نص طولي (على الشعاع) — كل حرف على نقطة مختلفة
+    function _radialTextVertical(text, midDeg, innerR, outerR, cx, cy, fontSize, bold) {
+        if (!text) return '';
+        const midR = (innerR + outerR) / 2;
+        const rad = (midDeg - 90) * Math.PI / 180;
+        const x = cx + midR * Math.cos(rad);
+        const y = cy + midR * Math.sin(rad);
+        // النص يُكتب ككلمة متصلة عادية، مُدارة بزاوية الشعاع
+        // midDeg - 90 يجعل النص مائلاً على طول الشعاع
+        const isBottom = midDeg > 90 && midDeg < 270;
+        let rot = midDeg - 90;
+        if (isBottom) rot += 180;
+        const fw = bold ? ' font-weight="700"' : '';
+        // نستخدم foreignObject مع div عربي لضمان اتصال الحروف
+        const boxW = outerR - innerR;
+        const boxH = fontSize * 1.4;
+        // نقطة الـ foreignObject: مركزها على الشعاع
+        const foX = x - boxW / 2;
+        const foY = y - boxH / 2;
+        return `<foreignObject x="${foX}" y="${foY}" width="${boxW}" height="${boxH}" transform="rotate(${rot},${x},${y})" class="durur-text-fo">` +
+               `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:${fontSize}px;${fw ? 'font-weight:700;' : ''}color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:hidden;line-height:1;pointer-events:none;">${text}</div>` +
+               `</foreignObject>`;
+    }
+
+    // توزيع الرياح على 5 حلقات فرعية — مطابق للصورة المرجعية
+    // Lane 4 (خارجي) = رياح مظلة كبيرة، Lane 0 (داخلي) = رياح قصيرة
+    // الرياح الأم في الحلقات الخارجية، والرياح الفرعية تتداخل تحتها
+    const WIND_LANE_MAP = [
+        4, // [0]  هبايب سهيل
+        3, // [1]  رياح الكوس
+        0, // [2]  الروايح
+        0, // [3]  رياح الأكيذب
+        2, // [4]  الأزيب
+        4, // [5]  السهيلي
+        0, // [6]  ضربة الأحيمر (ريح)
+        1, // [7]  العقربي
+        3, // [8]  رياح الشمال
+        2, // [9]  الياهي
+        1, // [10] النعشي
+        0, // [11] النعايات
+        3, // [12] الصبا (المطلعي)
+        4, // [13] السرايات (المراويح)
+        2, // [14] الطوز — فوق البوارح، تحت السرايات
+        0, // [15] البوارح
+        1, // [16] بارح البطين
+        1, // [17] بارح الثريا
+        1, // [18] بارح الجوزاء — فوق البوارح
+        2, // [19] رياح السموم
+        3, // [20] الغربي — فوق بارح البطين وبارح الثريا
+        4, // [21] بارح المرزم — فوق الروايح
+    ];
+    function _assignWindLanes(winds) {
+        // استخدام الخريطة الثابتة المطابقة للأصل
+        if (winds.length === WIND_LANE_MAP.length) return [...WIND_LANE_MAP];
+        // fallback: خوارزمية greedy إذا تغيرت البيانات
+        const NUM_LANES = 5;
+        const items = winds.map((w, i) => {
+            const aFrom = _dateToAngle(w.from[0], w.from[1]);
+            const aTo = _dateToAngleEnd(w.to[0], w.to[1]);
+            let arcStart = aTo, arcEnd = aFrom;
+            if (arcEnd < arcStart) arcEnd += 360;
+            return { index: i, a1: arcStart, a2: arcEnd, span: arcEnd - arcStart };
+        });
+        const sorted = [...items].sort((a, b) => b.span - a.span);
+        const lanes = Array.from({ length: NUM_LANES }, () => []);
+        const laneAssignment = new Array(winds.length).fill(0);
+        for (const item of sorted) {
+            let placed = false;
+            for (let lane = NUM_LANES - 1; lane >= 0; lane--) {
+                let conflict = false;
+                for (const existing of lanes[lane]) {
+                    if (_anglesOverlap(item.a1, item.a2, existing.a1, existing.a2)) { conflict = true; break; }
+                }
+                if (!conflict) { lanes[lane].push(item); laneAssignment[item.index] = lane; placed = true; break; }
+            }
+            if (!placed) { lanes[0].push(item); laneAssignment[item.index] = 0; }
+        }
+        return laneAssignment;
+    }
+
+    // تحديد فصل الريح بناءً على منتصف فترتها
+    function _windSeason(w) {
+        const fm = w.from[0], fd = w.from[1], tm = w.to[0], td = w.to[1];
+        // حساب منتصف الفترة
+        const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        const doyFrom = DOY[fm - 1] + fd;
+        let doyTo = DOY[tm - 1] + td;
+        if (doyTo < doyFrom) doyTo += 365;
+        const midDoy = ((doyFrom + doyTo) / 2) % 365 || 365;
+        // الفصول: صيف (القيظ)=Jun21-Sep22, خريف (الصفري)=Sep23-Dec21, شتاء=Dec22-Mar20, ربيع (الصيف)=Mar21-Jun20
+        if (midDoy >= 172 && midDoy <= 265) return 'summer';   // القيظ (يونيو-سبتمبر)
+        if (midDoy >= 266 && midDoy <= 355) return 'autumn';   // الصفري (سبتمبر-ديسمبر)
+        if (midDoy >= 356 || midDoy <= 79)  return 'winter';   // الشتاء (ديسمبر-مارس)
+        return 'spring'; // الصيف/الربيع (مارس-يونيو)
+    }
+
+    // فحص تداخل فترتين زاويتين (a1→a2 و b1→b2 حيث a2 >= a1 دائماً، قد يتجاوز 360)
+    function _anglesOverlap(a1, a2, b1, b2) {
+        const margin = 2; // هامش أمان 2 درجات
+        // تطبيع البداية إلى 0-360، والنهاية نسبة لها
+        const norm = (s, e) => {
+            const ns = ((s % 360) + 360) % 360;
+            let ne = ns + (e - s);
+            return [ns, ne];
+        };
+        const [na1, na2] = norm(a1, a2);
+        const [nb1, nb2] = norm(b1, b2);
+        // نحول كل فترة إلى قائمة أجزاء [0-360]
+        const segments = (s, e) => {
+            if (e <= 360) return [[s, e]];
+            return [[s, 360], [0, e - 360]];
+        };
+        const segsA = segments(na1, na2);
+        const segsB = segments(nb1, nb2);
+        // فحص تقاطع أي جزء من A مع أي جزء من B
+        for (const [as, ae] of segsA) {
+            for (const [bs, be] of segsB) {
+                if (as - margin < be && bs - margin < ae) return true;
+            }
+        }
+        return false;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ⚠️  أنصاف الأقطار وتخطيط الحلقات — مُقفل (LOCKED v4.58)
+    //     لا يجوز تعديل الترتيب أو الأنصاف أو عدد الحلقات
+    //     المرجع: DURUR_CIRCLE_SPEC.md
+    // ══════════════════════════════════════════════════════════════
+    function _renderDururCircle(gMonth, gDay, gYear, lang) {
+        const cx = 540, cy = 540;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const RC = _RING_COLORS;
+        const todayAngle = _dateToAngle(gMonth, gDay);
+
+        let svg = `<svg viewBox="0 0 1080 1080" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
+        // جعل كل العناصر غير التفاعلية شفافة للنقر، فقط .durur-segment تستقبل الأحداث
+        svg += `<style>
+            .durur-circle-svg circle, .durur-circle-svg line, .durur-circle-svg text,
+            .durur-circle-svg foreignObject, .durur-circle-svg foreignObject * { pointer-events: none; }
+            .durur-circle-svg .durur-segment { pointer-events: all; cursor: pointer; }
+        </style>`;
+
+        // ─── خلفيات الحلقات ───
+        const _bgRing = (innerR, outerR, fill) => {
+            const midR = (innerR + outerR) / 2;
+            const sw = outerR - innerR;
+            return `<circle cx="${cx}" cy="${cy}" r="${midR}" fill="none" stroke="${fill}" stroke-width="${sw}"/>`;
+        };
+        // Ring 0: Seasons (center)
+        svg += `<circle cx="${cx}" cy="${cy}" r="80" fill="${isDark ? '#2a2218' : '#e8dcc0'}"/>`;
+        // Ring 1: Zodiac
+        svg += _bgRing(82, 140, isDark ? '#2a2218' : '#e0d0a8');
+        // Ring 2: Stars
+        svg += _bgRing(142, 220, isDark ? RC.starDark : RC.star);
+        // Ring 3: Durr
+        svg += _bgRing(222, 280, isDark ? '#28221a' : '#e8dcc0');
+        // Ring 4: Winds (5 lanes)
+        svg += _bgRing(282, 360, isDark ? RC.windDark : RC.wind);
+        // Ring 5a: Day tick marks (inner)
+        svg += _bgRing(362, 388, isDark ? '#1e1c18' : '#f5f0e8');
+        // Ring 5b: Day numbers (outer)
+        svg += _bgRing(390, 412, isDark ? '#252218' : '#efe8d8');
+        // Ring 6: Months
+        svg += _bgRing(414, 470, isDark ? RC.outerDark : RC.outer);
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 0: الفصول الأربعة — أرباع ثابتة في المركز ───
+        // ═══════════════════════════════════════════════════
+        // أرباع ثابتة (90° لكل فصل) — نص أفقي مع اسمين
+        // الترتيب: أعلى-يمين=الربيع(الصيف)، أعلى-يسار=الصيف(القيظ)، أسفل-يسار=الخريف(الصفري)، أسفل-يمين=الشتاء
+        const miaQuadrants = [
+            { startDeg: 0,   endDeg: 90,  mainLabel: lang === 'en' ? 'Spring' : 'الربيع', subLabel: lang === 'en' ? '(Sayf)' : '(الصيف)', colorIdx: 2, tx: cx + 33, ty: cy - 33 },
+            { startDeg: 270, endDeg: 360, mainLabel: lang === 'en' ? 'Summer' : 'الصيف', subLabel: lang === 'en' ? '(Qayz)' : '(القيظ)', colorIdx: 3, tx: cx - 33, ty: cy - 33 },
+            { startDeg: 180, endDeg: 270, mainLabel: lang === 'en' ? 'Autumn' : 'الخريف', subLabel: lang === 'en' ? '(Safari)' : '(الصفري)', colorIdx: 0, tx: cx - 33, ty: cy + 33 },
+            { startDeg: 90,  endDeg: 180, mainLabel: lang === 'en' ? 'Winter' : 'الشتاء', subLabel: lang === 'en' ? '(Shita)' : '(الشتاء)', colorIdx: 1, tx: cx + 33, ty: cy + 33 },
+        ];
+        miaQuadrants.forEach((q, i) => {
+            const fill = isDark ? RC.miaDark[q.colorIdx] : RC.mia[q.colorIdx];
+            let isCurrent = false;
+            if (q.startDeg === 0) {
+                isCurrent = todayAngle >= 0 && todayAngle < 90;
+            } else {
+                isCurrent = todayAngle >= q.startDeg && todayAngle < q.endDeg;
+            }
+            svg += `<path d="${_arcPath(q.startDeg, q.endDeg, 0, 80, cx, cy)}" fill="${fill}" stroke="#fff" stroke-width="1.5" class="durur-segment" data-ring="mia" data-index="${i}" data-name="${q.mainLabel}"${isCurrent ? ' opacity="1"' : ' opacity="0.8"'}/>`;
+            svg += `<text x="${q.tx}" y="${q.ty - 6}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="16" font-weight="bold" font-family="Calibri, sans-serif" style="text-shadow:0 1px 3px rgba(0,0,0,0.5)">${q.mainLabel}</text>`;
+            svg += `<text x="${q.tx}" y="${q.ty + 12}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="10" font-family="Calibri, sans-serif" style="text-shadow:0 1px 2px rgba(0,0,0,0.4)">${q.subLabel}</text>`;
+        });
+        // خطوط تقسيم الأرباع (عمودي + أفقي)
+        svg += `<line x1="${cx}" y1="${cy - 80}" x2="${cx}" y2="${cy + 80}" stroke="#fff" stroke-width="2"/>`;
+        svg += `<line x1="${cx - 80}" y1="${cy}" x2="${cx + 80}" y2="${cy}" stroke="#fff" stroke-width="2"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="81" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 1: الأبراج (12 برج) — نص طولي ───
+        // ═══════════════════════════════════════════════════
+        const zodiac = H.ZODIAC;
+        zodiac.forEach((z, i) => {
+            // في النظام العكسي: from → زاوية أكبر، to → زاوية أصغر
+            const aFrom = _dateToAngle(z.from[0], z.from[1]);
+            const aTo = _dateToAngleEnd(z.to[0], z.to[1]);
+            let arcStart = aTo, arcEnd = aFrom;
+            if (arcEnd < arcStart) arcEnd += 360;
+            const fill = isDark ? RC.zodiacDark[i] : RC.zodiac[i];
+            const midDeg = (arcStart + (arcEnd - arcStart) / 2) % 360;
+            const isCurrent = (todayAngle >= arcStart && todayAngle < arcEnd) || (arcEnd > 360 && todayAngle < arcEnd - 360);
+            svg += `<path d="${_arcPath(arcStart, arcEnd, 82, 140, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="zodiac" data-index="${i}" data-name="${lang === 'en' ? z.en : z.ar}"${isCurrent ? ' opacity="1"' : ' opacity="0.75"'}/>`;
+            const name = lang === 'en' ? z.en : z.ar;
+            svg += _radialTextVertical(name, midDeg, 86, 136, cx, cy, 17, isCurrent);
+        });
+        svg += `<circle cx="${cx}" cy="${cy}" r="141" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 2: الأنواء/الطوالع (28 نجم) — نص طولي ───
+        // ═══════════════════════════════════════════════════
+        const stars = H.TAWALIE;
+        const currentStar = H.getTale3(gMonth, gDay);
+        stars.forEach((s, i) => {
+            const aFrom = _dateToAngle(s.from[0], s.from[1]);
+            const aTo = _dateToAngleEnd(s.to[0], s.to[1]);
+            let arcStart = aTo, arcEnd = aFrom;
+            if (arcEnd < arcStart) arcEnd += 360;
+            const isCurrent = currentStar && currentStar.nameAr === s.ar;
+            const fill = isCurrent ? (isDark ? RC.starCurrentDark : RC.starCurrent) : (isDark ? RC.starDark : RC.star);
+            svg += `<path d="${_arcPath(arcStart, arcEnd, 142, 220, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="star" data-index="${i}" data-name="${lang === 'en' ? s.en : s.ar}"/>`;
+            const midDeg = (arcStart + (arcEnd - arcStart) / 2) % 360;
+            const rawName = (lang === 'en' ? s.en : s.ar).split('(')[0].trim();
+            // اختصار الأسماء الطويلة مع الحفاظ على تمييز منازل سعد والأسماء المركبة
+            let shortName;
+            if (rawName.length <= 10) {
+                shortName = rawName;
+            } else {
+                const words = rawName.split(' ');
+                shortName = words.length > 2 ? words.slice(0, 2).join(' ') : rawName;
+            }
+            svg += _radialTextVertical(shortName, midDeg, 148, 216, cx, cy, 14, isCurrent);
+        });
+        svg += `<circle cx="${cx}" cy="${cy}" r="221" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 3: الدرور (37 در) — نص طولي + ألوان الفصول ───
+        // ═══════════════════════════════════════════════════
+        const durrLabels = H.DUROR_LABELS[lang];
+        const currentDurr = H.getDurr(gMonth, gDay, gYear);
+        // تحويل يوم سهيل إلى شهر/يوم ميلادي (أغسطس 15 = يوم 1)
+        const _suhailToDate = (sDay) => {
+            const d = new Date(2025, 7, 15); // Aug 15
+            d.setDate(d.getDate() + sDay - 1);
+            return [d.getMonth() + 1, d.getDate()];
+        };
+        let durrDayStart = 0;
+        const durrCounts = [10, 10, 10, 7];
+        for (let mia = 0; mia < 4; mia++) {
+            const count = durrCounts[mia];
+            for (let d = 0; d < count; d++) {
+                const startDay = durrDayStart;
+                const endDay = durrDayStart + (mia < 3 ? 10 : (d < 6 ? 10 : 5));
+                const [sm, sd] = _suhailToDate(startDay + 1);
+                const [em, ed] = _suhailToDate(endDay);
+                const aStart = _dateToAngle(sm, sd);
+                const aEnd = _dateToAngleEnd(em, ed);
+                // القوس من aEnd (الأصغر) إلى aStart (الأكبر) — عكسي
+                let arcS = aEnd, arcE = aStart;
+                if (arcE < arcS) arcE += 360;
+                const aliasKey = `${mia}-${d}`;
+                const label = (H.DUROR_ALIASES && H.DUROR_ALIASES[lang] && H.DUROR_ALIASES[lang][aliasKey]) || durrLabels[d] || `${(d + 1) * 10}`;
+                const isDurrCurrent = currentDurr && currentDurr.durr === durrLabels[d] && currentDurr.mia === H.DUROR_MIA[lang][mia];
+                const fill = isDurrCurrent
+                    ? (isDark ? RC.durrCurrentDark : RC.durrCurrent)
+                    : (isDark ? RC.durrMiaDark[mia][d] : RC.durrMia[mia][d]);
+                svg += `<path d="${_arcPath(arcS, arcE, 222, 280, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="durr" data-index="${mia * 10 + d}" data-name="${label}" data-mia="${mia}"/>`;
+                const midDeg = (arcS + (arcE - arcS) / 2) % 360;
+                svg += _radialTextVertical(label, midDeg, 226, 276, cx, cy, 12, isDurrCurrent);
+                durrDayStart = endDay;
+            }
+        }
+        svg += `<circle cx="${cx}" cy="${cy}" r="281" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 4: الرياح الموسمية (5 حلقات فرعية) ───
+        // ═══════════════════════════════════════════════════
+        const winds = H.ANWA_ENRICHMENT.seasonalWinds;
+        const currentWinds = H.getSeasonalWinds(gMonth, gDay);
+        const currentWindNames = currentWinds.map(w => w.name);
+        const laneAssignment = _assignWindLanes(winds);
+        const NUM_WIND_LANES = 5;
+        const windInnerR = 282, windOuterR = 360;
+        const laneW = (windOuterR - windInnerR) / NUM_WIND_LANES;
+        const laneRadii = [];
+        for (let l = 0; l < NUM_WIND_LANES; l++) {
+            laneRadii.push({ inner: windInnerR + l * laneW, outer: windInnerR + (l + 1) * laneW });
+        }
+
+        // خلفية حلقة الرياح
+        svg += `<circle cx="${cx}" cy="${cy}" r="${(windInnerR + windOuterR) / 2}" fill="none" stroke="${isDark ? '#1e2530' : '#f0ebe0'}" stroke-width="${windOuterR - windInnerR}"/>`;
+
+        // ألوان الرياح حسب الفصل
+        const windSeasonColors = {
+            summer:  { light: '#e8b4a0', dark: '#7a4a38' },  // القيظ — أحمر/برتقالي فاتح
+            autumn:  { light: '#d4b896', dark: '#6a5030' },  // الصفري — بني/ذهبي
+            winter:  { light: '#a0c4dc', dark: '#3a5a7a' },  // الشتاء — أزرق فاتح
+            spring:  { light: '#a8d4a8', dark: '#3a6840' },  // الصيف/الربيع — أخضر فاتح
+        };
+        const windSeasonCurrentColors = {
+            summer:  { light: '#c75050', dark: '#904040' },
+            autumn:  { light: '#b08040', dark: '#6a5030' },
+            winter:  { light: '#5a8fad', dark: '#3a5a7a' },
+            spring:  { light: '#508050', dark: '#3a6840' },
+        };
+
+        // رسم كل ريح كقطاع مستقل — مطابق للصورة المرجعية
+        winds.forEach((w, i) => {
+            const aFrom = _dateToAngle(w.from[0], w.from[1]);
+            const aTo = _dateToAngleEnd(w.to[0], w.to[1]);
+            let a1 = aTo, a2 = aFrom;
+            if (a2 < a1) a2 += 360;
+            const lane = laneAssignment[i];
+            const lr = laneRadii[lane];
+            const name = lang === 'en' ? w.en : w.ar;
+            const isCurrent = currentWindNames.includes(w.ar);
+            // لون الريح حسب الفصل
+            const season = _windSeason(w);
+            const sColors = isCurrent ? windSeasonCurrentColors[season] : windSeasonColors[season];
+            const fill = isDark ? sColors.dark : sColors.light;
+            // القطاع
+            svg += `<path d="${_arcPath(a1, a2, lr.inner, lr.outer, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="wind" data-index="${i}" data-name="${name}" data-lane="${lane}" opacity="${isCurrent ? 1 : 0.85}"/>`;
+            // خطوط شعاعية عند بداية ونهاية كل ريح
+            const toRad = d => (d - 90) * Math.PI / 180;
+            const radStart = toRad(a1), radEnd = toRad(a2 % 360);
+            svg += `<line x1="${cx + lr.inner * Math.cos(radStart)}" y1="${cy + lr.inner * Math.sin(radStart)}" x2="${cx + lr.outer * Math.cos(radStart)}" y2="${cy + lr.outer * Math.sin(radStart)}" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            svg += `<line x1="${cx + lr.inner * Math.cos(radEnd)}" y1="${cy + lr.inner * Math.sin(radEnd)}" x2="${cx + lr.outer * Math.cos(radEnd)}" y2="${cy + lr.outer * Math.sin(radEnd)}" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            // نص الريح — foreignObject مماسي للقوس (حروف عربية متصلة)
+            const span = a2 - a1;
+            if (span >= 6) {
+                const midR = (lr.inner + lr.outer) / 2;
+                const midDeg = (a1 + span / 2) % 360;
+                const mRad = (midDeg - 90) * Math.PI / 180;
+                const mx = cx + midR * Math.cos(mRad);
+                const my = cy + midR * Math.sin(mRad);
+                const arcLen = (span / 360) * 2 * Math.PI * midR;
+                const laneH = lr.outer - lr.inner;
+                // الدوران المماسي
+                let rot = midDeg;
+                if (midDeg > 90 && midDeg < 270) rot += 180;
+                const fontSize = span >= 40 ? 13 : span >= 25 ? 11 : span >= 12 ? 9 : 8;
+                const shortName = name.length > 16 ? name.split(' ').slice(0, 2).join(' ') : name;
+                const foW = Math.max(arcLen * 0.85, 50);
+                const foH = laneH;
+                svg += `<foreignObject x="${mx - foW / 2}" y="${my - foH / 2}" width="${foW}" height="${foH}" transform="rotate(${rot},${mx},${my})">` +
+                       `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:${fontSize}px;${isCurrent ? 'font-weight:700;' : ''}color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:visible;line-height:1;pointer-events:none;">${shortName}</div>` +
+                       `</foreignObject>`;
+            }
+        });
+        svg += `<circle cx="${cx}" cy="${cy}" r="361" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 4b: الضربات البحرية ───
+        // ═══════════════════════════════════════════════════
+        const strikeInner = 362, strikeOuter = 374;
+        const seaStrikes = H.ANWA_ENRICHMENT.seaStrikes;
+
+        // خلفية حلقة الضربات
+        svg += `<circle cx="${cx}" cy="${cy}" r="${(strikeInner + strikeOuter) / 2}" fill="none" stroke="${isDark ? '#2a1818' : '#f5ebe0'}" stroke-width="${strikeOuter - strikeInner}"/>`;
+
+        seaStrikes.forEach((s, i) => {
+            const aFrom = _dateToAngle(s.from[0], s.from[1]);
+            const aTo = _dateToAngleEnd(s.to[0], s.to[1]);
+            let a1 = aTo, a2 = aFrom;
+            if (a2 < a1) a2 += 360;
+
+            const strikeFill = isDark ? '#6a2020' : '#e0a0a0';
+            svg += `<path d="${_arcPath(a1, a2, strikeInner, strikeOuter, cx, cy)}" fill="${strikeFill}" fill-opacity="0.8" stroke="${_darkenColor(strikeFill)}" stroke-width="0.5" stroke-opacity="0.8" class="durur-segment" data-ring="sea-strike" data-index="${i}" data-name="${lang === 'en' ? s.en : s.ar}" cursor="pointer"/>`;
+
+            // اسم الضربة
+            const span = a2 - a1;
+            if (span >= 5) {
+                const midDeg = (a1 + span / 2) % 360;
+                const midR = (strikeInner + strikeOuter) / 2;
+                svg += _radialText(lang === 'en' ? s.en : s.ar, midDeg, midR, cx, cy, 8, false);
+            }
+        });
+        svg += `<circle cx="${cx}" cy="${cy}" r="${strikeOuter + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 5: المواسم الكبرى (حلقتان لمعالجة التداخل) ───
+        // ═══════════════════════════════════════════════════
+        const seasons = H.SEASONS;
+        // Lane 0 (كامل العرض): المواسم العادية
+        // Lane 1 (خارجية): كنة الثريا (تتداخل مع الذراعين)
+        // Lane 2 (داخلية): الذراعين (أسفل الكنة)
+        // ⚠️ مُقفل — لا يجوز تعديل ترتيب الحارات — DURUR_CIRCLE_SPEC.md
+        const SEASON_LANES = [0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0];
+        const seasonLane0Inner = 376, seasonLane0Outer = 398;
+        const seasonLane1Inner = 398, seasonLane1Outer = 420;
+        const seasonOutermost = 420;
+
+        // الأسماء المختصرة
+        const _shortSeasonName = (ar) => {
+            const map = {
+                'مربعانية الشتاء': 'المربعانية',
+                'برد البطين (الشبط)': 'الشبط',
+                'كنة الثريا': 'الكنة',
+                'الجوزاء الأولى (الهقعة)': 'الجوزاء ١',
+                'الجوزاء الثانية (الهنعة)': 'الجوزاء ٢',
+            };
+            return map[ar] || ar;
+        };
+
+        // تحديد لون الموسم بناءً على فترته
+        const _seasonColor = (s, current) => {
+            const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+            const doy1 = DOY[s.from[0] - 1] + s.from[1];
+            let doy2 = DOY[s.to[0] - 1] + s.to[1];
+            if (doy2 < doy1) doy2 += 365;
+            const midDoy = ((doy1 + doy2) / 2) % 365;
+
+            let season;
+            if (midDoy >= 172 && midDoy <= 265) season = 'Summer';
+            else if (midDoy >= 266 && midDoy <= 355) season = 'Autumn';
+            else if (midDoy >= 356 || midDoy <= 79) season = 'Winter';
+            else season = 'Spring';
+
+            if (current) return isDark ? RC['seasonCurrentDark'] : RC['seasonCurrent'];
+            return isDark ? RC['season' + season + 'Dark'] : RC['season' + season];
+        };
+
+        // هل الموسم الحالي؟
+        const _isSeasonCurrent = (s) => {
+            const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+            const today = DOY[gMonth - 1] + gDay;
+            const start = DOY[s.from[0] - 1] + s.from[1];
+            let end = DOY[s.to[0] - 1] + s.to[1];
+            if (end >= start) return today >= start && today <= end;
+            return today >= start || today <= end;
+        };
+
+        // خلفية حلقة المواسم (حلقة واحدة كاملة)
+        svg += `<circle cx="${cx}" cy="${cy}" r="${(seasonLane0Inner + seasonOutermost) / 2}" fill="none" stroke="${isDark ? '#2a2418' : '#f5edd5'}" stroke-width="${seasonOutermost - seasonLane0Inner}"/>`;
+
+        // المواسم العادية (Lane 0) تمتد على كامل عرض الحلقة
+        // كنة الثريا (Lane 1) تُرسم فوقها في النصف الخارجي فقط
+        seasons.forEach((s, i) => {
+            const aFrom = _dateToAngle(s.from[0], s.from[1]);
+            const aTo = _dateToAngleEnd(s.to[0], s.to[1]);
+            let arcStart = aTo, arcEnd = aFrom;
+            if (arcEnd < arcStart) arcEnd += 360;
+
+            const lane = SEASON_LANES[i];
+            // Lane 0: كامل العرض (376→420) — Lane 1: النصف الخارجي (398→420) — Lane 2: النصف الداخلي (376→398)
+            const innerR = lane === 1 ? seasonLane1Inner : seasonLane0Inner;
+            const outerR = lane === 2 ? seasonLane0Outer : seasonOutermost;
+
+            const isCurrent = _isSeasonCurrent(s);
+            const color = _seasonColor(s, isCurrent);
+
+            svg += `<path d="${_arcPath(arcStart, arcEnd, innerR, outerR, cx, cy)}" fill="${color}" fill-opacity="${isCurrent ? 1 : 0.85}" stroke="${_darkenColor(color)}" stroke-width="0.5" stroke-opacity="${isCurrent ? 1 : 0.85}" class="durur-segment" data-ring="season" data-index="${i}" data-name="${lang === 'en' ? s.en : s.ar}" cursor="pointer"/>`;
+
+            // النص
+            const shortName = lang === 'en' ? s.en.split('(')[0].trim().split(' ').slice(0, 2).join(' ') : _shortSeasonName(s.ar);
+            const span = arcEnd - arcStart;
+            if (span >= 8) {
+                const midDeg = (arcStart + span / 2) % 360;
+                const midR = (innerR + outerR) / 2;
+                const fontSize = span >= 30 ? 13 : span >= 18 ? 11 : span >= 12 ? 9 : 8;
+                svg += _radialText(shortName, midDeg, midR, cx, cy, fontSize, isCurrent);
+            }
+        });
+        svg += `<circle cx="${cx}" cy="${cy}" r="${seasonOutermost + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 6: علامات الأيام ───
+        // ═══════════════════════════════════════════════════
+        const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const tickColor = isDark ? '#a09080' : '#4a3520';
+        const tickColorLight = isDark ? '#807060' : '#6a5540';
+        // ─── Ring 6a: الخطوط (أشرطة الأيام) ───
+        for (let m = 1; m <= 12; m++) {
+            for (let d = 1; d <= monthDays[m - 1]; d++) {
+                const angle = _dateToAngle(m, d);
+                const rad = (angle - 90) * Math.PI / 180;
+                const isFive = d % 5 === 0;
+                if (d === 1) {
+                    svg += `<line x1="${cx + 422 * Math.cos(rad)}" y1="${cy + 422 * Math.sin(rad)}" x2="${cx + 447 * Math.cos(rad)}" y2="${cy + 447 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="2"/>`;
+                } else if (isFive) {
+                    svg += `<line x1="${cx + 424 * Math.cos(rad)}" y1="${cy + 424 * Math.sin(rad)}" x2="${cx + 446 * Math.cos(rad)}" y2="${cy + 446 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="1.2"/>`;
+                } else {
+                    svg += `<line x1="${cx + 430 * Math.cos(rad)}" y1="${cy + 430 * Math.sin(rad)}" x2="${cx + 444 * Math.cos(rad)}" y2="${cy + 444 * Math.sin(rad)}" stroke="${tickColorLight}" stroke-width="0.6" opacity="0.7"/>`;
+                }
+            }
+        }
+        svg += `<circle cx="${cx}" cy="${cy}" r="449" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+
+        // ─── Ring 6b: الأرقام الخمسية ───
+        for (let m = 1; m <= 12; m++) {
+            for (let d = 1; d <= monthDays[m - 1]; d++) {
+                if (d % 5 === 0) {
+                    const angle = _dateToAngle(m, d);
+                    svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, 460, cx, cy, 11, false);
+                }
+            }
+        }
+        svg += `<circle cx="${cx}" cy="${cy}" r="471" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── Ring 7: الأشهر الميلادية ───
+        // ═══════════════════════════════════════════════════
+        const gMonthNames = lang === 'en' ? H.GREGORIAN_MONTH_NAMES_EN : H.GREGORIAN_MONTH_NAMES;
+        const monthLineColor = isDark ? '#a09080' : '#4a3520';
+        for (let m = 0; m < 12; m++) {
+            const aFirst = _dateToAngle(m + 1, 1);
+            const aLast = _dateToAngle(m + 1, monthDays[m]);
+            let arcStart = aLast, arcEnd = aFirst;
+            if (arcEnd < arcStart) arcEnd += 360;
+            // خط شعاعي عند بداية كل شهر (يمتد عبر كل الحلقات الخارجية)
+            const rad1 = (aFirst - 90) * Math.PI / 180;
+            svg += `<line x1="${cx + 422 * Math.cos(rad1)}" y1="${cy + 422 * Math.sin(rad1)}" x2="${cx + 519 * Math.cos(rad1)}" y2="${cy + 519 * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5"/>`;
+            // اسم الشهر في منتصف القوس
+            const midDeg = (arcStart + (arcEnd - arcStart) / 2) % 360;
+            svg += _radialText(gMonthNames[m], midDeg, 497, cx, cy, 22, false);
+        }
+        svg += `<circle cx="${cx}" cy="${cy}" r="520" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── الإطار الذهبي الخارجي المزخرف ───
+        // ═══════════════════════════════════════════════════
+        const goldInner = 522;
+        const goldOuter = 530;
+        const goldMid = (goldInner + goldOuter) / 2;
+        const goldColor1 = isDark ? '#8a7030' : '#c8a040';
+        const goldColor2 = isDark ? '#a08838' : '#d4b050';
+        const goldColor3 = isDark ? '#6a5828' : '#b89838';
+
+        // الحلقة الذهبية الرئيسية
+        svg += `<circle cx="${cx}" cy="${cy}" r="${goldMid}" fill="none" stroke="${goldColor1}" stroke-width="${goldOuter - goldInner}" opacity="0.6"/>`;
+        // خط داخلي رفيع
+        svg += `<circle cx="${cx}" cy="${cy}" r="${goldInner}" fill="none" stroke="${goldColor2}" stroke-width="1.5" opacity="0.8"/>`;
+        // خط خارجي رفيع
+        svg += `<circle cx="${cx}" cy="${cy}" r="${goldOuter}" fill="none" stroke="${goldColor2}" stroke-width="1.5" opacity="0.8"/>`;
+
+        // زخارف نقطية على الإطار الذهبي (كل 5 درجات)
+        for (let deg = 0; deg < 360; deg += 5) {
+            const radG = (deg - 90) * Math.PI / 180;
+            const gx = cx + goldMid * Math.cos(radG);
+            const gy = cy + goldMid * Math.sin(radG);
+            const dotR = deg % 15 === 0 ? 2 : 1;
+            svg += `<circle cx="${gx}" cy="${gy}" r="${dotR}" fill="${goldColor2}" opacity="${deg % 15 === 0 ? 0.9 : 0.5}"/>`;
+        }
+
+        // زخارف دائرية صغيرة كل 30 درجة (تمثل الأشهر)
+        for (let deg = 0; deg < 360; deg += 30) {
+            const radH = (deg - 90) * Math.PI / 180;
+            const hx = cx + goldMid * Math.cos(radH);
+            const hy = cy + goldMid * Math.sin(radH);
+            svg += `<circle cx="${hx}" cy="${hy}" r="3.5" fill="none" stroke="${goldColor3}" stroke-width="1.2" opacity="0.7"/>`;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // ─── مؤشر اليوم (خط أحمر شعاعي) ───
+        // ═══════════════════════════════════════════════════
+        const needleRad = (todayAngle - 90) * Math.PI / 180;
+        const nx = cx + (goldOuter + 3) * Math.cos(needleRad);
+        const ny = cy + (goldOuter + 3) * Math.sin(needleRad);
+        svg += `<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#e74c3c" stroke-width="2.5" opacity="0.7" stroke-dasharray="6,4" class="today-needle"/>`;
+        svg += `<circle cx="${nx}" cy="${ny}" r="7" fill="#e74c3c" opacity="0.9"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="5" fill="#e74c3c" opacity="0.9"/>`;
+
+        svg += `</svg>`;
+
+        // ─── Info panel + أقسام إضافية ───
+        let html = `<div class="durur-circle-container">${svg}</div>`;
+        html += `<div class="durur-info-panel" id="durur-info-panel" style="display:none"></div>`;
+
+        // ─── الأسماك / المحاصيل / الحياة الفطرية (الموسمية فقط) ───
+        const fishActive = H.getSeasonalFish(gMonth, gDay).filter(f => f.inSeason);
+        const cropsActive = H.getSeasonalCrops(gMonth, gDay).filter(c => c.inSeason);
+        const wildlifeActive = H.getSeasonalWildlife(gMonth, gDay).filter(w => w.inSeason);
+
+        if (fishActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllFish')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            fishActive.forEach(f => {
+                html += `<span class="durur-list-tag in-season">${f.name}</span>`;
+            });
+            html += `</div></div>`;
+        }
+
+        if (cropsActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllCrops')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            cropsActive.forEach(c => {
+                html += `<span class="durur-list-tag in-season">${c.name}</span>`;
+            });
+            html += `</div></div>`;
+        }
+
+        if (wildlifeActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllWildlife')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            wildlifeActive.forEach(w => {
+                html += `<span class="durur-list-tag in-season">${w.name}</span>`;
+            });
+            html += `</div></div>`;
+        }
+
+        html += `<div class="durur-source">${H.t('anwaSource')}</div>`;
+
+        // ─── بطاقات الإثراء من كتاب الدرور والطوالع ───
+        html += `<div class="durur-enrich-section">`;
+
+        // 1. وصف الدر الحالي
+        const durrDetails = H.getDurrDetails(gMonth, gDay, gYear);
+        if (durrDetails && durrDetails.desc_ar) {
+            const durrDesc = lang === 'en' ? durrDetails.desc_en : durrDetails.desc_ar;
+            html += `<div class="dv-enrich-card dv-enrich-durr">`;
+            html += `<div class="dv-enrich-icon">📜</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${durrDetails.durr} — ${durrDetails.mia}</div>`;
+            html += `<div class="dv-enrich-desc">${durrDesc}</div>`;
+            html += `</div></div>`;
+        }
+
+        // 2. المواسم الخاصة النشطة
+        const activeSeasons = H.getActiveSeasons(gMonth, gDay);
+        if (activeSeasons.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-seasons">`;
+            html += `<div class="dv-enrich-icon">🗓️</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Active Seasons' : 'المواسم الحالية'}</div>`;
+            activeSeasons.forEach(s => {
+                const sName = lang === 'en' ? s.en : s.ar;
+                const sDesc = lang === 'en' ? s.desc_en : s.desc_ar;
+                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> <strong>${sName}</strong>: ${sDesc}</div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // 3. أمثال اليوم
+        const proverbs = H.getSeasonalProverbs(gMonth, gDay, gYear);
+        if (proverbs.length > 0) {
+            const randomProverb = proverbs[Math.floor(Math.random() * proverbs.length)];
+            html += `<div class="dv-enrich-card dv-enrich-proverb">`;
+            html += `<div class="dv-enrich-icon">💬</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Proverb of the Day' : 'مثل اليوم'}</div>`;
+            html += `<div class="dv-enrich-quote">"${lang === 'en' ? randomProverb.en : randomProverb.ar}"</div>`;
+            if (lang === 'ar' && randomProverb.en) html += `<div class="dv-enrich-quote-sub">${randomProverb.en}</div>`;
+            html += `</div></div>`;
+        }
+
+        // 4. أحداث فلكية قريبة
+        const upcomingAstro = H.getUpcomingAstroEvents(gMonth, gDay);
+        if (upcomingAstro.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-astro">`;
+            html += `<div class="dv-enrich-icon">🔭</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Upcoming Astronomical Events' : 'أحداث فلكية قريبة'}</div>`;
+            upcomingAstro.forEach(ev => {
+                const evName = lang === 'en' ? ev.en : ev.ar;
+                const evDesc = lang === 'en' ? ev.desc_en : ev.desc_ar;
+                const evDate = lang === 'en' ? `${ev.date[1]}/${ev.date[0]}` : H.toArabicNumerals(`${ev.date[1]}/${ev.date[0]}`);
+                html += `<div class="dv-enrich-astro-item">${ev.icon} <strong>${evName}</strong> (${evDate})<br><span class="dv-enrich-astro-desc">${evDesc}</span></div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // 5. هجرة الطيور الحالية
+        const birdsMigration = H.getActiveBirdMigration(gMonth, gDay);
+        if (birdsMigration.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-birds">`;
+            html += `<div class="dv-enrich-icon">🦅</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Bird Migration' : 'هجرة الطيور'}</div>`;
+            birdsMigration.forEach(b => {
+                const bName = lang === 'en' ? b.en : b.ar;
+                const bDesc = lang === 'en' ? b.desc_en : b.desc_ar;
+                const dirIcon = b.direction === 'south' ? '⬇️' : b.direction === 'north' ? '⬆️' : '📍';
+                html += `<div class="dv-enrich-bird-item">${dirIcon} <strong>${bName}</strong>: ${bDesc}</div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // 6. اقتران الثريا القادم
+        const nextConj = H.getNextThurayaConjunction(gMonth, gDay);
+        if (nextConj) {
+            const cName = lang === 'en' ? nextConj.en : nextConj.ar;
+            const cNick = lang === 'en' ? nextConj.nickname_en : nextConj.nickname_ar;
+            const cDesc = lang === 'en' ? nextConj.desc_en : nextConj.desc_ar;
+            const cDate = _fmtDateRange(nextConj.from, nextConj.to, lang);
+            html += `<div class="dv-enrich-card dv-enrich-thuraya">`;
+            html += `<div class="dv-enrich-icon">✨</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Next Pleiades Conjunction' : 'اقتران الثريا القادم'}</div>`;
+            html += `<div class="dv-enrich-desc"><strong>${cName}</strong> — ${cNick}<br>${cDate}<br>${cDesc}</div>`;
+            html += `</div></div>`;
+        }
+
+        html += `</div>`; // close durur-enrich-section
+
+        return html;
+    }
+
+    function _setupDururCircleEvents(container) {
+        const infoPanel = container.querySelector('#durur-info-panel');
+        if (!infoPanel) return;
+        const lang = H.getLang();
+
+        container.querySelectorAll('.durur-segment').forEach(seg => {
+            seg.addEventListener('click', (e) => {
+                e.stopPropagation();
+                container.querySelectorAll('.durur-segment-active').forEach(el => el.classList.remove('durur-segment-active'));
+                seg.classList.add('durur-segment-active');
+
+                const ring = seg.dataset.ring;
+                const idx = parseInt(seg.dataset.index);
+                const name = seg.dataset.name;
+                let detail = '';
+
+                if (ring === 'star') {
+                    const star = H.TAWALIE[idx];
+                    if (star) {
+                        const weather = lang === 'en' ? star.weatherEn : star.weatherAr;
+                        detail = `<strong>${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(star.from, star.to, lang)}</span><br><span class="durur-info-desc">${weather}</span>`;
+                    }
+                } else if (ring === 'zodiac') {
+                    const z = H.ZODIAC[idx];
+                    if (z) {
+                        detail = `<strong>${z.symbol} ${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(z.from, z.to, lang)}</span>`;
+                        const climate = H.CLIMATE_DATA[idx];
+                        if (climate) {
+                            const tempLabel = lang === 'en' ? 'Temp' : 'الحرارة';
+                            const humLabel = lang === 'en' ? 'Humidity' : 'الرطوبة';
+                            const rainLabel = lang === 'en' ? 'Rain' : 'أمطار';
+                            const windLabel = lang === 'en' ? 'Wind' : 'رياح';
+                            detail += `<br><span class="durur-info-desc" style="margin-top:6px;display:block;font-size:12px;line-height:1.8">`;
+                            detail += `🌡️ ${tempLabel}: ${climate.minTemp}° — ${climate.maxTemp}°`;
+                            detail += `<br>💧 ${humLabel}: ${climate.humidity}%`;
+                            detail += climate.rain > 0 ? `<br>🌧️ ${rainLabel}: ${climate.rain}mm` : '';
+                            detail += `<br>💨 ${windLabel}: ${climate.maxWind} km/h`;
+                            detail += `</span>`;
+                        }
+                    }
+                } else if (ring === 'durr') {
+                    const miaIdx = parseInt(seg.dataset.mia || '0');
+                    const miaName = H.DUROR_MIA[lang][miaIdx];
+                    const durrKey = miaIdx + '-' + idx;
+                    const durrInfo = H.DURR_DETAILS[durrKey];
+                    detail = `<strong>${name}</strong><br><span class="durur-info-desc">${miaName}</span>`;
+                    if (durrInfo) {
+                        const desc = lang === 'en' ? durrInfo.en : durrInfo.ar;
+                        const dateStr = durrInfo.dates ? _fmtDateRange([durrInfo.dates[0], durrInfo.dates[1]], [durrInfo.dates[2], durrInfo.dates[3]], lang) : '';
+                        detail += dateStr ? `<br><span class="durur-info-dates">${dateStr}</span>` : '';
+                        detail += `<br><span class="durur-info-desc" style="margin-top:6px;display:block;font-size:13px;line-height:1.6;opacity:0.9">${desc}</span>`;
+                    }
+                } else if (ring === 'wind') {
+                    const w = H.ANWA_ENRICHMENT.seasonalWinds[idx];
+                    if (w) {
+                        const desc = lang === 'en' ? w.desc_en : w.desc_ar;
+                        detail = `<strong>${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(w.from, w.to, lang)}</span><br><span class="durur-info-desc">${desc}</span>`;
+                    }
+                } else if (ring === 'season') {
+                    const s = H.SEASONS[idx];
+                    if (s) {
+                        const sName = lang === 'en' ? s.en : s.ar;
+                        detail = `<strong>${sName}</strong><br><span class="durur-info-dates">${_fmtDateRange(s.from, s.to, lang)}</span>`;
+                    }
+                } else if (ring === 'sea-strike') {
+                    const ss = H.ANWA_ENRICHMENT.seaStrikes[idx];
+                    if (ss) {
+                        const ssName = lang === 'en' ? ss.en : ss.ar;
+                        detail = `<strong>${ssName}</strong><br><span class="durur-info-dates">${_fmtDateRange(ss.from, ss.to, lang)}</span><br><span class="durur-info-desc" style="margin-top:4px;display:block;font-size:13px;line-height:1.5;opacity:0.9;color:#c06060">${lang === 'en' ? 'Dangerous sea storm period — fishing and sailing not recommended' : 'فترة عواصف بحرية خطرة — لا يُنصح بالصيد أو الإبحار'}</span>`;
+                    }
+                } else if (ring === 'month') {
+                    const gMonthNames = lang === 'en' ? H.GREGORIAN_MONTH_NAMES_EN : H.GREGORIAN_MONTH_NAMES;
+                    detail = `<strong>${gMonthNames[idx]}</strong>`;
+                } else if (ring === 'mia') {
+                    const miaName = H.DUROR_MIA[lang][idx];
+                    detail = `<strong>${name}</strong><br><span class="durur-info-desc">${miaName}</span>`;
+                } else {
+                    detail = `<strong>${name}</strong>`;
+                }
+
+                if (detail) {
+                    infoPanel.innerHTML = detail;
+                    infoPanel.style.display = '';
+                }
+            });
+        });
+
+        // إخفاء اللوحة عند النقر في مكان فارغ
+        container.addEventListener('click', (e) => {
+            if (!e.target.closest('.durur-segment') && !e.target.closest('#durur-info-panel')) {
+                container.querySelectorAll('.durur-segment-active').forEach(el => el.classList.remove('durur-segment-active'));
+                infoPanel.style.display = 'none';
+            }
+        });
+    }
+
+    // ─── Palette System ───
+    const PALETTES = [
+        { id: '',          color: '#8b5a2b', nameKey: 'palettePapyrus' },
+        { id: 'emerald',   color: '#2d7a4f', nameKey: 'paletteEmerald' },
+        { id: 'ocean',     color: '#2a6080', nameKey: 'paletteOcean' },
+        { id: 'amethyst',  color: '#6b3a8a', nameKey: 'paletteAmethyst' },
+        { id: 'gold',      color: '#a07818', nameKey: 'paletteGold' },
+        { id: 'ruby',      color: '#8a3a3a', nameKey: 'paletteRuby' },
+        { id: 'snow',      color: '#e8e8e8', nameKey: 'paletteSnow' },
+        { id: 'noir',      color: '#222222', nameKey: 'paletteNoir' },
+    ];
+
+    function applyPalette(id) {
+        if (id) {
+            document.documentElement.setAttribute('data-palette', id);
+        } else {
+            document.documentElement.removeAttribute('data-palette');
+        }
+        try { localStorage.setItem('hijri-palette', id || ''); } catch (e) {}
+        // Update active swatch
+        document.querySelectorAll('.palette-swatch').forEach(s => {
+            s.classList.toggle('active', (s.dataset.palette || '') === (id || ''));
+        });
+    }
+
+    function setupPalette() {
+        // Restore saved palette
+        let saved = '';
+        try { saved = localStorage.getItem('hijri-palette') || ''; } catch (e) {}
+        applyPalette(saved);
+
+        const btn = document.getElementById('dv-palette-btn');
+        const popup = document.getElementById('palette-popup');
+        const overlay = document.getElementById('palette-overlay');
+        const container = document.getElementById('palette-swatches');
+        const title = document.getElementById('palette-popup-title');
+        if (!btn || !popup || !container) return;
+
+        // Update title with i18n
+        if (title) title.textContent = H.t('palette');
+
+        // Build swatches
+        container.innerHTML = '';
+        PALETTES.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'palette-item';
+            const swatch = document.createElement('div');
+            swatch.className = 'palette-swatch' + ((saved || '') === (p.id || '') ? ' active' : '');
+            swatch.style.background = p.color;
+            swatch.dataset.palette = p.id;
+            swatch.addEventListener('click', () => {
+                applyPalette(p.id);
+                setTimeout(() => {
+                    popup.classList.remove('open');
+                    if (overlay) overlay.classList.remove('open');
+                }, 200);
+            });
+            const label = document.createElement('div');
+            label.className = 'palette-swatch-label';
+            label.textContent = H.t(p.nameKey);
+            item.appendChild(swatch);
+            item.appendChild(label);
+            container.appendChild(item);
+        });
+
+        // Toggle popup
+        btn.addEventListener('click', () => {
+            const isOpen = popup.classList.contains('open');
+            if (isOpen) {
+                popup.classList.remove('open');
+                if (overlay) overlay.classList.remove('open');
+            } else {
+                // refresh labels in case language changed
+                if (title) title.textContent = H.t('palette');
+                container.querySelectorAll('.palette-item').forEach((item, i) => {
+                    const lbl = item.querySelector('.palette-swatch-label');
+                    if (lbl && PALETTES[i]) lbl.textContent = H.t(PALETTES[i].nameKey);
+                });
+                popup.classList.add('open');
+                if (overlay) overlay.classList.add('open');
+            }
+        });
+
+        // Close on overlay click
+        if (overlay) overlay.addEventListener('click', () => {
+            popup.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+    }
+
+    function setupDayView() {
+        const backBtn = document.getElementById('dv-back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', showCalendarView);
+        }
+        // Anwa detail back button
+        const anwaBackBtn = document.getElementById('anwa-detail-back');
+        if (anwaBackBtn) anwaBackBtn.addEventListener('click', closeAnwaDetail);
+        // Today button
+        const todayBtn = document.getElementById('dv-today-btn');
+        if (todayBtn) todayBtn.addEventListener('click', () => showDayView(null));
+        // Calendar view: back to day view
+        const cvBackBtn = document.getElementById('cv-back-btn');
+        if (cvBackBtn) cvBackBtn.addEventListener('click', () => showDayView(null));
+        // Navigation arrows
+        const nextBtn = document.getElementById('dv-nav-next');
+        const prevBtn = document.getElementById('dv-nav-prev');
+        if (nextBtn) nextBtn.addEventListener('click', () => navigateDayView(1));
+        if (prevBtn) prevBtn.addEventListener('click', () => navigateDayView(-1));
+
+        // Language toggle buttons
+        const langAr = document.getElementById('dv-lang-ar');
+        const langEn = document.getElementById('dv-lang-en');
+        if (langAr) langAr.addEventListener('click', () => {
+            if (H.getLang() === 'ar') return;
+            H.setLang('ar');
+            H._saveLang();
+            applyLabels();
+            renderDayView(_selectedDate || null);
+        });
+        if (langEn) langEn.addEventListener('click', () => {
+            if (H.getLang() === 'en') return;
+            H.setLang('en');
+            H._saveLang();
+            applyLabels();
+            renderDayView(_selectedDate || null);
+        });
+
+        // Theme toggle button in day view
+        const dvThemeBtn = document.getElementById('dv-theme-toggle');
+        if (dvThemeBtn) {
+            // Sync icon with current theme
+            const curTheme = document.documentElement.getAttribute('data-theme');
+            dvThemeBtn.textContent = curTheme === 'dark' ? '☀️' : '🌙';
+            dvThemeBtn.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                dvThemeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+                // Sync the calendar view theme button
+                const cvBtn = document.getElementById('theme-toggle');
+                if (cvBtn) cvBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+                try { localStorage.setItem('hijri-theme', next); } catch (e) {}
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.content = next === 'dark' ? '#064e3b' : '#14553f';
+            });
+        }
+
+        // Palette selector
+        setupPalette();
+
+        // Swipe support for day navigation
+        let touchStartX = 0;
+        const dayView = document.getElementById('day-view');
+        if (dayView) {
+            dayView.addEventListener('touchstart', e => {
+                touchStartX = e.touches[0].clientX;
+            }, { passive: true });
+            dayView.addEventListener('touchend', e => {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                if (Math.abs(dx) > 60) {
+                    // RTL: swipe left = next day, swipe right = prev day
+                    const isRTL = H.getLang() === 'ar';
+                    if (dx < 0) navigateDayView(isRTL ? 1 : -1);
+                    else navigateDayView(isRTL ? -1 : 1);
+                }
+            }, { passive: true });
+        }
     }
 
     return { init };
