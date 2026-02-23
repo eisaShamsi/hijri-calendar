@@ -5293,10 +5293,30 @@ tr:nth-child(even) { background: #fafafa; }
             return ((angleDeg % 360) + 360) % 360;
         }
 
+        // ── صوت نقرة ميكانيكية (cog tick) ──
+        let _tickCtx = null;
+        let _prevSnapDay = null;
+        function _playTick() {
+            try {
+                if (!_tickCtx) _tickCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = _tickCtx.createOscillator();
+                const gain = _tickCtx.createGain();
+                osc.connect(gain);
+                gain.connect(_tickCtx.destination);
+                osc.frequency.value = 3000;
+                osc.type = 'square';
+                gain.gain.setValueAtTime(0.08, _tickCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, _tickCtx.currentTime + 0.008);
+                osc.start(_tickCtx.currentTime);
+                osc.stop(_tickCtx.currentTime + 0.008);
+            } catch (e) { /* ignore audio errors */ }
+        }
+
         function onDragStart(e) {
             e.preventDefault();
             e.stopPropagation();
             isDragging = true;
+            _prevSnapDay = null;
             svgEl.classList.add('needle-dragging');
             tooltip.style.display = '';
         }
@@ -5313,6 +5333,13 @@ tr:nth-child(even) { background: #fafafa; }
             // ── سلوك كوارتز: قفز إلى أقرب يوم ──
             const dateInfo = _angleToDate(rawAngle);
             const snappedAngle = _dateToAngle(dateInfo.month, dateInfo.day);
+
+            // ── صوت نقرة عند الانتقال ليوم جديد ──
+            const snapKey = `${dateInfo.month}-${dateInfo.day}`;
+            if (snapKey !== _prevSnapDay) {
+                _prevSnapDay = snapKey;
+                _playTick();
+            }
 
             // تدوير الإبرة
             needleGroup.setAttribute('transform', `rotate(${snappedAngle}, ${cx}, ${cy})`);
@@ -5337,6 +5364,7 @@ tr:nth-child(even) { background: #fafafa; }
         function onDragEnd(e) {
             if (!isDragging) return;
             isDragging = false;
+            _prevSnapDay = null;
             svgEl.classList.remove('needle-dragging');
             tooltip.style.display = 'none';
 
