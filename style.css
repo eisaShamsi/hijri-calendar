@@ -264,7 +264,7 @@
 }
 
 html {
-    font-size: 16px;
+    font-size: clamp(14px, 3.6vw, 16px);
     scroll-behavior: smooth;
 }
 
@@ -1869,6 +1869,27 @@ html[dir="ltr"] .anwa-card {
 }
 
 /* ─── الاستجابة ──────────────────────────────────────────── */
+
+/* ── أجهزة لوحية ── */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 12px 40px;
+    }
+
+    .prayer-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tool-group {
+        min-width: 160px;
+    }
+
+    .toolbar-row {
+        gap: 12px;
+    }
+}
+
+/* ── هواتف ── */
 @media (max-width: 600px) {
     .container {
         padding: 16px 10px 32px;
@@ -1950,32 +1971,314 @@ html[dir="ltr"] .anwa-card {
     .anwa-value {
         font-size: 0.82rem;
     }
+
+    /* ديرة الدرور — تمرير أفقي لمنع ضغط النصوص */
+    .durur-circle-container {
+        width: calc(100vw - 12px);
+        max-width: none;
+        margin-inline-start: -6px;
+        margin-inline-end: -6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .durur-circle-svg {
+        min-width: 500px;
+    }
 }
 
-@media (max-width: 380px) {
+/* ── هواتف قياسية ── */
+@media (max-width: 480px) {
+    .container {
+        padding: 12px 6px 24px;
+    }
+
+    /* شبكة التقويم */
     .day-headers {
-        grid-template-columns: 26px repeat(7, 1fr);
+        grid-template-columns: 24px repeat(7, 1fr);
     }
 
     .calendar-grid {
-        grid-template-columns: 26px repeat(7, 1fr);
+        grid-template-columns: 24px repeat(7, 1fr);
+    }
+
+    .week-number {
+        font-size: 0.55rem;
+        min-height: 44px;
+    }
+
+    .calendar-cell {
+        min-height: 44px;
+        padding: 4px 2px;
+    }
+
+    .calendar-cell .hijri-day {
+        font-size: 0.95rem;
+    }
+
+    .calendar-cell .greg-day {
+        font-size: 0.58rem;
     }
 
     .day-header {
-        font-size: 0.65rem;
-        padding: 8px 2px;
+        font-size: 0.68rem;
+        padding: 6px 2px;
     }
 
     .day-header.week-header {
         font-size: 0.55rem;
     }
 
+    /* عرض اليوم — أحجام مرنة */
+    .dv-day-name {
+        font-size: clamp(2.4rem, 9vw, 4rem);
+        margin-bottom: 8px;
+    }
+
+    .dv-dates {
+        padding: 0 10px;
+    }
+
+    .dv-date-num {
+        font-size: clamp(2.2rem, 8vw, 3.8rem);
+    }
+
+    .dv-date-month {
+        font-size: clamp(1rem, 3.5vw, 1.5rem);
+    }
+
+    .dv-date-year {
+        font-size: clamp(1.2rem, 4vw, 1.9rem);
+    }
+
+    .dv-arab-time {
+        font-size: clamp(1rem, 3.5vw, 1.45rem);
+    }
+
+    .dv-card {
+        padding: 20px 10px 16px;
+    }
+
+    .day-view {
+        padding: 12px 8px 20px;
+    }
+
+    /* مواقيت الصلاة */
+    .prayer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .prayer-name {
+        font-size: 0.72rem;
+    }
+
+    .prayer-time {
+        font-size: 0.95rem;
+    }
+
+    .prayer-item {
+        padding: 8px 6px;
+    }
+
+    /* شريط التنقل */
+    .nav-bar .month-title {
+        font-size: 1.1rem;
+    }
+
+    .nav-bar .gregorian-range {
+        font-size: 0.72rem;
+    }
+
+    .nav-bar .nav-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .today-nav-btn {
+        font-size: 0.72rem;
+        padding: 4px 10px;
+    }
+
+    /* الموقع في العمود الأوسط */
+    .dv-location {
+        font-size: clamp(1rem, 4vw, 2.2rem);
+        line-height: 1.2;
+    }
+
+    .dv-suburb {
+        font-size: 0.75rem;
+    }
+
+    /* قوس الشمس */
+    .sun-arc-svg {
+        max-width: 100%;
+    }
+
+    .arc-label {
+        font-size: 13px;
+    }
+
+    .sun-arc-info {
+        gap: 12px;
+        font-size: 0.8rem;
+    }
+
+    /* شريط الأدوات */
+    .toolbar-card {
+        padding: 10px 12px;
+    }
+
+    .toolbar-row {
+        gap: 10px;
+    }
+
+    .tool-group {
+        min-width: 140px;
+    }
+
+    .tool-label {
+        font-size: 0.68rem;
+    }
+
+    .mode-select {
+        font-size: 0.78rem;
+        padding: 6px 8px;
+    }
+
+    /* الانتقال إلى تاريخ */
+    .goto-body {
+        padding: 10px 12px;
+    }
+
+    .input-row {
+        gap: 4px;
+    }
+
+    .input-group input {
+        padding: 6px 6px;
+        font-size: 0.85rem;
+    }
+
+    .convert-btn {
+        font-size: 0.78rem;
+        padding: 6px 14px;
+    }
+
+    /* جدول المواقيت الشهري */
+    .timetable {
+        font-size: 0.68rem;
+    }
+
+    .timetable th {
+        padding: 4px 2px;
+    }
+
+    .timetable td {
+        padding: 3px 2px;
+    }
+
+    /* قوس عرض اليوم */
+    .dv-arc-svg {
+        max-width: 100%;
+    }
+
+    .dv-arc-svg .arc-label {
+        font-size: 13px;
+    }
+
+    .dv-arc-info {
+        gap: 10px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .container {
+        padding: 8px 4px 20px;
+    }
+
+    .day-headers {
+        grid-template-columns: 20px repeat(7, 1fr);
+    }
+
+    .calendar-grid {
+        grid-template-columns: 20px repeat(7, 1fr);
+    }
+
+    .day-header {
+        font-size: 0.62rem;
+        padding: 6px 1px;
+    }
+
+    .day-header.week-header {
+        font-size: 0.52rem;
+    }
+
     .week-number {
-        font-size: 0.55rem;
+        font-size: 0.52rem;
+        min-height: 40px;
+    }
+
+    .calendar-cell {
+        min-height: 40px;
+        padding: 3px 1px;
     }
 
     .calendar-cell .hijri-day {
+        font-size: 0.85rem;
+    }
+
+    .calendar-cell .greg-day {
+        font-size: 0.5rem;
+    }
+
+    .cell-moon-phase {
+        display: none;
+    }
+
+    /* عرض اليوم — هواتف صغيرة */
+    .dv-dates {
+        padding: 0 4px;
+    }
+
+    .dv-date-num {
+        font-size: 2rem;
+    }
+
+    .dv-date-month {
         font-size: 0.9rem;
+    }
+
+    .dv-date-year {
+        font-size: 1.1rem;
+    }
+
+    .dv-arab-time {
+        font-size: 0.95rem;
+    }
+
+    .dv-location {
+        font-size: 0.9rem;
+    }
+
+    /* شبكة الأنواء — عمود واحد */
+    .anwa-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .anwa-item {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 8px 12px;
+    }
+
+    .anwa-value {
+        font-size: 0.78rem;
+    }
+
+    /* ديرة الدرور — أصغر */
+    .durur-circle-svg {
+        min-width: 440px;
     }
 }
 
@@ -2658,10 +2961,36 @@ html[dir="ltr"] .anwa-card {
     line-height: 1.3;
 }
 [data-theme="dark"] .dv-location { color: var(--text-secondary); }
+@media (max-width: 480px) {
+    .dv-location { font-size: clamp(1rem, 4vw, 2.2rem); line-height: 1.2; }
+    .dv-suburb { font-size: 0.75rem; }
+}
+@media (max-width: 380px) {
+    .dv-location { font-size: 0.9rem; }
+}
 .dv-suburb {
     font-size: 1rem;
     font-weight: 400;
     opacity: 0.7;
+}
+
+/* ─── استجابة عرض اليوم (بعد الأنماط الأساسية) ─── */
+@media (max-width: 480px) {
+    .day-view { padding: 12px 8px 20px; }
+    .dv-card { padding: 20px 10px 16px; }
+    .dv-day-name { font-size: clamp(2.4rem, 9vw, 4rem); margin-bottom: 8px; }
+    .dv-dates { padding: 0 10px; }
+    .dv-date-num { font-size: clamp(2.2rem, 8vw, 3.8rem); }
+    .dv-date-month { font-size: clamp(1rem, 3.5vw, 1.5rem); }
+    .dv-date-year { font-size: clamp(1.2rem, 4vw, 1.9rem); }
+    .dv-arab-time { font-size: clamp(1rem, 3.5vw, 1.45rem); }
+}
+@media (max-width: 380px) {
+    .dv-dates { padding: 0 4px; }
+    .dv-date-num { font-size: 2rem; }
+    .dv-date-month { font-size: 0.9rem; }
+    .dv-date-year { font-size: 1.1rem; }
+    .dv-arab-time { font-size: 0.95rem; }
 }
 
 /* ─── Arc section ─── */
