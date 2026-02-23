@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مقترحات التصميم — العواصم الإسلامية</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Reem+Kufi:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Cairo', sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    padding: 30px 16px;
+}
+h1 { text-align: center; font-family: 'Amiri', serif; font-size: 1.8rem; color: #fbbf24; margin-bottom: 6px; }
+.subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 40px; }
+.row-title { text-align: center; font-family: 'Amiri', serif; font-size: 1.4rem; color: #e2e8f0; margin: 40px 0 6px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+.row-title:first-of-type { border-top: none; margin-top: 0; }
+.row-desc { text-align: center; color: #64748b; font-size: 0.8rem; margin-bottom: 20px; }
+.mockups { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+.mw { flex: 0 0 340px; max-width: 360px; }
+.mt { text-align: center; font-family: 'Amiri', serif; font-size: 1.2rem; color: #fbbf24; margin-bottom: 3px; }
+.md { text-align: center; color: #94a3b8; font-size: 0.73rem; margin-bottom: 12px; line-height: 1.7; }
+
+/* ─── Shared card structure ─── */
+.card {
+    border-radius: 20px;
+    padding: 22px 16px 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 640px;
+}
+.c-day { font-size: 1.9rem; font-weight: 700; position: relative; z-index: 2; }
+.c-dates { display: flex; justify-content: center; gap: 32px; margin: 4px 0; position: relative; z-index: 2; }
+.c-col { text-align: center; }
+.c-num { font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
+.c-month { font-size: 0.82rem; }
+.c-year { font-size: 1.2rem; font-weight: 700; }
+.c-loc { font-size: 0.75rem; margin-bottom: 8px; position: relative; z-index: 2; }
+.c-div { width: 50%; height: 1px; margin: 8px auto; position: relative; z-index: 2; }
+.c-arc { height: 120px; margin: 0 auto; max-width: 260px; position: relative; z-index: 2; }
+.c-arc-ring { width: 210px; height: 105px; border-bottom: none; border-radius: 105px 105px 0 0; margin: 0 auto; position: relative; }
+.c-arc-day { position: absolute; top: 5px; left: 5px; right: 5px; height: calc(100% - 5px); border-bottom: none; border-radius: 100px 100px 0 0; }
+.c-sun { width: 12px; height: 12px; border-radius: 50%; position: absolute; top: 16px; right: 32px; }
+.c-moon { width: 60px; height: 60px; border-radius: 50%; margin: -6px auto 0; position: relative; z-index: 2; }
+.c-shadow { position: absolute; inset: 0; border-radius: 50%; }
+.c-mlabel { font-size: 0.73rem; margin-top: 2px; text-align: center; position: relative; z-index: 2; }
+.c-sec { margin: 6px auto; max-width: 270px; border-radius: 10px; padding: 7px 10px; text-align: start; position: relative; z-index: 2; }
+.c-st { font-size: 0.75rem; font-weight: 700; margin-bottom: 2px; }
+.c-sb { font-size: 0.7rem; line-height: 1.5; }
+.c-btn { margin-top: 12px; padding: 8px 24px; border-radius: 10px; font-size: 0.82rem; font-family: inherit; font-weight: 700; position: relative; z-index: 2; cursor: pointer; }
+.c-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; z-index: 3; }
+.c-nav.nx { left: -14px; }
+.c-nav.pv { right: -14px; }
+
+/* Architectural SVG background layer */
+.arch-svg {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 55%;
+    pointer-events: none;
+    z-index: 1;
+}
+.arch-svg svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ══════════════════════════════════════════
+   ٧. البسيط — Minimalist
+   ══════════════════════════════════════════ */
+.t-mini .card { background: #fff; border: 2px solid #d1d5db; color: #111827; }
+.t-mini .c-day { color: #111827; font-family: 'Cairo', sans-serif; }
+.t-mini .c-num { color: #111827; }
+.t-mini .c-month { color: #6b7280; }
+.t-mini .c-year { color: #374151; }
+.t-mini .c-loc { color: #9ca3af; }
+.t-mini .c-div { background: #e5e7eb; }
+.t-mini .c-arc-ring { border: 2px solid #9ca3af; }
+.t-mini .c-arc-day { border: 2px solid #111827; }
+.t-mini .c-sun { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.3); }
+.t-mini .c-moon { background: radial-gradient(circle at 40% 40%, #e5e7eb, #9ca3af); }
+.t-mini .c-shadow { background: linear-gradient(to left, transparent 55%, #fff 75%); }
+.t-mini .c-mlabel { color: #6b7280; }
+.t-mini .c-sec { background: #f9fafb; border: 1px solid #e5e7eb; }
+.t-mini .c-st { color: #111827; }
+.t-mini .c-sb { color: #6b7280; }
+.t-mini .c-btn { background: #111827; color: #fff; border: none; }
+.t-mini .c-nav { background: #fff; border: 1.5px solid #d1d5db; color: #374151; }
+
+/* ══════════════════════════════════════════
+   DARK THEMES (مكة، بغداد، القدس، القاهرة)
+   ══════════════════════════════════════════ */
+
+/* ٨. مكة */
+.t-makkah .card {
+    background: linear-gradient(180deg, #08080f 0%, #0e0e18 60%, #12121e 100%);
+    border: 2px solid rgba(197,164,78,0.35);
+    color: #F2F0EB;
+}
+.t-makkah .c-day { color: #D4AF37; font-family: 'Amiri', serif; text-shadow: 0 0 24px rgba(212,175,55,0.4); }
+.t-makkah .c-num { color: #F2F0EB; }
+.t-makkah .c-month { color: #C5A44E; }
+.t-makkah .c-year { color: #D4AF37; }
+.t-makkah .c-loc { color: #8C8680; }
+.t-makkah .c-div { background: linear-gradient(to left, transparent, #C5A44E, transparent); }
+.t-makkah .c-arc-ring { border: 2.5px solid rgba(197,164,78,0.2); }
+.t-makkah .c-arc-day { border: 2px solid rgba(212,175,55,0.45); }
+.t-makkah .c-sun { background: #D4AF37; box-shadow: 0 0 18px rgba(212,175,55,0.7); }
+.t-makkah .c-moon { background: radial-gradient(circle at 35% 35%, #F2F0EB, #C5A44E, #8C8680); box-shadow: 0 2px 14px rgba(212,175,55,0.2); }
+.t-makkah .c-shadow { background: linear-gradient(to left, transparent 55%, #08080f 78%); }
+.t-makkah .c-mlabel { color: #C5A44E; }
+.t-makkah .c-sec { background: rgba(197,164,78,0.07); border: 1px solid rgba(197,164,78,0.15); backdrop-filter: blur(6px); }
+.t-makkah .c-st { color: #D4AF37; }
+.t-makkah .c-sb { color: #8C8680; }
+.t-makkah .c-btn { background: transparent; border: 1.5px solid rgba(197,164,78,0.45); color: #C5A44E; }
+.t-makkah .c-nav { background: rgba(0,0,0,0.6); border: 1.5px solid rgba(197,164,78,0.3); color: #C5A44E; }
+
+/* ٩. المدينة */
+.t-madinah .card {
+    background: linear-gradient(180deg, #f8f6f0 0%, #f2f0e6 60%, #ece8dc 100%);
+    border: 2px solid rgba(27,107,58,0.2);
+    color: #14553f;
+}
+.t-madinah .c-day { color: #1B6B3A; font-family: 'Amiri', serif; }
+.t-madinah .c-num { color: #0d3b2e; }
+.t-madinah .c-month { color: #1B6B3A; }
+.t-madinah .c-year { color: #14553f; }
+.t-madinah .c-loc { color: #4ade80; }
+.t-madinah .c-div { background: linear-gradient(to left, transparent, rgba(27,107,58,0.3), transparent); }
+.t-madinah .c-arc-ring { border: 2px solid rgba(27,107,58,0.18); }
+.t-madinah .c-arc-day { border: 2px solid rgba(27,107,58,0.4); }
+.t-madinah .c-sun { background: #D4A843; box-shadow: 0 0 10px rgba(212,168,67,0.35); }
+.t-madinah .c-moon { background: radial-gradient(circle at 35% 35%, #d1fae5, #a7f3d0); }
+.t-madinah .c-shadow { background: linear-gradient(to left, transparent 55%, #f2f0e6 78%); }
+.t-madinah .c-mlabel { color: #1B6B3A; }
+.t-madinah .c-sec { background: rgba(27,107,58,0.05); border: 1px solid rgba(27,107,58,0.12); }
+.t-madinah .c-st { color: #14553f; }
+.t-madinah .c-sb { color: #4B5563; }
+.t-madinah .c-btn { background: #1B6B3A; color: #f8f6f0; border: none; }
+.t-madinah .c-nav { background: rgba(255,255,255,0.85); border: 1.5px solid rgba(27,107,58,0.18); color: #1B6B3A; }
+
+/* ١٠. بغداد */
+.t-baghdad .card {
+    background: linear-gradient(180deg, #1a1308 0%, #221a0e 60%, #2a1f12 100%);
+    border: 2px solid rgba(201,152,46,0.25);
+    color: #EDE3D0;
+}
+.t-baghdad .c-day { color: #C9982E; font-family: 'Reem Kufi', sans-serif; text-shadow: 0 0 18px rgba(201,152,46,0.25); }
+.t-baghdad .c-num { color: #EDE3D0; }
+.t-baghdad .c-month { color: #C2703E; }
+.t-baghdad .c-year { color: #C9982E; }
+.t-baghdad .c-loc { color: #8C7060; }
+.t-baghdad .c-div { background: linear-gradient(to left, transparent, rgba(201,152,46,0.4), transparent); }
+.t-baghdad .c-arc-ring { border: 2.5px solid rgba(181,101,29,0.22); }
+.t-baghdad .c-arc-day { border: 2px solid rgba(201,152,46,0.4); }
+.t-baghdad .c-sun { background: #C9982E; box-shadow: 0 0 18px rgba(201,152,46,0.6); }
+.t-baghdad .c-moon { background: radial-gradient(circle at 35% 35%, #EDE3D0, #C2703E); box-shadow: 0 2px 14px rgba(181,101,29,0.12); }
+.t-baghdad .c-shadow { background: linear-gradient(to left, transparent 55%, #221a0e 78%); }
+.t-baghdad .c-mlabel { color: #C2703E; }
+.t-baghdad .c-sec { background: rgba(181,101,29,0.07); border: 1px solid rgba(181,101,29,0.14); backdrop-filter: blur(6px); }
+.t-baghdad .c-st { color: #C9982E; }
+.t-baghdad .c-sb { color: #8C7060; }
+.t-baghdad .c-btn { background: rgba(181,101,29,0.18); border: 1.5px solid rgba(181,101,29,0.3); color: #EDE3D0; }
+.t-baghdad .c-nav { background: rgba(28,28,28,0.7); border: 1.5px solid rgba(181,101,29,0.22); color: #C9982E; }
+
+/* ١١. دمشق */
+.t-damascus .card {
+    background: linear-gradient(180deg, #f5edd8 0%, #ede2c8 60%, #e5d8b8 100%);
+    border: 2px solid rgba(212,160,23,0.3);
+    color: #2C2C2C;
+}
+.t-damascus .c-day { color: #2C2C2C; font-family: 'Amiri', serif; }
+.t-damascus .c-num { color: #2C2C2C; }
+.t-damascus .c-month { color: #D4A017; }
+.t-damascus .c-year { color: #4A3F2C; }
+.t-damascus .c-loc { color: #A8A9AD; }
+.t-damascus .c-div { background: linear-gradient(to left, transparent, #D4A017, transparent); }
+.t-damascus .c-arc-ring { border: 2.5px solid rgba(44,44,44,0.15); }
+.t-damascus .c-arc-day { border: 2px solid #D4A017; }
+.t-damascus .c-sun { background: #D4A017; box-shadow: 0 0 14px rgba(212,160,23,0.5); }
+.t-damascus .c-moon { background: radial-gradient(circle at 35% 35%, #F0E8D8, #D4A017); }
+.t-damascus .c-shadow { background: linear-gradient(to left, transparent 55%, #ede2c8 78%); }
+.t-damascus .c-mlabel { color: #6B5A30; }
+.t-damascus .c-sec { background: rgba(212,160,23,0.06); border: 1px solid rgba(212,160,23,0.15); }
+.t-damascus .c-st { color: #4A3F2C; }
+.t-damascus .c-sb { color: #6B5A30; }
+.t-damascus .c-btn { background: #2C2C2C; color: #e8dcc8; border: none; }
+.t-damascus .c-nav { background: rgba(245,237,216,0.85); border: 1.5px solid rgba(44,44,44,0.15); color: #2C2C2C; }
+
+/* ١٢. القدس */
+.t-quds .card {
+    background: linear-gradient(180deg, #0d2240 0%, #163660 60%, #1a4a80 100%);
+    border: 2px solid rgba(212,168,67,0.35);
+    color: #F0EDE6;
+}
+.t-quds .c-day { color: #D4A843; font-family: 'Amiri', serif; text-shadow: 0 0 22px rgba(212,168,67,0.35); }
+.t-quds .c-num { color: #F0EDE6; }
+.t-quds .c-month { color: #D4A843; }
+.t-quds .c-year { color: #E8D5B0; }
+.t-quds .c-loc { color: #1A8A7D; }
+.t-quds .c-div { background: linear-gradient(to left, transparent, rgba(212,168,67,0.45), transparent); }
+.t-quds .c-arc-ring { border: 2.5px solid rgba(30,90,168,0.3); }
+.t-quds .c-arc-day { border: 2px solid rgba(212,168,67,0.45); }
+.t-quds .c-sun { background: #D4A843; box-shadow: 0 0 18px rgba(212,168,67,0.7); }
+.t-quds .c-moon { background: radial-gradient(circle at 35% 35%, #F0EDE6, #D4A843); box-shadow: 0 2px 16px rgba(212,168,67,0.18); }
+.t-quds .c-shadow { background: linear-gradient(to left, transparent 55%, #163660 78%); }
+.t-quds .c-mlabel { color: #1A8A7D; }
+.t-quds .c-sec { background: rgba(212,168,67,0.07); border: 1px solid rgba(212,168,67,0.14); backdrop-filter: blur(6px); }
+.t-quds .c-st { color: #D4A843; }
+.t-quds .c-sb { color: #8CA0B8; }
+.t-quds .c-btn { background: rgba(212,168,67,0.15); border: 1.5px solid rgba(212,168,67,0.35); color: #D4A843; }
+.t-quds .c-nav { background: rgba(15,40,71,0.7); border: 1.5px solid rgba(212,168,67,0.3); color: #D4A843; }
+
+/* ١٣. إسطنبول */
+.t-istanbul .card {
+    background: linear-gradient(180deg, #eae4d6 0%, #f0ebe0 60%, #f5f0e5 100%);
+    border: 2px solid rgba(26,75,140,0.25);
+    color: #1A4B8C;
+}
+.t-istanbul .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(90deg,
+        #1A4B8C 0px, #1A4B8C 6px, #f0ebe0 6px, #f0ebe0 8px,
+        #C0392B 8px, #C0392B 14px, #f0ebe0 14px, #f0ebe0 16px,
+        #00838F 16px, #00838F 22px, #f0ebe0 22px, #f0ebe0 24px);
+    pointer-events: none; z-index: 4;
+}
+.t-istanbul .c-day { color: #1A4B8C; font-family: 'Amiri', serif; }
+.t-istanbul .c-num { color: #1A4B8C; }
+.t-istanbul .c-month { color: #C0392B; }
+.t-istanbul .c-year { color: #2D6A4F; }
+.t-istanbul .c-loc { color: #00838F; }
+.t-istanbul .c-div { background: linear-gradient(to left, transparent, rgba(26,75,140,0.3), transparent); }
+.t-istanbul .c-arc-ring { border: 2.5px solid rgba(26,75,140,0.18); }
+.t-istanbul .c-arc-day { border: 2px solid rgba(192,57,43,0.35); }
+.t-istanbul .c-sun { background: #C8A95E; box-shadow: 0 0 12px rgba(200,169,94,0.4); }
+.t-istanbul .c-moon { background: radial-gradient(circle at 35% 35%, #f0ebe0, #1A4B8C); }
+.t-istanbul .c-shadow { background: linear-gradient(to left, transparent 55%, #f0ebe0 78%); }
+.t-istanbul .c-mlabel { color: #1A4B8C; }
+.t-istanbul .c-sec { background: rgba(26,75,140,0.04); border: 1px solid rgba(26,75,140,0.12); }
+.t-istanbul .c-st { color: #1A4B8C; }
+.t-istanbul .c-sb { color: #6B6B6B; }
+.t-istanbul .c-btn { background: #1A4B8C; color: #f0ebe0; border: none; }
+.t-istanbul .c-nav { background: rgba(255,255,255,0.85); border: 1.5px solid rgba(26,75,140,0.18); color: #1A4B8C; }
+
+/* ١٤. القاهرة */
+.t-cairo .card {
+    background: linear-gradient(180deg, #241e18 0%, #2e2620 60%, #362e26 100%);
+    border: 2px solid rgba(201,168,76,0.22);
+    color: #D4B896;
+}
+.t-cairo .c-day { color: #C9A84C; font-family: 'Amiri', serif; text-shadow: 0 0 18px rgba(201,168,76,0.25); }
+.t-cairo .c-num { color: #F0EBE0; }
+.t-cairo .c-month { color: #C9A84C; }
+.t-cairo .c-year { color: #D4B896; }
+.t-cairo .c-loc { color: #8B6B4A; }
+.t-cairo .c-div { background: linear-gradient(to left, transparent, rgba(201,168,76,0.35), transparent); }
+.t-cairo .c-arc-ring { border: 2.5px solid rgba(139,46,46,0.18); }
+.t-cairo .c-arc-day { border: 2px solid rgba(201,168,76,0.4); }
+.t-cairo .c-sun { background: #C9A84C; box-shadow: 0 0 18px rgba(201,168,76,0.6); }
+.t-cairo .c-moon { background: radial-gradient(circle at 35% 35%, #F0EBE0, #D4B896); box-shadow: 0 2px 14px rgba(212,184,150,0.12); }
+.t-cairo .c-shadow { background: linear-gradient(to left, transparent 55%, #2e2620 78%); }
+.t-cairo .c-mlabel { color: #C9A84C; }
+.t-cairo .c-sec { background: rgba(93,58,26,0.12); border: 1px solid rgba(212,184,150,0.12); backdrop-filter: blur(6px); }
+.t-cairo .c-st { color: #C9A84C; }
+.t-cairo .c-sb { color: #8B6B4A; }
+.t-cairo .c-btn { background: rgba(139,46,46,0.22); border: 1.5px solid rgba(139,46,46,0.35); color: #D4B896; }
+.t-cairo .c-nav { background: rgba(45,41,38,0.7); border: 1.5px solid rgba(212,184,150,0.18); color: #C9A84C; }
+
+/* ١٥. تونس */
+.t-tunis .card {
+    background: linear-gradient(180deg, #f5f9ff 0%, #eef4ff 60%, #FAFCFF 100%);
+    border: 2.5px solid #1560A6;
+    color: #1E1E1E;
+}
+.t-tunis .c-day { color: #1560A6; font-family: 'Amiri', serif; }
+.t-tunis .c-num { color: #1E1E1E; }
+.t-tunis .c-month { color: #1560A6; }
+.t-tunis .c-year { color: #1E1E1E; }
+.t-tunis .c-loc { color: #3B7A57; }
+.t-tunis .c-div { background: linear-gradient(to left, transparent, #1560A6, transparent); height: 2px; }
+.t-tunis .c-arc-ring { border: 2.5px solid rgba(21,96,166,0.22); }
+.t-tunis .c-arc-day { border: 2px solid #1560A6; }
+.t-tunis .c-sun { background: #E6C035; box-shadow: 0 0 12px rgba(230,192,53,0.4); }
+.t-tunis .c-moon { background: radial-gradient(circle at 35% 35%, #FAFCFF, #93c5fd); }
+.t-tunis .c-shadow { background: linear-gradient(to left, transparent 55%, #FAFCFF 78%); }
+.t-tunis .c-mlabel { color: #1560A6; }
+.t-tunis .c-sec { background: rgba(21,96,166,0.05); border: 1px solid rgba(21,96,166,0.14); }
+.t-tunis .c-st { color: #1560A6; }
+.t-tunis .c-sb { color: #4B5563; }
+.t-tunis .c-btn { background: #1560A6; color: #FAFCFF; border: none; }
+.t-tunis .c-nav { background: #FAFCFF; border: 2px solid #1560A6; color: #1560A6; }
+
+/* ١٦. الرباط */
+.t-rabat .card {
+    background: linear-gradient(180deg, #c89868 0%, #b88858 60%, #c49060 100%);
+    border: 2px solid rgba(27,107,60,0.35);
+    color: #F5F0E0;
+}
+.t-rabat .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: repeating-linear-gradient(90deg,
+        #1B6B3C 0px, #1B6B3C 8px, #F5F0E0 8px, #F5F0E0 10px,
+        #1A4A7A 10px, #1A4A7A 18px, #F5F0E0 18px, #F5F0E0 20px,
+        #D4A32F 20px, #D4A32F 28px, #F5F0E0 28px, #F5F0E0 30px);
+    pointer-events: none; z-index: 4;
+}
+.t-rabat .c-day { color: #F5F0E0; font-family: 'Amiri', serif; text-shadow: 0 1px 10px rgba(0,0,0,0.2); }
+.t-rabat .c-num { color: #F5F0E0; }
+.t-rabat .c-month { color: #1B6B3C; }
+.t-rabat .c-year { color: #F0EAD6; }
+.t-rabat .c-loc { color: #F0EAD6; }
+.t-rabat .c-div { background: linear-gradient(to left, transparent, rgba(245,240,224,0.4), transparent); }
+.t-rabat .c-arc-ring { border: 2.5px solid rgba(245,240,224,0.25); }
+.t-rabat .c-arc-day { border: 2px solid rgba(27,107,60,0.45); }
+.t-rabat .c-sun { background: #D4A32F; box-shadow: 0 0 14px rgba(212,163,47,0.5); }
+.t-rabat .c-moon { background: radial-gradient(circle at 35% 35%, #F5F0E0, #C4956A); }
+.t-rabat .c-shadow { background: linear-gradient(to left, transparent 55%, #b88858 78%); }
+.t-rabat .c-mlabel { color: #F0EAD6; }
+.t-rabat .c-sec { background: rgba(0,0,0,0.12); border: 1px solid rgba(245,240,224,0.18); }
+.t-rabat .c-st { color: #F5F0E0; }
+.t-rabat .c-sb { color: #F0EAD6; }
+.t-rabat .c-btn { background: #1B6B3C; color: #F5F0E0; border: none; }
+.t-rabat .c-nav { background: rgba(0,0,0,0.22); border: 1.5px solid rgba(245,240,224,0.3); color: #F5F0E0; }
+
+/* ١٧. الأندلس */
+.t-andalus .card {
+    background: linear-gradient(180deg, #a03828 0%, #8c3025 60%, #7a2820 100%);
+    border: 2px solid rgba(240,228,204,0.25);
+    color: #F0E4CC;
+}
+/* Cordoba ablaq top */
+.t-andalus .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(90deg, #F2E8D5 0px, #F2E8D5 10px, #7a2820 10px, #7a2820 20px);
+    pointer-events: none; z-index: 4;
+}
+.t-andalus .c-day { color: #F0E4CC; font-family: 'Amiri', serif; text-shadow: 0 1px 12px rgba(0,0,0,0.25); }
+.t-andalus .c-num { color: #F0E4CC; }
+.t-andalus .c-month { color: #C5A55A; }
+.t-andalus .c-year { color: #F2E8D5; }
+.t-andalus .c-loc { color: #a0d0a0; }
+.t-andalus .c-div { background: linear-gradient(to left, transparent, rgba(240,228,204,0.4), transparent); }
+.t-andalus .c-arc-ring { border: 2.5px solid rgba(240,228,204,0.18); }
+.t-andalus .c-arc-day { border: 2px solid rgba(197,165,90,0.45); }
+.t-andalus .c-sun { background: #C5A55A; box-shadow: 0 0 16px rgba(197,165,90,0.6); }
+.t-andalus .c-moon { background: radial-gradient(circle at 35% 35%, #F0E4CC, #C5A55A); box-shadow: 0 2px 14px rgba(197,165,90,0.12); }
+.t-andalus .c-shadow { background: linear-gradient(to left, transparent 55%, #8c3025 78%); }
+.t-andalus .c-mlabel { color: #C5A55A; }
+.t-andalus .c-sec { background: rgba(0,0,0,0.14); border: 1px solid rgba(240,228,204,0.14); backdrop-filter: blur(6px); }
+.t-andalus .c-st { color: #C5A55A; }
+.t-andalus .c-sb { color: #E8D0B0; }
+.t-andalus .c-btn { background: rgba(240,228,204,0.15); border: 1.5px solid rgba(240,228,204,0.3); color: #F0E4CC; }
+.t-andalus .c-nav { background: rgba(140,48,37,0.7); border: 1.5px solid rgba(240,228,204,0.25); color: #F0E4CC; }
+
+/* ١٨. الجزائر */
+.t-algiers .card {
+    background: linear-gradient(180deg, #f5f2ea 0%, #ede8dc 60%, #e5e0d0 100%);
+    border: 2px solid rgba(0,100,60,0.25);
+    color: #2a2a2a;
+}
+.t-algiers .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, transparent 3%, #00643C 15%, #D4AF37 50%, #00643C 85%, transparent 97%);
+    pointer-events: none; z-index: 4;
+}
+.t-algiers .c-day { color: #00643C; font-family: 'Amiri', serif; }
+.t-algiers .c-num { color: #2a2a2a; }
+.t-algiers .c-month { color: #00643C; }
+.t-algiers .c-year { color: #3a3a3a; }
+.t-algiers .c-loc { color: #D4AF37; }
+.t-algiers .c-div { background: linear-gradient(to left, transparent, rgba(0,100,60,0.3), transparent); }
+.t-algiers .c-arc-ring { border: 2.5px solid rgba(0,100,60,0.16); }
+.t-algiers .c-arc-day { border: 2px solid rgba(0,100,60,0.38); }
+.t-algiers .c-sun { background: #D4AF37; box-shadow: 0 0 14px rgba(212,175,55,0.45); }
+.t-algiers .c-moon { background: radial-gradient(circle at 35% 35%, #f5f2ea, #00643C); }
+.t-algiers .c-shadow { background: linear-gradient(to left, transparent 55%, #ede8dc 78%); }
+.t-algiers .c-mlabel { color: #00643C; }
+.t-algiers .c-sec { background: rgba(0,100,60,0.04); border: 1px solid rgba(0,100,60,0.12); }
+.t-algiers .c-st { color: #00643C; }
+.t-algiers .c-sb { color: #5a5a5a; }
+.t-algiers .c-btn { background: #00643C; color: #f5f2ea; border: none; }
+.t-algiers .c-nav { background: rgba(255,255,255,0.85); border: 1.5px solid rgba(0,100,60,0.18); color: #00643C; }
+</style>
+</head>
+<body>
+
+<h1>مقترحات التصميم — الجزء الثاني</h1>
+<p class="subtitle">خلفيات معمارية حيّة — قباب ومآذن وأقواس من معالم كل مدينة</p>
+
+<div class="row-title">النمط البسيط</div>
+<div class="row-desc">تصميم نظيف — بدون زخارف</div>
+<div class="mockups">
+<div class="mw t-mini">
+    <div class="mt">٧. البسيط</div>
+    <div class="md">أبيض نقي · خط عصري · حدود رمادية خفيفة</div>
+    <div class="card" id="card-mini"></div>
+</div>
+</div>
+
+<div class="row-title">العواصم الإسلامية</div>
+<div class="row-desc">كل نمط يعكس معالم المدينة — قباب ومآذن وأقواس بعمق بصري</div>
+<div class="mockups" id="cities"></div>
+
+<script>
+// SVG silhouettes for each city — hand-crafted architectural skylines
+const svgData = {
+    makkah: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="mk-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4AF37" stop-opacity="0.15"/><stop offset="100%" stop-color="#D4AF37" stop-opacity="0.03"/></linearGradient>
+            <linearGradient id="mk-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(212,175,55,0.05)"/></linearGradient>
+        </defs>
+        <!-- Ambient glow -->
+        <ellipse cx="170" cy="160" rx="120" ry="60" fill="url(#mk-glow)"/>
+        <!-- Far buildings silhouette -->
+        <path d="M0,200 L0,140 Q30,135 60,138 L80,130 L100,135 L130,128 L145,133 L170,125 L195,133 L210,128 L240,135 L260,130 L280,138 Q310,135 340,140 L340,200Z" fill="#0c0c16" opacity="0.6"/>
+        <!-- Left minaret (tall, pencil style) -->
+        <rect x="48" y="42" width="7" height="138" rx="1" fill="#16162a" opacity="0.85"/>
+        <rect x="45" y="88" width="13" height="6" rx="1" fill="#16162a" opacity="0.85"/>
+        <rect x="45" y="56" width="13" height="6" rx="1" fill="#16162a" opacity="0.85"/>
+        <circle cx="51.5" cy="38" r="3.5" fill="#D4AF37" opacity="0.7"/>
+        <!-- Right minaret -->
+        <rect x="285" y="50" width="7" height="130" rx="1" fill="#16162a" opacity="0.85"/>
+        <rect x="282" y="92" width="13" height="6" rx="1" fill="#16162a" opacity="0.85"/>
+        <rect x="282" y="64" width="13" height="6" rx="1" fill="#16162a" opacity="0.85"/>
+        <circle cx="288.5" cy="46" r="3.5" fill="#D4AF37" opacity="0.7"/>
+        <!-- Haram arches colonnade -->
+        <path d="M60,180 L60,148 Q75,132 90,148 L90,180" fill="none" stroke="#1a1a30" stroke-width="2.5" opacity="0.6"/>
+        <path d="M90,180 L90,148 Q105,132 120,148 L120,180" fill="none" stroke="#1a1a30" stroke-width="2.5" opacity="0.6"/>
+        <path d="M220,180 L220,148 Q235,132 250,148 L250,180" fill="none" stroke="#1a1a30" stroke-width="2.5" opacity="0.6"/>
+        <path d="M250,180 L250,148 Q265,132 280,148 L280,180" fill="none" stroke="#1a1a30" stroke-width="2.5" opacity="0.6"/>
+        <!-- Kaaba (center, black cube) -->
+        <rect x="147" y="130" width="46" height="50" rx="2" fill="#0a0a14"/>
+        <!-- Kiswah gold band -->
+        <rect x="147" y="148" width="46" height="4" rx="1" fill="#C5A44E" opacity="0.6"/>
+        <!-- Kaaba door (gold) -->
+        <rect x="162" y="155" width="12" height="20" rx="2" fill="#D4AF37" opacity="0.35"/>
+        <!-- Ground -->
+        <rect x="0" y="180" width="340" height="20" fill="#0e0e1a" opacity="0.8"/>
+    </svg>`,
+
+    madinah: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="md-dome" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1B8B4A"/><stop offset="100%" stop-color="#14653A"/></linearGradient>
+            <linearGradient id="md-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1B6B3A" stop-opacity="0.08"/><stop offset="100%" stop-color="#1B6B3A" stop-opacity="0.02"/></linearGradient>
+        </defs>
+        <ellipse cx="170" cy="150" rx="100" ry="50" fill="url(#md-glow)"/>
+        <!-- Mosque body -->
+        <rect x="80" y="120" width="180" height="60" rx="2" fill="#d8d0b8" opacity="0.4"/>
+        <!-- Arched colonnade -->
+        <path d="M95,180 L95,150 Q110,136 125,150 L125,180" fill="none" stroke="#c8c0a4" stroke-width="2" opacity="0.45"/>
+        <path d="M130,180 L130,150 Q145,136 160,150 L160,180" fill="none" stroke="#c8c0a4" stroke-width="2" opacity="0.45"/>
+        <path d="M180,180 L180,150 Q195,136 210,150 L210,180" fill="none" stroke="#c8c0a4" stroke-width="2" opacity="0.45"/>
+        <path d="M215,180 L215,150 Q230,136 245,150 L245,180" fill="none" stroke="#c8c0a4" stroke-width="2" opacity="0.45"/>
+        <!-- GREEN DOME (القبة الخضراء) — prominent -->
+        <ellipse cx="170" cy="95" rx="38" ry="32" fill="url(#md-dome)" opacity="0.55"/>
+        <!-- Dome 3D highlight -->
+        <ellipse cx="160" cy="88" rx="22" ry="18" fill="rgba(255,255,255,0.08)"/>
+        <!-- Dome base/drum -->
+        <rect x="138" y="95" width="64" height="25" fill="#c8c0a4" opacity="0.35"/>
+        <!-- Gold crescent on dome -->
+        <line x1="170" y1="55" x2="170" y2="64" stroke="#D4A843" stroke-width="1.5" opacity="0.7"/>
+        <circle cx="170" cy="53" r="3" fill="#D4A843" opacity="0.7"/>
+        <!-- Left minaret (tall) -->
+        <rect x="60" y="32" width="7" height="148" rx="1" fill="#d0c8ac" opacity="0.4"/>
+        <rect x="57" y="75" width="13" height="5" rx="1" fill="#c4bc9c" opacity="0.4"/>
+        <ellipse cx="63.5" cy="28" rx="5" ry="7" fill="#1B6B3A" opacity="0.4"/>
+        <circle cx="63.5" cy="20" r="2.5" fill="#D4A843" opacity="0.6"/>
+        <!-- Right minaret -->
+        <rect x="273" y="38" width="7" height="142" rx="1" fill="#d0c8ac" opacity="0.4"/>
+        <rect x="270" y="78" width="13" height="5" rx="1" fill="#c4bc9c" opacity="0.4"/>
+        <ellipse cx="276.5" cy="34" rx="5" ry="7" fill="#1B6B3A" opacity="0.4"/>
+        <circle cx="276.5" cy="26" r="2.5" fill="#D4A843" opacity="0.6"/>
+        <!-- Ground / courtyard -->
+        <rect x="0" y="180" width="340" height="20" fill="#e0d8c4" opacity="0.3"/>
+    </svg>`,
+
+    baghdad: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="bg-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C9982E" stop-opacity="0.1"/><stop offset="100%" stop-color="#B5651D" stop-opacity="0.02"/></linearGradient></defs>
+        <ellipse cx="170" cy="155" rx="110" ry="50" fill="url(#bg-glow)"/>
+        <!-- Malwiya spiral minaret (left, iconic) -->
+        <rect x="55" y="20" width="18" height="160" rx="2" fill="#2e2010" opacity="0.7"/>
+        <!-- Spiral effect -->
+        <line x1="55" y1="50" x2="73" y2="44" stroke="#C9982E" stroke-width="0.8" opacity="0.3"/>
+        <line x1="55" y1="75" x2="73" y2="69" stroke="#C9982E" stroke-width="0.8" opacity="0.3"/>
+        <line x1="55" y1="100" x2="73" y2="94" stroke="#C9982E" stroke-width="0.8" opacity="0.3"/>
+        <line x1="55" y1="125" x2="73" y2="119" stroke="#C9982E" stroke-width="0.8" opacity="0.3"/>
+        <line x1="55" y1="150" x2="73" y2="144" stroke="#C9982E" stroke-width="0.8" opacity="0.3"/>
+        <!-- Abbasid dome (center) -->
+        <ellipse cx="175" cy="92" rx="34" ry="28" fill="#2a1f0f" opacity="0.65"/>
+        <ellipse cx="168" cy="86" rx="18" ry="15" fill="rgba(201,152,46,0.06)"/>
+        <rect x="145" y="92" width="60" height="68" fill="#2a1f0f" opacity="0.55"/>
+        <!-- Pointed arch iwan (center) -->
+        <path d="M155,160 L155,130 Q175,108 195,130 L195,160" fill="none" stroke="#3a2a15" stroke-width="2.5" opacity="0.6"/>
+        <!-- Side iwans -->
+        <path d="M110,160 L110,140 Q125,125 140,140 L140,160" fill="none" stroke="#3a2a15" stroke-width="2" opacity="0.5"/>
+        <path d="M200,160 L200,140 Q215,125 230,140 L230,160" fill="none" stroke="#3a2a15" stroke-width="2" opacity="0.5"/>
+        <!-- Right minaret (simpler) -->
+        <rect x="280" y="45" width="8" height="135" rx="1" fill="#2e2010" opacity="0.65"/>
+        <rect x="277" y="80" width="14" height="5" rx="1" fill="#2e2010" opacity="0.55"/>
+        <ellipse cx="284" cy="42" rx="5" ry="7" fill="#2e2010" opacity="0.55"/>
+        <circle cx="284" cy="34" r="2.5" fill="#C9982E" opacity="0.5"/>
+        <!-- Ground -->
+        <rect x="0" y="160" width="340" height="40" fill="#1e1508" opacity="0.5"/>
+        <!-- Brick texture hint -->
+        <line x1="0" y1="168" x2="340" y2="168" stroke="#C9982E" stroke-width="0.5" opacity="0.1"/>
+        <line x1="0" y1="176" x2="340" y2="176" stroke="#C9982E" stroke-width="0.5" opacity="0.1"/>
+    </svg>`,
+
+    damascus: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="dm-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4A017" stop-opacity="0.08"/><stop offset="100%" stop-color="#D4A017" stop-opacity="0.01"/></linearGradient></defs>
+        <ellipse cx="170" cy="150" rx="100" ry="50" fill="url(#dm-glow)"/>
+        <!-- Umayyad Mosque body (ablaq stone) -->
+        <rect x="70" y="115" width="200" height="65" fill="#c4b590" opacity="0.35"/>
+        <!-- Ablaq stripes on wall -->
+        <rect x="70" y="120" width="200" height="4" fill="#3a3530" opacity="0.15"/>
+        <rect x="70" y="130" width="200" height="4" fill="#3a3530" opacity="0.15"/>
+        <rect x="70" y="140" width="200" height="4" fill="#3a3530" opacity="0.15"/>
+        <!-- Dome of the Eagle (قبة النسر) — large, prominent -->
+        <ellipse cx="170" cy="85" rx="42" ry="36" fill="#5a5040" opacity="0.45"/>
+        <ellipse cx="160" cy="78" rx="25" ry="20" fill="rgba(212,160,23,0.06)"/>
+        <rect x="135" y="85" width="70" height="30" fill="#c4b590" opacity="0.35"/>
+        <!-- Gold mosaic shimmer hint -->
+        <ellipse cx="170" cy="82" rx="30" ry="24" fill="#D4A017" opacity="0.04"/>
+        <!-- Minaret of Jesus (left, square, tallest) -->
+        <rect x="38" y="18" width="10" height="162" rx="1" fill="#c4b590" opacity="0.4"/>
+        <rect x="35" y="18" width="16" height="14" fill="#b5a580" opacity="0.4"/>
+        <circle cx="43" cy="12" r="2.5" fill="#D4A017" opacity="0.5"/>
+        <!-- Minaret of the Bride (right, octagonal) -->
+        <rect x="288" y="35" width="9" height="145" rx="1" fill="#c4b590" opacity="0.38"/>
+        <rect x="285" y="35" width="15" height="12" fill="#b5a580" opacity="0.38"/>
+        <circle cx="292.5" cy="29" r="2.5" fill="#D4A017" opacity="0.5"/>
+        <!-- Triple arches -->
+        <path d="M120,180 L120,155 Q140,140 160,155 L160,180" fill="none" stroke="#b5a580" stroke-width="2" opacity="0.35"/>
+        <path d="M165,180 L165,155 Q185,140 205,155 L205,180" fill="none" stroke="#b5a580" stroke-width="2" opacity="0.35"/>
+        <!-- Ground / courtyard -->
+        <rect x="0" y="180" width="340" height="20" fill="#ddd2b6" opacity="0.25"/>
+    </svg>`,
+
+    quds: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="qs-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E8C840"/><stop offset="100%" stop-color="#C4982E"/></linearGradient>
+            <linearGradient id="qs-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4A843" stop-opacity="0.15"/><stop offset="100%" stop-color="#D4A843" stop-opacity="0.02"/></linearGradient>
+        </defs>
+        <ellipse cx="170" cy="145" rx="90" ry="50" fill="url(#qs-glow)"/>
+        <!-- Old city walls -->
+        <path d="M0,200 L0,155 L15,155 L15,150 L25,150 L25,155 L40,155 L40,150 L50,150 L50,155 L340,155 L340,200Z" fill="#6B5D45" opacity="0.4"/>
+        <path d="M290,155 L290,150 L300,150 L300,155" fill="#6B5D45" opacity="0.4"/>
+        <path d="M310,155 L310,150 L320,150 L320,155" fill="#6B5D45" opacity="0.4"/>
+        <!-- Octagonal drum (Dome of the Rock base) -->
+        <rect x="125" y="95" width="90" height="55" fill="#1B5AA0" opacity="0.45"/>
+        <!-- Blue tile pattern on drum -->
+        <rect x="125" y="105" width="90" height="2" fill="rgba(255,255,255,0.06)"/>
+        <rect x="125" y="115" width="90" height="2" fill="rgba(255,255,255,0.06)"/>
+        <rect x="125" y="125" width="90" height="2" fill="rgba(255,255,255,0.06)"/>
+        <!-- GOLDEN DOME — large, iconic -->
+        <ellipse cx="170" cy="72" rx="48" ry="40" fill="url(#qs-gold)" opacity="0.55"/>
+        <!-- Dome 3D highlight -->
+        <ellipse cx="157" cy="62" rx="28" ry="22" fill="rgba(255,255,255,0.12)"/>
+        <!-- Dome shadow -->
+        <ellipse cx="185" cy="78" rx="18" ry="25" fill="rgba(0,0,0,0.1)"/>
+        <!-- Finial + crescent -->
+        <line x1="170" y1="24" x2="170" y2="34" stroke="#D4A843" stroke-width="2" opacity="0.8"/>
+        <circle cx="170" cy="21" r="4" fill="#D4A843" opacity="0.8"/>
+        <!-- Al-Aqsa (left, smaller darker dome) -->
+        <ellipse cx="60" cy="118" rx="26" ry="20" fill="#4a4a55" opacity="0.4"/>
+        <rect x="38" y="118" width="44" height="32" fill="#555560" opacity="0.3"/>
+        <!-- Right minaret -->
+        <rect x="282" y="55" width="7" height="95" rx="1" fill="#c4b888" opacity="0.45"/>
+        <rect x="279" y="75" width="13" height="5" rx="1" fill="#c4b888" opacity="0.4"/>
+        <ellipse cx="285.5" cy="52" rx="5" ry="6" fill="#c4b888" opacity="0.4"/>
+        <circle cx="285.5" cy="44" r="2.5" fill="#D4A843" opacity="0.6"/>
+        <!-- Ground -->
+        <rect x="0" y="150" width="340" height="50" fill="#4A3D2E" opacity="0.3"/>
+    </svg>`,
+
+    istanbul: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="is-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A4B8C" stop-opacity="0.06"/><stop offset="100%" stop-color="#1A4B8C" stop-opacity="0.01"/></linearGradient></defs>
+        <ellipse cx="170" cy="155" rx="110" ry="45" fill="url(#is-glow)"/>
+        <!-- Mosque body -->
+        <rect x="90" y="120" width="160" height="60" fill="#b8b0a0" opacity="0.3"/>
+        <!-- Main dome (large) -->
+        <ellipse cx="170" cy="80" rx="44" ry="38" fill="#8a96a8" opacity="0.4"/>
+        <ellipse cx="160" cy="73" rx="26" ry="22" fill="rgba(255,255,255,0.08)"/>
+        <!-- Cascading half-domes -->
+        <ellipse cx="132" cy="105" rx="24" ry="18" fill="#909aac" opacity="0.35"/>
+        <ellipse cx="208" cy="105" rx="24" ry="18" fill="#909aac" opacity="0.35"/>
+        <!-- Small quarter domes -->
+        <ellipse cx="108" cy="120" rx="14" ry="10" fill="#98a2b4" opacity="0.3"/>
+        <ellipse cx="232" cy="120" rx="14" ry="10" fill="#98a2b4" opacity="0.3"/>
+        <!-- 6 pencil minarets (iconic Blue Mosque) -->
+        <rect x="28" y="25" width="4" height="155" rx="1" fill="#b8b0a0" opacity="0.38"/>
+        <polygon points="30,18 27,28 33,28" fill="#8a96a8" opacity="0.38"/>
+        <rect x="68" y="35" width="4" height="145" rx="1" fill="#b8b0a0" opacity="0.35"/>
+        <polygon points="70,28 67,38 73,38" fill="#8a96a8" opacity="0.35"/>
+        <rect x="268" y="35" width="4" height="145" rx="1" fill="#b8b0a0" opacity="0.35"/>
+        <polygon points="270,28 267,38 273,38" fill="#8a96a8" opacity="0.35"/>
+        <rect x="308" y="25" width="4" height="155" rx="1" fill="#b8b0a0" opacity="0.38"/>
+        <polygon points="310,18 307,28 313,28" fill="#8a96a8" opacity="0.38"/>
+        <!-- Ground -->
+        <rect x="0" y="180" width="340" height="20" fill="#d0c8b8" opacity="0.2"/>
+    </svg>`,
+
+    cairo: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="ca-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C9A84C" stop-opacity="0.1"/><stop offset="100%" stop-color="#C9A84C" stop-opacity="0.02"/></linearGradient></defs>
+        <ellipse cx="170" cy="155" rx="100" ry="45" fill="url(#ca-glow)"/>
+        <!-- Sultan Hassan Mosque body -->
+        <rect x="80" y="110" width="160" height="70" fill="#3a2e20" opacity="0.55"/>
+        <!-- Mashrabiya lattice window row -->
+        <rect x="95" y="130" width="14" height="20" rx="2" fill="#2a2015" opacity="0.5"/>
+        <rect x="115" y="130" width="14" height="20" rx="2" fill="#2a2015" opacity="0.5"/>
+        <rect x="135" y="130" width="14" height="20" rx="2" fill="#2a2015" opacity="0.5"/>
+        <rect x="195" y="130" width="14" height="20" rx="2" fill="#2a2015" opacity="0.5"/>
+        <rect x="215" y="130" width="14" height="20" rx="2" fill="#2a2015" opacity="0.5"/>
+        <!-- Lattice pattern on windows -->
+        <line x1="102" y1="130" x2="102" y2="150" stroke="#C9A84C" stroke-width="0.5" opacity="0.2"/>
+        <line x1="122" y1="130" x2="122" y2="150" stroke="#C9A84C" stroke-width="0.5" opacity="0.2"/>
+        <line x1="142" y1="130" x2="142" y2="150" stroke="#C9A84C" stroke-width="0.5" opacity="0.2"/>
+        <!-- Mamluk ribbed dome -->
+        <ellipse cx="155" cy="85" rx="32" ry="28" fill="#4a3a28" opacity="0.6"/>
+        <ellipse cx="148" cy="79" rx="18" ry="16" fill="rgba(201,168,76,0.05)"/>
+        <!-- Dome ribs -->
+        <path d="M140,100 Q155,60 170,100" fill="none" stroke="rgba(201,168,76,0.08)" stroke-width="1"/>
+        <path d="M145,100 Q155,65 165,100" fill="none" stroke="rgba(201,168,76,0.08)" stroke-width="1"/>
+        <rect x="128" y="85" width="54" height="25" fill="#3a2e20" opacity="0.45"/>
+        <!-- Tall Mamluk minaret (right, very prominent) -->
+        <rect x="275" y="15" width="9" height="165" rx="1" fill="#3a2e20" opacity="0.7"/>
+        <!-- Minaret balconies (muqarnas) -->
+        <rect x="271" y="55" width="17" height="7" rx="1" fill="#4a3a28" opacity="0.65"/>
+        <rect x="272" y="95" width="15" height="6" rx="1" fill="#4a3a28" opacity="0.6"/>
+        <rect x="273" y="130" width="13" height="5" rx="1" fill="#4a3a28" opacity="0.55"/>
+        <!-- Octagonal top -->
+        <ellipse cx="279.5" cy="12" rx="6" ry="8" fill="#4a3a28" opacity="0.6"/>
+        <circle cx="279.5" cy="3" r="2.5" fill="#C9A84C" opacity="0.5"/>
+        <!-- Left shorter minaret -->
+        <rect x="55" y="50" width="8" height="130" rx="1" fill="#3a2e20" opacity="0.55"/>
+        <rect x="52" y="85" width="14" height="6" rx="1" fill="#4a3a28" opacity="0.5"/>
+        <!-- Pointed Mamluk arches -->
+        <path d="M90,180 L90,160 Q110,142 130,160 L130,180" fill="none" stroke="#4a3a28" stroke-width="2" opacity="0.4"/>
+        <path d="M160,180 L160,160 Q180,142 200,160 L200,180" fill="none" stroke="#4a3a28" stroke-width="2" opacity="0.4"/>
+        <!-- Ground -->
+        <rect x="0" y="180" width="340" height="20" fill="#2a2218" opacity="0.5"/>
+    </svg>`,
+
+    tunis: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sidi Bou Said white houses + blue domes -->
+        <!-- Stepped white houses -->
+        <rect x="30" y="90" width="55" height="90" rx="3" fill="#d8e4f0" opacity="0.35"/>
+        <rect x="20" y="110" width="40" height="70" rx="3" fill="#dce8f4" opacity="0.3"/>
+        <rect x="255" y="100" width="55" height="80" rx="3" fill="#d8e4f0" opacity="0.32"/>
+        <rect x="280" y="80" width="40" height="100" rx="3" fill="#dce8f4" opacity="0.28"/>
+        <!-- Central house (larger) -->
+        <rect x="120" y="95" width="100" height="85" rx="3" fill="#e0eaf6" opacity="0.35"/>
+        <!-- Blue domes -->
+        <ellipse cx="170" cy="78" rx="28" ry="22" fill="#1560A6" opacity="0.35"/>
+        <ellipse cx="162" cy="72" rx="16" ry="12" fill="rgba(255,255,255,0.1)"/>
+        <ellipse cx="50" cy="82" rx="18" ry="14" fill="#2178C0" opacity="0.3"/>
+        <ellipse cx="290" cy="92" rx="16" ry="12" fill="#2178C0" opacity="0.28"/>
+        <!-- Blue doors (iconic studded) -->
+        <rect x="158" y="148" width="14" height="24" rx="7" fill="#1560A6" opacity="0.3"/>
+        <rect x="40" y="152" width="10" height="18" rx="5" fill="#1560A6" opacity="0.25"/>
+        <rect x="276" y="148" width="10" height="18" rx="5" fill="#1560A6" opacity="0.25"/>
+        <!-- Blue windows -->
+        <rect x="145" y="115" width="10" height="14" rx="2" fill="#1560A6" opacity="0.2"/>
+        <rect x="185" y="115" width="10" height="14" rx="2" fill="#1560A6" opacity="0.2"/>
+        <!-- Bougainvillea hint (pink flowers) -->
+        <circle cx="210" cy="120" r="8" fill="rgba(219,112,147,0.1)"/>
+        <circle cx="90" cy="108" r="6" fill="rgba(219,112,147,0.08)"/>
+        <!-- Steps -->
+        <rect x="0" y="180" width="340" height="20" fill="#e4ecf4" opacity="0.2"/>
+        <rect x="100" y="175" width="140" height="5" fill="#dce6f0" opacity="0.15"/>
+    </svg>`,
+
+    rabat: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <!-- Hassan Tower (tall, square, unfinished) — very prominent -->
+        <rect x="155" y="10" width="30" height="170" rx="2" fill="#9a7048" opacity="0.5"/>
+        <!-- Tower decorative arched windows -->
+        <rect x="163" y="30" width="14" height="18" rx="7" fill="#7a5530" opacity="0.35"/>
+        <rect x="163" y="60" width="14" height="18" rx="7" fill="#7a5530" opacity="0.35"/>
+        <rect x="163" y="90" width="14" height="18" rx="7" fill="#7a5530" opacity="0.35"/>
+        <rect x="163" y="120" width="14" height="18" rx="7" fill="#7a5530" opacity="0.35"/>
+        <!-- Tower horizontal bands -->
+        <rect x="155" y="52" width="30" height="2" fill="rgba(245,240,224,0.12)"/>
+        <rect x="155" y="82" width="30" height="2" fill="rgba(245,240,224,0.12)"/>
+        <rect x="155" y="112" width="30" height="2" fill="rgba(245,240,224,0.12)"/>
+        <rect x="155" y="142" width="30" height="2" fill="rgba(245,240,224,0.12)"/>
+        <!-- Incomplete mosque columns (iconic!) -->
+        <rect x="40" y="138" width="5" height="42" rx="1" fill="#a08060" opacity="0.4"/>
+        <rect x="58" y="142" width="5" height="38" rx="1" fill="#a08060" opacity="0.38"/>
+        <rect x="76" y="136" width="5" height="44" rx="1" fill="#a08060" opacity="0.42"/>
+        <rect x="94" y="140" width="5" height="40" rx="1" fill="#a08060" opacity="0.38"/>
+        <rect x="112" y="144" width="5" height="36" rx="1" fill="#a08060" opacity="0.36"/>
+        <rect x="224" y="140" width="5" height="40" rx="1" fill="#a08060" opacity="0.38"/>
+        <rect x="242" y="136" width="5" height="44" rx="1" fill="#a08060" opacity="0.42"/>
+        <rect x="260" y="142" width="5" height="38" rx="1" fill="#a08060" opacity="0.38"/>
+        <rect x="278" y="138" width="5" height="42" rx="1" fill="#a08060" opacity="0.4"/>
+        <rect x="296" y="144" width="5" height="36" rx="1" fill="#a08060" opacity="0.36"/>
+        <!-- Ground platform -->
+        <rect x="0" y="180" width="340" height="20" fill="#a87850" opacity="0.3"/>
+        <!-- Zellige hint at ground -->
+        <rect x="30" y="178" width="280" height="3" fill="#1B6B3C" opacity="0.12"/>
+    </svg>`,
+
+    andalus: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="an-glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C5A55A" stop-opacity="0.08"/><stop offset="100%" stop-color="#C5A55A" stop-opacity="0.01"/></linearGradient></defs>
+        <ellipse cx="170" cy="155" rx="100" ry="45" fill="url(#an-glow)"/>
+        <!-- Alhambra Court of the Lions -->
+        <!-- Central pavilion -->
+        <rect x="145" y="80" width="50" height="80" fill="#d4c4a8" opacity="0.3"/>
+        <!-- Pavilion dome -->
+        <ellipse cx="170" cy="68" rx="22" ry="18" fill="#8a5040" opacity="0.4"/>
+        <ellipse cx="164" cy="63" rx="12" ry="10" fill="rgba(240,228,204,0.06)"/>
+        <!-- Horseshoe arches (Cordoba style — iconic) -->
+        <path d="M100,160 L100,125 Q100,105 120,105 Q140,105 140,125 L140,160" fill="none" stroke="#d4c4a8" stroke-width="2.5" opacity="0.35"/>
+        <path d="M145,160 L145,120 Q145,95 170,95 Q195,95 195,120 L195,160" fill="none" stroke="#d4c4a8" stroke-width="2.5" opacity="0.4"/>
+        <path d="M200,160 L200,125 Q200,105 220,105 Q240,105 240,125 L240,160" fill="none" stroke="#d4c4a8" stroke-width="2.5" opacity="0.35"/>
+        <!-- Slim marble columns -->
+        <rect x="99" y="125" width="3" height="55" fill="#d4c4a8" opacity="0.35"/>
+        <rect x="138" y="125" width="3" height="55" fill="#d4c4a8" opacity="0.35"/>
+        <rect x="144" y="120" width="3" height="60" fill="#d4c4a8" opacity="0.38"/>
+        <rect x="193" y="120" width="3" height="60" fill="#d4c4a8" opacity="0.38"/>
+        <rect x="199" y="125" width="3" height="55" fill="#d4c4a8" opacity="0.35"/>
+        <rect x="238" y="125" width="3" height="55" fill="#d4c4a8" opacity="0.35"/>
+        <!-- Column capitals (decorative) -->
+        <rect x="96" y="122" width="9" height="5" rx="1" fill="#c4b498" opacity="0.3"/>
+        <rect x="135" y="122" width="9" height="5" rx="1" fill="#c4b498" opacity="0.3"/>
+        <rect x="196" y="122" width="9" height="5" rx="1" fill="#c4b498" opacity="0.3"/>
+        <rect x="235" y="122" width="9" height="5" rx="1" fill="#c4b498" opacity="0.3"/>
+        <!-- Lion fountain hint -->
+        <ellipse cx="170" cy="172" rx="25" ry="6" fill="rgba(180,200,220,0.08)"/>
+        <!-- Muqarnas decorative band -->
+        <rect x="100" y="97" width="140" height="3" fill="#c4b498" opacity="0.15"/>
+        <!-- Ground -->
+        <rect x="0" y="180" width="340" height="20" fill="#6a2418" opacity="0.35"/>
+    </svg>`,
+
+    algiers: `<svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ketchaoua Mosque twin domes + Casbah -->
+        <!-- Casbah stepped houses (background) -->
+        <rect x="15" y="100" width="40" height="80" rx="2" fill="#d0c8b0" opacity="0.3"/>
+        <rect x="5" y="115" width="35" height="65" rx="2" fill="#ccc4ac" opacity="0.25"/>
+        <rect x="285" y="105" width="40" height="75" rx="2" fill="#d0c8b0" opacity="0.28"/>
+        <rect x="300" y="95" width="30" height="85" rx="2" fill="#ccc4ac" opacity="0.24"/>
+        <!-- Mosque body -->
+        <rect x="100" y="110" width="140" height="60" fill="#c8c0aa" opacity="0.35"/>
+        <!-- Twin domes (Ketchaoua characteristic) -->
+        <ellipse cx="145" cy="82" rx="28" ry="24" fill="#b0a890" opacity="0.4"/>
+        <ellipse cx="138" cy="76" rx="16" ry="14" fill="rgba(255,255,255,0.06)"/>
+        <ellipse cx="195" cy="82" rx="28" ry="24" fill="#b0a890" opacity="0.4"/>
+        <ellipse cx="188" cy="76" rx="16" ry="14" fill="rgba(255,255,255,0.06)"/>
+        <!-- Crescents on domes -->
+        <circle cx="145" cy="55" r="3" fill="#D4AF37" opacity="0.5"/>
+        <line x1="145" y1="58" x2="145" y2="64" stroke="#D4AF37" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="195" cy="55" r="3" fill="#D4AF37" opacity="0.5"/>
+        <line x1="195" y1="58" x2="195" y2="64" stroke="#D4AF37" stroke-width="1.5" opacity="0.5"/>
+        <!-- Left minaret -->
+        <rect x="68" y="30" width="7" height="150" rx="1" fill="#c0b898" opacity="0.4"/>
+        <rect x="65" y="70" width="13" height="5" rx="1" fill="#b8b098" opacity="0.38"/>
+        <ellipse cx="71.5" cy="26" rx="5" ry="7" fill="#00643C" opacity="0.35"/>
+        <circle cx="71.5" cy="18" r="2.5" fill="#D4AF37" opacity="0.5"/>
+        <!-- Right minaret -->
+        <rect x="265" y="35" width="7" height="145" rx="1" fill="#c0b898" opacity="0.38"/>
+        <rect x="262" y="72" width="13" height="5" rx="1" fill="#b8b098" opacity="0.36"/>
+        <ellipse cx="268.5" cy="31" rx="5" ry="7" fill="#00643C" opacity="0.33"/>
+        <circle cx="268.5" cy="23" r="2.5" fill="#D4AF37" opacity="0.5"/>
+        <!-- Horseshoe arches -->
+        <path d="M115,170 L115,145 Q130,130 145,145 L145,170" fill="none" stroke="#b8b098" stroke-width="2" opacity="0.3"/>
+        <path d="M155,170 L155,145 Q170,130 185,145 L185,170" fill="none" stroke="#b8b098" stroke-width="2" opacity="0.3"/>
+        <path d="M195,170 L195,145 Q210,130 225,145 L225,170" fill="none" stroke="#b8b098" stroke-width="2" opacity="0.3"/>
+        <!-- Ground -->
+        <rect x="0" y="180" width="340" height="20" fill="#ddd6c0" opacity="0.2"/>
+    </svg>`
+};
+
+// Card HTML template
+function cardHTML(hasSvg, svgKey) {
+    let svg = '';
+    if (hasSvg && svgData[svgKey]) {
+        svg = `<div class="arch-svg">${svgData[svgKey]}</div>`;
+    }
+    return `
+        <div class="c-nav nx">\u276E</div><div class="c-nav pv">\u276F</div>
+        <div class="c-day">الخميس</div>
+        <div class="c-dates"><div class="c-col"><div class="c-num">19</div><div class="c-month">فبراير</div><div class="c-year">2026</div></div><div class="c-col"><div class="c-num">\u0662</div><div class="c-month">رمضان</div><div class="c-year">\u0661\u0664\u0664\u0667</div></div></div>
+        <div class="c-div"></div><div class="c-loc">دبي</div>
+        <div class="c-arc"><div class="c-arc-ring"><div class="c-arc-day"></div><div class="c-sun"></div></div></div>
+        <div class="c-moon"><div class="c-shadow"></div></div><div class="c-mlabel">هلال أول</div>
+        <div class="c-sec"><div class="c-st">حركات المد والجزر</div><div class="c-sb">مد ٠٢:٠٦ · جزر ٠٨:١٨ · مد ١٤:٣١ · جزر ٢٠:٤٣</div></div>
+        <div class="c-sec"><div class="c-st">حالة الطقس</div><div class="c-sb">بداية انكسار شدة البرد تدريجياً</div></div>
+        <div class="c-sec"><div class="c-st">الدرور والأنواء</div><div class="c-sb">سعد الذابح · الحوت ♓ · العقارب · در التسعين</div></div>
+        <button class="c-btn">العودة إلى التقويم</button>
+        ${svg}`;
+}
+
+// Fill minimalist card
+document.getElementById('card-mini').innerHTML = cardHTML(false);
+
+// City cards
+const cities = [
+    { cls: 't-makkah', key: 'makkah', name: '٨. مكة المكرمة', desc: 'الكعبة المشرفة · مآذن الحرم · سماء الليل والذهب' },
+    { cls: 't-madinah', key: 'madinah', name: '٩. المدينة المنورة', desc: 'القبة الخضراء · مآذن المسجد النبوي · الرخام الأبيض' },
+    { cls: 't-baghdad', key: 'baghdad', name: '١٠. بغداد', desc: 'المنارة الملوية · القباب العباسية · الإيوانات والطوب' },
+    { cls: 't-damascus', key: 'damascus', name: '١١. دمشق', desc: 'قبة النسر · مآذن الجامع الأموي · الأبلق والفسيفساء' },
+    { cls: 't-quds', key: 'quds', name: '١٢. القدس', desc: 'قبة الصخرة الذهبية · أسوار المدينة القديمة · المسجد الأقصى' },
+    { cls: 't-istanbul', key: 'istanbul', name: '١٣. إسطنبول', desc: 'الجامع الأزرق · القباب المتدرجة · المآذن الستة' },
+    { cls: 't-cairo', key: 'cairo', name: '١٤. القاهرة', desc: 'مسجد السلطان حسن · المشربية · المآذن المملوكية' },
+    { cls: 't-tunis', key: 'tunis', name: '١٥. تونس', desc: 'بيوت سيدي بوسعيد · القباب الزرقاء · الأبواب المرصعة' },
+    { cls: 't-rabat', key: 'rabat', name: '١٦. الرباط', desc: 'صومعة حسّان · الأعمدة المتبقية · الزليج المغربي' },
+    { cls: 't-andalus', key: 'andalus', name: '١٧. الأندلس', desc: 'قصر الحمراء · باحة الأسود · أقواس حدوة الحصان' },
+    { cls: 't-algiers', key: 'algiers', name: '١٨. الجزائر', desc: 'جامع كتشاوة · القصبة · القباب المزدوجة العثمانية' },
+];
+
+const container = document.getElementById('cities');
+cities.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'mw ' + c.cls;
+    div.innerHTML = `
+        <div class="mt">${c.name}</div>
+        <div class="md">${c.desc}</div>
+        <div class="card">${cardHTML(true, c.key)}</div>`;
+    container.appendChild(div);
+});
+</script>
+
+</body>
+</html>

@@ -2510,7 +2510,7 @@ html[dir="ltr"] .anwa-card {
 
 /* ─── Day name ─── */
 .dv-day-name {
-    font-size: 2.4rem;
+    font-size: 4.0rem;
     font-weight: 800;
     color: var(--papyrus-text);
     margin-bottom: 12px;
@@ -2559,6 +2559,83 @@ html[dir="ltr"] .anwa-card {
     color: var(--papyrus-text);
 }
 [data-theme="dark"] .dv-date-year { color: var(--text-primary); }
+
+/* ─── Arabic Time Name ─── */
+.dv-arab-time {
+    font-size: 1.45rem;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    position: relative;
+    color: var(--papyrus-text, #3d2517);
+}
+[data-theme="dark"] .dv-arab-time {
+    color: var(--text-primary, #f5edd8);
+}
+.dv-arab-time-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--papyrus-text-secondary, #6b4c35);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--papyrus-text-secondary, #6b4c35);
+    cursor: pointer;
+    margin-inline-start: 4px;
+    vertical-align: middle;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+.dv-arab-time-help:hover { opacity: 1; }
+[data-theme="dark"] .dv-arab-time-help {
+    border-color: var(--text-secondary, #94a3b8);
+    color: var(--text-secondary, #94a3b8);
+}
+.dv-arab-time-tooltip {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #faf4e8;
+    color: #3d2517;
+    border: 1px solid rgba(139,90,43,0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: center;
+    min-width: 220px;
+    max-width: 300px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    z-index: 100;
+    white-space: normal;
+}
+.dv-arab-time-tooltip .att-title {
+    font-weight: 700;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+.dv-arab-time-tooltip .att-desc {
+    font-size: 0.85rem;
+    line-height: 1.7;
+}
+.dv-arab-time-tooltip .att-src {
+    font-size: 0.68rem;
+    opacity: 0.5;
+    margin-top: 6px;
+}
+[data-theme="dark"] .dv-arab-time-tooltip {
+    background: #1a1510;
+    color: #f5edd8;
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
 
 /* ─── Event ─── */
 .dv-event {
@@ -2937,6 +3014,101 @@ html[dir="ltr"] .anwa-card {
 }
 .dv-share-btn:active {
     opacity: 0.8;
+}
+
+/* ─── Info tooltip (?) button ─── */
+.info-help-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--papyrus-text-secondary);
+    background: transparent;
+    color: var(--papyrus-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-inline-start: 6px;
+    vertical-align: middle;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+.info-help-btn:hover {
+    opacity: 1;
+}
+.info-help-popup {
+    display: none;
+    background: var(--papyrus-card, #fff);
+    border: 1.5px solid var(--papyrus-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--papyrus-text);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    text-align: start;
+}
+.info-help-popup.show {
+    display: block;
+}
+.info-help-popup h4 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+[data-theme="dark"] .info-help-btn {
+    border-color: rgba(200,180,140,0.4);
+    color: rgba(200,180,140,0.6);
+}
+[data-theme="dark"] .info-help-popup {
+    background: rgba(30,24,14,0.95);
+    border-color: rgba(139,90,43,0.3);
+    color: var(--papyrus-dark, #e0c9a0);
+}
+
+/* ─── Day View Go-To Card (papyrus theme) ─── */
+.dv-goto-card {
+    background: var(--papyrus-card);
+    border: 1.5px solid var(--papyrus-border);
+    box-shadow: 0 2px 8px rgba(100, 60, 20, 0.08);
+    margin-top: 20px;
+}
+.dv-goto-card .goto-header {
+    background: var(--papyrus-section);
+    border-bottom-color: var(--papyrus-border);
+    color: var(--papyrus-text);
+}
+.dv-goto-card .goto-radio {
+    color: var(--papyrus-text-secondary);
+}
+.dv-goto-card .goto-radio input[type="radio"] {
+    accent-color: var(--papyrus-text-secondary);
+}
+.dv-goto-card .convert-btn {
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+}
+[data-theme="dark"] .dv-goto-card {
+    background: rgba(30,24,14,0.5);
+    border-color: rgba(139,90,43,0.2);
+}
+[data-theme="dark"] .dv-goto-card .goto-header {
+    background: rgba(139,90,43,0.15);
+    border-bottom-color: rgba(139,90,43,0.2);
+    color: var(--papyrus-dark);
+}
+
+/* ─── Day View nav separator ─── */
+.dv-nav-separator {
+    width: 60%;
+    max-width: 300px;
+    height: 1px;
+    background: var(--papyrus-text-secondary);
+    opacity: 0.2;
+    margin: 24px auto 8px;
 }
 
 /* ─── Credits ─── */
@@ -3605,6 +3777,81 @@ html[dir="ltr"] .anwa-card {
     flex-direction: column;
     align-items: center;
 }
+/* ═══════════════════════════════════════════════════════ */
+/* ═══ Onboarding Overlay ═══ */
+/* ═══════════════════════════════════════════════════════ */
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.4s;
+}
+.onboarding-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.onboarding-card {
+    background: var(--papyrus-card);
+    border-radius: 20px;
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .onboarding-card {
+    background: #1e293b;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.onboarding-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+.onboarding-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--papyrus-text);
+    margin: 0 0 8px;
+}
+[data-theme="dark"] .onboarding-title { color: var(--text-primary); }
+.onboarding-msg {
+    font-size: 0.95rem;
+    color: var(--papyrus-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 24px;
+}
+[data-theme="dark"] .onboarding-msg { color: var(--text-secondary); }
+.onboarding-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--gold-600);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.onboarding-btn:hover { background: var(--gold-500); }
+.onboarding-btn:disabled { opacity: 0.6; cursor: wait; }
+.onboarding-skip {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--papyrus-text-secondary);
+    cursor: pointer;
+    text-decoration: underline;
+}
+[data-theme="dark"] .onboarding-skip { color: var(--text-secondary); }
+
 .palette-overlay {
     position: fixed;
     inset: 0;
@@ -3639,6 +3886,7 @@ html[dir="ltr"] .anwa-card {
     opacity: 0.5;
 }
 [dir="ltr"] .dv-anwa-clickable::after { content: '→'; }
+.durur-more-btn.dv-anwa-clickable::after { display: none; }
 .anwa-clickable {
     cursor: pointer;
     transition: background 0.15s;
@@ -3906,7 +4154,26 @@ html[dir="ltr"] .anwa-card {
 }
 [data-theme="dark"] .anwa-detail-section-title { color: var(--text-primary, #f5edd8); }
 
-/* ─── دائرة الدرور (Durur Circle) ─── */
+/* ─── عنوان ديرة الدرور ─── */
+.anwa-detail-header.dirat-duror-header {
+    position: relative;
+}
+.anwa-detail-header.dirat-duror-header .anwa-detail-title {
+    font-size: 1.55rem;
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    pointer-events: none;
+}
+.anwa-detail-header.dirat-duror-header .anwa-detail-title .info-help-btn {
+    pointer-events: auto;
+}
+.anwa-detail-header.dirat-duror-header .anwa-detail-back-btn {
+    z-index: 1;
+}
+
+/* ─── ديرة الدرور (Dirat al-Duror) ─── */
 
 .durur-more-btn {
     display: block;
@@ -3917,7 +4184,7 @@ html[dir="ltr"] .anwa-card {
     border-radius: 12px;
     background: linear-gradient(135deg, rgba(196,148,64,0.1), rgba(196,148,64,0.05));
     color: var(--gold, #c49440);
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     font-weight: 700;
     font-family: var(--font-arabic);
     text-align: center;
@@ -3945,6 +4212,7 @@ html[dir="ltr"] .anwa-card {
     max-width: 760px;
     margin: 0 auto;
     padding: 8px 0;
+    position: relative;
 }
 .durur-circle-svg {
     width: 100%;
@@ -3957,6 +4225,31 @@ html[dir="ltr"] .anwa-card {
     pointer-events: none;
     user-select: none;
     font-family: var(--font-arabic, 'Calibri', sans-serif);
+}
+/* ═══ Draggable Needle ═══ */
+.needle-drag-handle { cursor: grab; }
+.needle-dragging .needle-drag-handle { cursor: grabbing; }
+.needle-dragging .durur-segment { pointer-events: none !important; }
+.durur-circle-svg.needle-dragging { touch-action: none; }
+.needle-tooltip {
+    position: absolute;
+    background: rgba(100, 110, 125, 0.92);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+    z-index: 10;
+    font-family: var(--font-arabic, 'Calibri', sans-serif);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    border: 1px solid rgba(200, 210, 220, 0.3);
+}
+[data-theme="dark"] .needle-tooltip {
+    background: rgba(60, 65, 75, 0.94);
+    border-color: rgba(150, 160, 175, 0.25);
 }
 [data-theme="dark"] .durur-circle-svg text.durur-text {
     fill: var(--text-primary, #f5edd8);

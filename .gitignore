@@ -29,3 +29,11 @@ generate-icons.js
 
 # Original import folder
 Main-claude-hijri-calendar-design-mfbdl/
+
+# Environment / secrets
+.env
+server/.env
+
+# Reference / backup
+durur-book.pdf
+*.pdf

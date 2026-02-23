@@ -15,6 +15,68 @@ const App = (() => {
     let _deferredInstallPrompt = null;
     let _selectedDate = null; // { year, month, day } gregorian — null means today
     let _arabicClockTimer = null;
+    let _arabTimeTimer = null;
+    let _needleJustReleased = false;
+    let _needleDragCleanup = null;
+
+    // ─── شاشة الترحيب ──────────────────────────────────────
+    function setupOnboarding() {
+        const overlay = document.getElementById('onboarding-overlay');
+        if (!overlay) return;
+
+        // إذا سبق تحديد الموقع أو اكتمل الـ onboarding → أخفِ فوراً
+        const hasLoc = localStorage.getItem('prayer-lat');
+        if (localStorage.getItem('onboarding-done') || hasLoc) {
+            overlay.style.display = 'none';
+            return;
+        }
+
+        // تعريب النصوص
+        document.getElementById('onboarding-title').textContent = H.t('welcomeTitle');
+        document.getElementById('onboarding-msg').textContent = H.t('welcomeMsg');
+        document.getElementById('onboarding-detect').textContent = H.t('welcomeDetect');
+        document.getElementById('onboarding-skip').textContent = H.t('welcomeSkip');
+
+        const dismiss = () => {
+            overlay.classList.add('hidden');
+            setTimeout(() => overlay.style.display = 'none', 400);
+            localStorage.setItem('onboarding-done', '1');
+        };
+
+        // زر تحديد الموقع
+        document.getElementById('onboarding-detect').addEventListener('click', async () => {
+            const btn = document.getElementById('onboarding-detect');
+            btn.textContent = H.t('welcomeDetecting');
+            btn.disabled = true;
+            try {
+                if (isNative()) {
+                    const { Geolocation } = window.Capacitor.Plugins;
+                    const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+                    localStorage.setItem('prayer-lat', String(Math.round(pos.coords.latitude * 100) / 100));
+                    localStorage.setItem('prayer-lng', String(Math.round(pos.coords.longitude * 100) / 100));
+                    localStorage.setItem('prayer-tz', String(-new Date().getTimezoneOffset() / 60));
+                    if (pos.coords.altitude) localStorage.setItem('prayer-elevation', String(Math.round(pos.coords.altitude)));
+                } else if (navigator.geolocation) {
+                    await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(pos => {
+                            localStorage.setItem('prayer-lat', String(Math.round(pos.coords.latitude * 100) / 100));
+                            localStorage.setItem('prayer-lng', String(Math.round(pos.coords.longitude * 100) / 100));
+                            localStorage.setItem('prayer-tz', String(-new Date().getTimezoneOffset() / 60));
+                            if (pos.coords.altitude) localStorage.setItem('prayer-elevation', String(Math.round(pos.coords.altitude)));
+                            resolve();
+                        }, reject, { enableHighAccuracy: true });
+                    });
+                }
+            } catch (e) {
+                console.warn('Onboarding geolocation failed', e);
+            }
+            dismiss();
+            location.reload();
+        });
+
+        // رابط التخطي
+        document.getElementById('onboarding-skip').addEventListener('click', dismiss);
+    }
 
     // ─── تهيئة ──────────────────────────────────────────────
     function init() {
@@ -22,6 +84,7 @@ const App = (() => {
         currentYear = today.year;
         currentMonth = today.month;
 
+        setupOnboarding();
         setupTheme();
         setupNavigation();
         setupModeSelector();
@@ -29,6 +92,7 @@ const App = (() => {
         setupLangSelector();
         setupCorrectionControls();
         setupGoToDate();
+        setupDayViewGoTo();
         setupExport();
         setupAdhkar();
         setupShare();
@@ -103,7 +167,7 @@ const App = (() => {
         document.getElementById('lbl-corrections').textContent = H.t('corrections');
         document.getElementById('corr-clear-all').textContent = H.t('corrClearAll');
 
-        // الانتقال إلى تاريخ
+        // الانتقال إلى تاريخ (التقويم)
         document.getElementById('goto-title').textContent = H.t('goToDate');
         document.getElementById('goto-hijri-label').textContent = H.t('hijri');
         document.getElementById('goto-greg-label').textContent = H.t('gregorian');
@@ -111,6 +175,15 @@ const App = (() => {
         document.getElementById('goto-lbl-month').textContent = H.t('month');
         document.getElementById('goto-lbl-year').textContent = H.t('year');
         document.getElementById('goto-btn').textContent = H.t('go');
+
+        // الانتقال إلى تاريخ (عرض اليوم)
+        document.getElementById('dv-goto-title').textContent = H.t('goToDate');
+        document.getElementById('dv-goto-hijri-label').textContent = H.t('hijri');
+        document.getElementById('dv-goto-greg-label').textContent = H.t('gregorian');
+        document.getElementById('dv-goto-lbl-day').textContent = H.t('day');
+        document.getElementById('dv-goto-lbl-month').textContent = H.t('month');
+        document.getElementById('dv-goto-lbl-year').textContent = H.t('year');
+        document.getElementById('dv-goto-btn').textContent = H.t('go');
 
         // تصدير
         document.getElementById('export-title').textContent = H.t('exportTitle');
@@ -287,7 +360,32 @@ const App = (() => {
         });
     }
 
-    // ─── الانتقال إلى تاريخ ─────────────────────────────────
+    // ─── الانتقال إلى تاريخ (عرض اليوم) ────────────────────
+    function setupDayViewGoTo() {
+        document.getElementById('dv-goto-btn').addEventListener('click', () => {
+            const d = parseInt(document.getElementById('dv-goto-day').value);
+            const m = parseInt(document.getElementById('dv-goto-month').value);
+            const y = parseInt(document.getElementById('dv-goto-year').value);
+
+            if (!d || !m || !y || m < 1 || m > 12 || d < 1) return;
+
+            const type = document.querySelector('input[name="dv-goto-type"]:checked').value;
+
+            let gYear, gMonth, gDay;
+            if (type === 'hijri') {
+                if (d > 30 || y < 1) return;
+                const greg = H.hijriToGregorian(y, m, d);
+                gYear = greg.year; gMonth = greg.month; gDay = greg.day;
+            } else {
+                if (d > 31 || y < 622) return;
+                gYear = y; gMonth = m; gDay = d;
+            }
+
+            showDayView({ year: gYear, month: gMonth, day: gDay });
+        });
+    }
+
+    // ─── الانتقال إلى تاريخ (التقويم الشهري) ─────────────
     function setupGoToDate() {
         document.getElementById('goto-btn').addEventListener('click', () => {
             const d = parseInt(document.getElementById('goto-day').value);
@@ -619,7 +717,7 @@ const App = (() => {
         const parts = [];
         if (tale3) parts.push(`${H.t('tale3Label')}: ${tale3.name}`);
         if (season) parts.push(`${H.t('seasonLabel')}: ${season.name}`);
-        if (durr) parts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
+        if (durr) parts.push(`${_formatDurrName(durr)} (${H.t('suhailLabel')} ${durr.suhailDay})`);
         if (moon) parts.push(`${moon.symbol} ${moon.name}`);
 
         el.textContent = parts.join(' • ');
@@ -648,7 +746,7 @@ const App = (() => {
 
         setVal('anwa-tale3', tale3 ? tale3.name : '—');
         setVal('anwa-season', season ? season.name : '—');
-        setVal('anwa-durr', durr ? durr.durr : '—');
+        setVal('anwa-durr', durr ? _formatDurrName(durr) : '—');
         setVal('anwa-suhail', durr ? durr.suhailDay : '—');
         setVal('anwa-mia', durr ? durr.mia : '—');
 
@@ -860,7 +958,7 @@ const App = (() => {
         const anwaParts = [];
         if (tale3) anwaParts.push(tale3.name);
         if (season) anwaParts.push(season.name);
-        if (durr) anwaParts.push(`${durr.durr} (${H.t('suhailLabel')} ${durr.suhailDay})`);
+        if (durr) anwaParts.push(`${_formatDurrName(durr)} (${H.t('suhailLabel')} ${durr.suhailDay})`);
         if (moon) anwaParts.push(`${moon.symbol} ${moon.name}`);
 
         if (anwaParts.length) {
@@ -1005,9 +1103,9 @@ const App = (() => {
         document.getElementById('prayer-detect').addEventListener('click', detectLocation);
         document.getElementById('prayer-detect-main').addEventListener('click', detectLocation);
 
-        // Auto-detect location on first use
+        // If coords exist but no city name yet, run reverse geocode only
         const currentSettings = PT.getSettings();
-        if (!currentSettings.lat && !currentSettings.lng) {
+        if (currentSettings.lat && currentSettings.lng && !localStorage.getItem('prayer-loc')) {
             detectLocation();
         }
 
@@ -3044,6 +3142,62 @@ tr:nth-child(even) { background: #fafafa; }
         }
         renderDayViewArc(times, isToday);
 
+        // الزمن العربي — فقط لليوم الحالي
+        _arabTimeTimer && clearInterval(_arabTimeTimer);
+        const arabTimeEl = document.getElementById('dv-arab-time');
+        if (arabTimeEl) {
+            if (isToday && times && times._raw) {
+                const _atSunrise = times._raw.sunrise, _atMaghrib = times._raw.maghrib;
+                const _atNameSpan = arabTimeEl.querySelector('.dv-arab-time-name');
+                const _atHelpBtn = arabTimeEl.querySelector('.dv-arab-time-help');
+                if (_atHelpBtn) _atHelpBtn.textContent = lang === 'en' ? '?' : '؟';
+                let _atCurrent = null;
+                const updateArabTime = () => {
+                    const n = new Date();
+                    const nd = n.getHours() + n.getMinutes() / 60;
+                    const at = H.getArabicTimeName(nd, _atSunrise, _atMaghrib);
+                    _atCurrent = at;
+                    if (_atNameSpan) _atNameSpan.textContent = lang === 'en' ? at.nameEn : at.nameAr;
+                };
+                updateArabTime();
+                // (؟) — onclick يُستبدل كل render فلا تتراكم المستمعات
+                if (_atHelpBtn) {
+                    _atHelpBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        const old = arabTimeEl.querySelector('.dv-arab-time-tooltip');
+                        if (old) { old.remove(); return; }
+                        if (!_atCurrent) return;
+                        const tip = document.createElement('div');
+                        tip.className = 'dv-arab-time-tooltip';
+                        const titleText = lang === 'en' ? 'Arabic Time Name' : '\u0627\u0644\u0632\u0645\u0646 \u0627\u0644\u0639\u0631\u0628\u064a';
+                        const desc = lang === 'en' ? _atCurrent.descEn : _atCurrent.descAr;
+                        const src = lang === 'en'
+                            ? 'From: Fiqh al-Lugha \u2014 al-Tha\u02bfalibi'
+                            : '\u0627\u0644\u0645\u0635\u062f\u0631: \u0641\u0642\u0647 \u0627\u0644\u0644\u063a\u0629 \u0648\u0633\u0631 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u2014 \u0627\u0644\u062b\u0639\u0627\u0644\u0628\u064a';
+                        const intro = lang === 'en'
+                            ? 'The Arabs divided day and night into 12 periods each, varying in length by season.'
+                            : '\u0642\u0633\u0651\u0645 \u0627\u0644\u0639\u0631\u0628 \u0627\u0644\u0646\u0647\u0627\u0631 \u0648\u0627\u0644\u0644\u064a\u0644 \u0625\u0644\u0649 12 \u0632\u0645\u0646\u0627\u064b \u0644\u0643\u0644\u0651 \u0645\u0646\u0647\u0645\u0627\u060c \u062a\u062a\u063a\u064a\u0631 \u0623\u0637\u0648\u0627\u0644\u0647\u0627 \u062d\u0633\u0628 \u0627\u0644\u0641\u0635\u0644.';
+                        tip.innerHTML = '<div class="att-title">' + titleText + '</div>'
+                            + '<div class="att-desc">' + desc + '</div>'
+                            + '<div class="att-desc" style="font-size:0.75rem;opacity:0.6;margin-top:4px">' + intro + '</div>'
+                            + '<div class="att-src">' + src + '</div>';
+                        arabTimeEl.appendChild(tip);
+                        const closeTip = (ev) => {
+                            if (!tip.contains(ev.target) && ev.target !== _atHelpBtn) {
+                                tip.remove();
+                                document.removeEventListener('click', closeTip);
+                            }
+                        };
+                        setTimeout(() => document.addEventListener('click', closeTip), 10);
+                    };
+                }
+                arabTimeEl.style.display = '';
+                _arabTimeTimer = setInterval(updateArabTime, 60000);
+            } else {
+                arabTimeEl.style.display = 'none';
+            }
+        }
+
         // Moon phase
         const moonContainer = document.getElementById('dv-moon-container');
         const moon = H.getMoonPhase(gYear, gMonth, gDay);
@@ -3089,13 +3243,18 @@ tr:nth-child(even) { background: #fafafa; }
         const cropsList = H.getSeasonalCrops(gMonth, gDay).filter(c => c.inSeason);
         const wildlifeList = H.getSeasonalWildlife(gMonth, gDay).filter(w => w.inSeason);
 
-        let anwaHtml = `<div class="dv-section-title">${H.t('anwaSeasons')}</div><div class="dv-anwa-grid">`;
-        if (tale3) anwaHtml += `<div class="dv-anwa-card dv-anwa-clickable" data-anwa-type="tale3"><div class="dv-anwa-label">${H.t('tale3Label')}</div><div class="dv-anwa-value">${tale3.name}</div></div>`;
-        if (season) anwaHtml += `<div class="dv-anwa-card dv-anwa-clickable" data-anwa-type="season"><div class="dv-anwa-label">${H.t('seasonLabel')}</div><div class="dv-anwa-value">${season.name}</div></div>`;
-        if (durr) anwaHtml += `<div class="dv-anwa-card dv-anwa-clickable" data-anwa-type="durr"><div class="dv-anwa-label">${H.t('durrLabel')}</div><div class="dv-anwa-value">${durr.durr}</div></div>`;
+        const helpBtn = lang === 'en' ? `<button class="info-help-btn" id="dv-anwa-help-btn" aria-label="What is this?">?</button>` : '';
+        let anwaHtml = `<div class="dv-section-title">${H.t('anwaSeasons')}${helpBtn}</div>`;
+        if (lang === 'en') {
+            anwaHtml += `<div class="info-help-popup" id="dv-anwa-help-popup"><h4>${H.t('anwaExplainTitle')}</h4><p>${H.t('anwaExplain').replace(/\n/g, '<br>')}</p></div>`;
+        }
+        anwaHtml += `<div class="dv-anwa-grid">`;
+        if (tale3) anwaHtml += `<div class="dv-anwa-card"><div class="dv-anwa-label">${H.t('tale3Label')}</div><div class="dv-anwa-value">${tale3.name}</div></div>`;
+        if (season) anwaHtml += `<div class="dv-anwa-card"><div class="dv-anwa-label">${H.t('seasonLabel')}</div><div class="dv-anwa-value">${season.name}</div></div>`;
+        if (durr) anwaHtml += `<div class="dv-anwa-card"><div class="dv-anwa-label">${H.t('durrLabel')}</div><div class="dv-anwa-value">${_formatDurrName(durr)}</div></div>`;
         anwaHtml += `</div>`;
-        // زر دائرة الدرور
-        anwaHtml += `<button class="durur-more-btn dv-anwa-clickable" data-anwa-type="durur-circle">☆ ${H.t('dururCircleMore')}</button>`;
+        // زر ديرة الدرور
+        anwaHtml += `<button class="durur-more-btn dv-anwa-clickable" data-anwa-type="durur-circle">${H.t('dururCircleMore')}</button>`;
         if (tale3 && tale3.weather) {
             anwaHtml += `<div class="dv-anwa-weather">${tale3.weather}</div>`;
         }
@@ -3108,7 +3267,10 @@ tr:nth-child(even) { background: #fafafa; }
             });
         });
 
-        // بطاقات الإثراء انتقلت إلى داخل دائرة الدرور (_renderDururCircle)
+        // Setup help (?) buttons (English only)
+        _setupHelpButtons();
+
+        // بطاقات الإثراء انتقلت إلى داخل ديرة الدرور (_renderDururCircle)
 
         // AI content
         renderAISection(hijri, gYear, gMonth, gDay, dow);
@@ -3178,6 +3340,23 @@ tr:nth-child(even) { background: #fafafa; }
     // ─── Anwa Detail View ───
     let _anwaDetailOrigin = 'day'; // 'day' or 'calendar'
 
+    // ─── Help (?) buttons — English only ───
+    function _setupHelpButtons() {
+        document.querySelectorAll('.info-help-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const popup = btn.parentElement.nextElementSibling;
+                if (popup && popup.classList.contains('info-help-popup')) {
+                    popup.classList.toggle('show');
+                } else {
+                    // For dirat help btn in header — find popup inside container
+                    const diratPopup = document.getElementById('dirat-help-popup');
+                    if (diratPopup) diratPopup.classList.toggle('show');
+                }
+            });
+        });
+    }
+
     function showAnwaDetail(type, gregDate) {
         const { year: gYear, month: gMonth, day: gDay } = gregDate;
         const lang = H.getLang();
@@ -3209,11 +3388,32 @@ tr:nth-child(even) { background: #fafafa; }
             titleEl.textContent = H.t('anwaAllWildlife');
             html = _renderListDetail('wildlife', gMonth, gDay, lang);
         } else if (type === 'durur-circle') {
-            titleEl.textContent = H.t('dururCircleTitle');
+            // عنوان الديرة مع السنة الميلادية والهجرية
+            const _hStart = H.gregorianToHijri(gYear, 1, 1);
+            const _hEnd = H.gregorianToHijri(gYear, 12, 31);
+            const _hijriYearsArr = _hStart.year === _hEnd.year ? [_hStart.year] : [_hStart.year, _hEnd.year];
+            const _yearLabel = lang === 'en'
+                ? `${gYear} — ${_hijriYearsArr.join('/')}`
+                : `${H.toArabicNumerals(String(gYear))} — ${_hijriYearsArr.map(y => H.toArabicNumerals(String(y))).join('/')}`;
+            titleEl.textContent = H.t('dururCircleTitle') + '  ' + _yearLabel;
+            if (lang === 'en') {
+                titleEl.innerHTML = H.t('dururCircleTitle') + '  ' + _yearLabel + ' <button class="info-help-btn" id="dirat-help-btn" aria-label="What is this?">?</button>';
+            }
             html = _renderDururCircle(gMonth, gDay, gYear, lang);
         }
 
+        // توسيط وتكبير عنوان ديرة الدرور
+        const header = document.querySelector('.anwa-detail-header');
+        if (type === 'durur-circle') {
+            header.classList.add('dirat-duror-header');
+        } else {
+            header.classList.remove('dirat-duror-header');
+        }
+
         container.innerHTML = html;
+
+        // Setup help (?) button event listeners (English only)
+        _setupHelpButtons();
 
         // Determine origin (day-view or calendar-view)
         const dvVisible = document.getElementById('day-view').style.display !== 'none';
@@ -3419,7 +3619,7 @@ tr:nth-child(even) { background: #fafafa; }
         return html;
     }
 
-    // ─── دائرة الدرور والأنواء (Durur Circle) ───
+    // ─── ديرة الدرور (Dirat al-Duror) ───
 
     // ألوان الحلقات
     const _RING_COLORS = {
@@ -3459,18 +3659,43 @@ tr:nth-child(even) { background: #fafafa; }
         outer: '#f0ebe0', outerDark: '#1e1c18',
     };
 
+    // _diratYear — السنة الميلادية المستخدمة لحساب زوايا الديرة (تُضبط في _renderDururCircle)
+    let _diratYear = new Date().getFullYear();
+
+    function _isLeapGregorian(y) {
+        return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+    }
+
     function _dateToAngle(month, day) {
-        const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-        const doy = DOY[month - 1] + day;
-        // 20 يونيو = أعلى الدائرة (0°)، الاتجاه عكس عقارب الساعة (كالصورة المرجعية)
-        const JUN20 = 171;
-        const offset = ((JUN20 - doy) % 365 + 365) % 365;
-        return (offset / 365) * 360;
+        // حساب يوم السنة من Date مباشرة — يتعامل مع الكبيسة تلقائياً
+        const dt = new Date(_diratYear, month - 1, day);
+        const jan1 = new Date(_diratYear, 0, 1);
+        const doy = Math.floor((dt - jan1) / 86400000) + 1;
+        const totalDays = _isLeapGregorian(_diratYear) ? 366 : 365;
+        // 20 يونيو = أعلى الديرة (0°)، الاتجاه عكس عقارب الساعة
+        const jun20 = new Date(_diratYear, 5, 20);
+        const JUN20 = Math.floor((jun20 - jan1) / 86400000) + 1;
+        const offset = ((JUN20 - doy) % totalDays + totalDays) % totalDays;
+        return (offset / totalDays) * 360;
     }
     // زاوية نهاية اليوم (= بداية اليوم التالي) — لسد الفجوات بين القطاعات المتجاورة
     function _dateToAngleEnd(month, day) {
-        const d = new Date(2025, month - 1, day + 1);
+        const d = new Date(_diratYear, month - 1, day + 1);
         return _dateToAngle(d.getMonth() + 1, d.getDate());
+    }
+
+    // تحويل زاوية في الديرة إلى تاريخ ميلادي (عكس _dateToAngle)
+    function _angleToDate(angleDeg) {
+        const totalDays = _isLeapGregorian(_diratYear) ? 366 : 365;
+        const jan1 = new Date(_diratYear, 0, 1);
+        const jun20 = new Date(_diratYear, 5, 20);
+        const JUN20 = Math.floor((jun20 - jan1) / 86400000) + 1;
+        const normAngle = ((angleDeg % 360) + 360) % 360;
+        const offset = Math.round((normAngle / 360) * totalDays);
+        let doy = ((JUN20 - offset) % totalDays + totalDays) % totalDays;
+        if (doy === 0) doy = totalDays;
+        const resultDate = new Date(jan1.getTime() + (doy - 1) * 86400000);
+        return { month: resultDate.getMonth() + 1, day: resultDate.getDate() };
     }
 
     // تغميق لون لإنتاج لون إطار مميز
@@ -3585,15 +3810,21 @@ tr:nth-child(even) { background: #fafafa; }
         return laneAssignment;
     }
 
+    // حساب يوم السنة من Date — يدعم الكبيسة
+    function _doyOf(month, day) {
+        const dt = new Date(_diratYear, month - 1, day);
+        const jan1 = new Date(_diratYear, 0, 1);
+        return Math.floor((dt - jan1) / 86400000) + 1;
+    }
+
     // تحديد فصل الريح بناءً على منتصف فترتها
     function _windSeason(w) {
         const fm = w.from[0], fd = w.from[1], tm = w.to[0], td = w.to[1];
-        // حساب منتصف الفترة
-        const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-        const doyFrom = DOY[fm - 1] + fd;
-        let doyTo = DOY[tm - 1] + td;
-        if (doyTo < doyFrom) doyTo += 365;
-        const midDoy = ((doyFrom + doyTo) / 2) % 365 || 365;
+        const totalDays = _isLeapGregorian(_diratYear) ? 366 : 365;
+        const doyFrom = _doyOf(fm, fd);
+        let doyTo = _doyOf(tm, td);
+        if (doyTo < doyFrom) doyTo += totalDays;
+        const midDoy = ((doyFrom + doyTo) / 2) % totalDays || totalDays;
         // الفصول: صيف (القيظ)=Jun21-Sep22, خريف (الصفري)=Sep23-Dec21, شتاء=Dec22-Mar20, ربيع (الصيف)=Mar21-Jun20
         if (midDoy >= 172 && midDoy <= 265) return 'summer';   // القيظ (يونيو-سبتمبر)
         if (midDoy >= 266 && midDoy <= 355) return 'autumn';   // الصفري (سبتمبر-ديسمبر)
@@ -3631,21 +3862,491 @@ tr:nth-child(even) { background: #fafafa; }
     // ══════════════════════════════════════════════════════════════
     // ⚠️  أنصاف الأقطار وتخطيط الحلقات — مُقفل (LOCKED v4.58)
     //     لا يجوز تعديل الترتيب أو الأنصاف أو عدد الحلقات
-    //     المرجع: DURUR_CIRCLE_SPEC.md
+    //     المرجع: DIRAT_DUROR_SPEC.md
     // ══════════════════════════════════════════════════════════════
+
+    // ─── تنسيق اسم الدر مع رقم المئة كحرف علوي ───
+    const _SUPERSCRIPTS = ['¹','²','³','⁴'];
+    function _formatDurrName(durr) {
+        if (!durr || durr.miaIdx == null) return durr ? durr.durr : '—';
+        return _SUPERSCRIPTS[durr.miaIdx] + durr.durrNum;
+    }
+
+    // ─── حساب تاريخ وسط النطاق ───
+    function _getMidDate(from, to) {
+        const dim = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+        function toDOY(m, d) { let s = 0; for (let i = 1; i < m; i++) s += dim[i]; return s + d; }
+        function fromDOY(doy) { if (doy < 1) doy += 365; let m = 1; while (m <= 12 && doy > dim[m]) { doy -= dim[m]; m++; } return [Math.min(m, 12), Math.max(doy, 1)]; }
+        let d1 = toDOY(from[0], from[1]);
+        let d2 = toDOY(to[0], to[1]);
+        if (d2 < d1) d2 += 365;
+        const mid = ((d1 + d2) >> 1);
+        return fromDOY(mid > 365 ? mid - 365 : mid);
+    }
+
+    // ─── بطاقة تاريخ الإبرة المسحوبة ───
+    function _showNeedleDateCard(gMonth, gDay, lang, infoPanel, container) {
+        if (!infoPanel) return;
+        const gYear = _diratYear || new Date().getFullYear();
+        const mNames = lang === 'en'
+            ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            : ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+        const hijri = H.gregorianToHijri(gYear, gMonth, gDay);
+        const hMonthNames = lang === 'en' ? H.MONTH_NAMES_EN : H.MONTH_NAMES;
+
+        let detail = `<div style="font-size:1.05rem;font-weight:700;margin-bottom:4px">`;
+        detail += `${gDay} ${mNames[gMonth - 1]} ${gYear}`;
+        detail += `</div>`;
+        detail += `<div style="font-size:0.9rem;opacity:0.8;margin-bottom:8px">`;
+        detail += `${hijri.day} ${hMonthNames[hijri.month - 1]} ${hijri.year}`;
+        detail += `</div>`;
+
+        // ملخص كل الحلقات لهذا اليوم
+        const summary = _buildRingSummaryHTML(gMonth, gDay, gMonth, gDay, gYear, lang);
+        if (summary) {
+            detail += `<div style="font-size:13px;line-height:1.7">${summary}</div>`;
+        }
+
+        // الأحداث الإسلامية
+        const eventKey = hijri.month + '-' + hijri.day;
+        const events = H.ISLAMIC_EVENTS;
+        if (events && events[eventKey]) {
+            const ev = events[eventKey];
+            const evName = lang === 'en' ? ev.en : ev.ar;
+            detail += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--papyrus-border,#ccc);text-align:center">`;
+            detail += `<span style="font-size:1.2em">🌙</span> <strong>${evName}</strong>`;
+            detail += `</div>`;
+        }
+
+        infoPanel.innerHTML = detail;
+        infoPanel.style.display = '';
+
+        // تحديث الأقسام الموسمية أسفل الديرة
+        const seasonalEl = container.querySelector('#durur-seasonal-section');
+        if (seasonalEl) {
+            seasonalEl.innerHTML = _buildSeasonalHTML(gMonth, gDay, gYear, lang);
+        }
+    }
+
+    // ─── ملخص حلقات الديرة لنطاق شهر كامل ───
+    // تجمع: الفصل، البرج، الأنواء، الدرور، الرياح، الضربات البحرية، المواسم الكبرى
+    function _buildRingSummaryHTML(fromMonth, fromDay, toMonth, toDay, gYear, lang, excludeRing) {
+        const dim = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+        if (_isLeapGregorian(gYear)) dim[2] = 29;
+        function toDOY(m, d) { let s = 0; for (let i = 1; i < m; i++) s += dim[i]; return s + d; }
+        function fromDOY(doy) { if (doy < 1) doy += 365; if (doy > 365) doy -= 365; let m = 1; while (m <= 12 && doy > dim[m]) { doy -= dim[m]; m++; } return [Math.min(m, 12), Math.max(doy, 1)]; }
+
+        let d1 = toDOY(fromMonth, fromDay);
+        let d2 = toDOY(toMonth, toDay);
+        if (d2 < d1) d2 += 365;
+
+        // نقاط معاينة كل 3 أيام لدقة أعلى
+        const pts = [];
+        for (let d = d1; d <= d2; d += 3) {
+            const [m, dy] = fromDOY(d > 365 ? d - 365 : d);
+            pts.push([m, dy]);
+        }
+        const [lm, ld] = fromDOY(d2 > 365 ? d2 - 365 : d2);
+        pts.push([lm, ld]);
+
+        // تجميع القيم الفريدة
+        const seasons = new Map(), zodiacs = new Map(), stars = new Map();
+        const durrs = new Map(), winds = new Map(), strikes = new Map(), bigSeasons = new Map();
+
+        pts.forEach(([m, d]) => {
+            const se = H.getSeason(m, d);
+            if (se) seasons.set(se.name, se);
+            const zo = H.getZodiac(m, d);
+            if (zo) zodiacs.set(zo.name, zo);
+            const ta = H.getTale3(m, d);
+            if (ta) stars.set(ta.name, ta);
+            const du = H.getDurr(m, d, gYear);
+            if (du) durrs.set(_formatDurrName(du), du);
+            H.getSeasonalWinds(m, d).forEach(w => winds.set(w.name, w));
+            // الضربات البحرية
+            H.ANWA_ENRICHMENT.seaStrikes.forEach(s => {
+                if (H._matchRange(m, d, s.from, s.to)) {
+                    const sName = lang === 'en' ? s.en : s.ar;
+                    strikes.set(sName, s);
+                }
+            });
+            // ضربة الأحيمر البحرية (المنقولة لحلقة الرياح)
+            if (H._matchRange(m, d, [11,1], [11,10])) {
+                strikes.set(lang === 'en' ? 'Ahimar Strike (Sea)' : 'ضربة الأحيمر (بحرية)', { from: [11,1], to: [11,10] });
+            }
+            H.getActiveSeasons(m, d).forEach(s => {
+                const sn = lang === 'en' ? s.en : s.ar;
+                bigSeasons.set(sn, s);
+            });
+        });
+
+        let html = '';
+        const section = (icon, title, items) => {
+            if (items.length === 0) return '';
+            return `<div style="margin:6px 0"><span style="opacity:0.7">${icon}</span> <strong>${title}:</strong> ${items.join('، ')}</div>`;
+        };
+
+        if (excludeRing !== 'season' && excludeRing !== 'mia') html += section('🌍', lang === 'en' ? 'Season' : 'الفصل', [...seasons.keys()]);
+        if (excludeRing !== 'zodiac') html += section('♈', lang === 'en' ? 'Zodiac' : 'البرج', [...zodiacs.keys()]);
+        if (excludeRing !== 'star') html += section('⭐', lang === 'en' ? 'Stars' : 'الأنواء', [...stars.keys()]);
+        if (excludeRing !== 'durr') html += section('📜', lang === 'en' ? 'Durr' : 'الدرور', [...durrs.keys()]);
+        if (excludeRing !== 'wind') html += section('💨', lang === 'en' ? 'Winds' : 'الرياح', [...winds.keys()]);
+        if (strikes.size > 0 && excludeRing !== 'sea-strike' && excludeRing !== 'sea-strike-wind') html += section('⚓', lang === 'en' ? 'Sea Strikes' : 'الضربات البحرية', [...strikes.keys()]);
+        if (bigSeasons.size > 0) html += section('🗓️', lang === 'en' ? 'Major Seasons' : 'المواسم', [...bigSeasons.keys()]);
+
+        return html;
+    }
+
+    // ─── بناء HTML لنطاق زمني كامل (تجميع عدة نقاط) ───
+    // تُستخدم عند النقر على شهر هجري يمتد عبر أكثر من شهر ميلادي
+    function _buildSeasonalRangeHTML(fromDate, toDate, gYear, lang) {
+        // إنشاء نقاط معاينة عبر النطاق (كل 7 أيام تقريباً)
+        const dim = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+        if (_isLeapGregorian(gYear)) dim[2] = 29;
+        function toDOY(m, d) { let s = 0; for (let i = 1; i < m; i++) s += dim[i]; return s + d; }
+        function fromDOY(doy) { if (doy < 1) doy += 365; if (doy > 365) doy -= 365; let m = 1; while (m <= 12 && doy > dim[m]) { doy -= dim[m]; m++; } return [Math.min(m, 12), Math.max(doy, 1)]; }
+
+        let d1 = toDOY(fromDate[0], fromDate[1]);
+        let d2 = toDOY(toDate[0], toDate[1]);
+        if (d2 < d1) d2 += 365;
+
+        // نقاط معاينة كل 5 أيام
+        const samplePoints = [];
+        for (let d = d1; d <= d2; d += 5) {
+            const [sm, sd] = fromDOY(d > 365 ? d - 365 : d);
+            samplePoints.push([sm, sd]);
+        }
+        // تأكد من تضمين آخر يوم
+        const [lastM, lastD] = fromDOY(d2 > 365 ? d2 - 365 : d2);
+        samplePoints.push([lastM, lastD]);
+
+        // تجميع النتائج الفريدة
+        const fishSet = new Map();
+        const cropsSet = new Map();
+        const wildlifeSet = new Map();
+        const seasonsSet = new Map();
+        const birdsSet = new Map();
+        const proverbsSet = new Map();
+        const astroSet = new Map();
+        let durrDetails = null;
+        let nextConj = null;
+
+        samplePoints.forEach(([sm, sd]) => {
+            H.getSeasonalFish(sm, sd).filter(f => f.inSeason).forEach(f => fishSet.set(f.name, f));
+            H.getSeasonalCrops(sm, sd).filter(c => c.inSeason).forEach(c => cropsSet.set(c.name, c));
+            H.getSeasonalWildlife(sm, sd).filter(w => w.inSeason).forEach(w => wildlifeSet.set(w.name, w));
+            const as = H.getActiveSeasons(sm, sd);
+            as.forEach(s => seasonsSet.set(lang === 'en' ? s.en : s.ar, s));
+            const bm = H.getActiveBirdMigration(sm, sd);
+            bm.forEach(b => birdsSet.set(lang === 'en' ? b.en : b.ar, b));
+            const pv = H.getSeasonalProverbs(sm, sd, gYear);
+            pv.forEach(p => proverbsSet.set(lang === 'en' ? p.en : p.ar, p));
+            const ae = H.getUpcomingAstroEvents(sm, sd);
+            ae.forEach(e => astroSet.set(lang === 'en' ? e.en : e.ar, e));
+            if (!durrDetails) durrDetails = H.getDurrDetails(sm, sd, gYear);
+            if (!nextConj) nextConj = H.getNextThurayaConjunction(sm, sd);
+        });
+
+        // بناء HTML — نفس البنية مثل _buildSeasonalHTML لكن مع النتائج المجمّعة
+        let html = '';
+
+        const fishActive = [...fishSet.values()];
+        const cropsActive = [...cropsSet.values()];
+        const wildlifeActive = [...wildlifeSet.values()];
+
+        if (fishActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllFish')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            fishActive.forEach(f => { html += `<span class="durur-list-tag in-season">${f.name}</span>`; });
+            html += `</div></div>`;
+        }
+
+        if (cropsActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllCrops')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            cropsActive.forEach(c => { html += `<span class="durur-list-tag in-season">${c.name}</span>`; });
+            html += `</div></div>`;
+        }
+
+        if (wildlifeActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllWildlife')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            wildlifeActive.forEach(w => { html += `<span class="durur-list-tag in-season">${w.name}</span>`; });
+            html += `</div></div>`;
+        }
+
+        html += `<div class="durur-source">${H.t('anwaSource')}</div>`;
+
+        // بطاقات الإثراء
+        html += `<div class="durur-enrich-section">`;
+
+        // الدر
+        if (durrDetails && durrDetails.desc_ar) {
+            const durrDesc = lang === 'en' ? durrDetails.desc_en : durrDetails.desc_ar;
+            html += `<div class="dv-enrich-card dv-enrich-durr">`;
+            html += `<div class="dv-enrich-icon">📜</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${_formatDurrName(durrDetails)} — ${durrDetails.mia}</div>`;
+            html += `<div class="dv-enrich-desc">${durrDesc}</div>`;
+            html += `</div></div>`;
+        }
+
+        // المواسم
+        const activeSeasons = [...seasonsSet.values()];
+        if (activeSeasons.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-seasons">`;
+            html += `<div class="dv-enrich-icon">🗓️</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Active Seasons' : 'المواسم الحالية'}</div>`;
+            activeSeasons.forEach(s => {
+                const sName = lang === 'en' ? s.en : s.ar;
+                const sDesc = lang === 'en' ? s.desc_en : s.desc_ar;
+                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> <strong>${sName}</strong>: ${sDesc}</div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // أمثال
+        const proverbs = [...proverbsSet.values()];
+        if (proverbs.length > 0) {
+            const randomProverb = proverbs[Math.floor(Math.random() * proverbs.length)];
+            html += `<div class="dv-enrich-card dv-enrich-proverb">`;
+            html += `<div class="dv-enrich-icon">💬</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Proverb of the Day' : 'مثل اليوم'}</div>`;
+            html += `<div class="dv-enrich-quote">"${lang === 'en' ? randomProverb.en : randomProverb.ar}"</div>`;
+            if (lang === 'ar' && randomProverb.en) html += `<div class="dv-enrich-quote-sub">${randomProverb.en}</div>`;
+            html += `</div></div>`;
+        }
+
+        // أحداث فلكية
+        const upcomingAstro = [...astroSet.values()];
+        if (upcomingAstro.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-astro">`;
+            html += `<div class="dv-enrich-icon">🔭</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Upcoming Astronomical Events' : 'أحداث فلكية قريبة'}</div>`;
+            upcomingAstro.forEach(ev => {
+                const evName = lang === 'en' ? ev.en : ev.ar;
+                const evDesc = lang === 'en' ? ev.desc_en : ev.desc_ar;
+                const evDate = lang === 'en' ? `${ev.date[1]}/${ev.date[0]}` : H.toArabicNumerals(`${ev.date[1]}/${ev.date[0]}`);
+                html += `<div class="dv-enrich-astro-item">${ev.icon} <strong>${evName}</strong> (${evDate})<br><span class="dv-enrich-astro-desc">${evDesc}</span></div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // هجرة الطيور
+        const birdsMigration = [...birdsSet.values()];
+        if (birdsMigration.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-birds">`;
+            html += `<div class="dv-enrich-icon">🦅</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Bird Migration' : 'هجرة الطيور'}</div>`;
+            birdsMigration.forEach(b => {
+                const bName = lang === 'en' ? b.en : b.ar;
+                const bDesc = lang === 'en' ? b.desc_en : b.desc_ar;
+                const dirIcon = b.direction === 'south' ? '⬇️' : b.direction === 'north' ? '⬆️' : '📍';
+                html += `<div class="dv-enrich-bird-item">${dirIcon} <strong>${bName}</strong>: ${bDesc}</div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // اقتران الثريا
+        if (nextConj) {
+            const cName = lang === 'en' ? nextConj.en : nextConj.ar;
+            const cNick = lang === 'en' ? nextConj.nickname_en : nextConj.nickname_ar;
+            const cDesc = lang === 'en' ? nextConj.desc_en : nextConj.desc_ar;
+            const cDate = _fmtDateRange(nextConj.from, nextConj.to, lang);
+            html += `<div class="dv-enrich-card dv-enrich-thuraya">`;
+            html += `<div class="dv-enrich-icon">✨</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Next Pleiades Conjunction' : 'اقتران الثريا القادم'}</div>`;
+            html += `<div class="dv-enrich-desc"><strong>${cName}</strong> — ${cNick}<br>${cDate}<br>${cDesc}</div>`;
+            html += `</div></div>`;
+        }
+
+        html += `</div>`; // close durur-enrich-section
+        return html;
+    }
+
+    // ─── بناء HTML الأقسام الموسمية + بطاقات الإثراء ───
+    function _buildSeasonalHTML(gMonth, gDay, gYear, lang) {
+        let html = '';
+
+        // ─── الأسماك / المحاصيل / الحياة الفطرية ───
+        const fishActive = H.getSeasonalFish(gMonth, gDay).filter(f => f.inSeason);
+        const cropsActive = H.getSeasonalCrops(gMonth, gDay).filter(c => c.inSeason);
+        const wildlifeActive = H.getSeasonalWildlife(gMonth, gDay).filter(w => w.inSeason);
+
+        if (fishActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllFish')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            fishActive.forEach(f => { html += `<span class="durur-list-tag in-season">${f.name}</span>`; });
+            html += `</div></div>`;
+        }
+
+        if (cropsActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllCrops')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            cropsActive.forEach(c => { html += `<span class="durur-list-tag in-season">${c.name}</span>`; });
+            html += `</div></div>`;
+        }
+
+        if (wildlifeActive.length > 0) {
+            html += `<div class="durur-list-section">`;
+            html += `<div class="durur-list-title">${H.t('anwaAllWildlife')}</div>`;
+            html += `<div class="durur-list-grid">`;
+            wildlifeActive.forEach(w => { html += `<span class="durur-list-tag in-season">${w.name}</span>`; });
+            html += `</div></div>`;
+        }
+
+        html += `<div class="durur-source">${H.t('anwaSource')}</div>`;
+
+        // ─── بطاقات الإثراء ───
+        html += `<div class="durur-enrich-section">`;
+
+        // 1. وصف الدر
+        const durrDetails = H.getDurrDetails(gMonth, gDay, gYear);
+        if (durrDetails && durrDetails.desc_ar) {
+            const durrDesc = lang === 'en' ? durrDetails.desc_en : durrDetails.desc_ar;
+            html += `<div class="dv-enrich-card dv-enrich-durr">`;
+            html += `<div class="dv-enrich-icon">📜</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${_formatDurrName(durrDetails)} — ${durrDetails.mia}</div>`;
+            html += `<div class="dv-enrich-desc">${durrDesc}</div>`;
+            html += `</div></div>`;
+        }
+
+        // 2. المواسم الخاصة النشطة
+        const activeSeasons = H.getActiveSeasons(gMonth, gDay);
+        if (activeSeasons.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-seasons">`;
+            html += `<div class="dv-enrich-icon">🗓️</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Active Seasons' : 'المواسم الحالية'}</div>`;
+            activeSeasons.forEach(s => {
+                const sName = lang === 'en' ? s.en : s.ar;
+                const sDesc = lang === 'en' ? s.desc_en : s.desc_ar;
+                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> <strong>${sName}</strong>: ${sDesc}</div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // 3. أمثال اليوم
+        const proverbs = H.getSeasonalProverbs(gMonth, gDay, gYear);
+        if (proverbs.length > 0) {
+            const randomProverb = proverbs[Math.floor(Math.random() * proverbs.length)];
+            html += `<div class="dv-enrich-card dv-enrich-proverb">`;
+            html += `<div class="dv-enrich-icon">💬</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Proverb of the Day' : 'مثل اليوم'}</div>`;
+            html += `<div class="dv-enrich-quote">"${lang === 'en' ? randomProverb.en : randomProverb.ar}"</div>`;
+            if (lang === 'ar' && randomProverb.en) html += `<div class="dv-enrich-quote-sub">${randomProverb.en}</div>`;
+            html += `</div></div>`;
+        }
+
+        // 4. أحداث فلكية قريبة
+        const upcomingAstro = H.getUpcomingAstroEvents(gMonth, gDay);
+        if (upcomingAstro.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-astro">`;
+            html += `<div class="dv-enrich-icon">🔭</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Upcoming Astronomical Events' : 'أحداث فلكية قريبة'}</div>`;
+            upcomingAstro.forEach(ev => {
+                const evName = lang === 'en' ? ev.en : ev.ar;
+                const evDesc = lang === 'en' ? ev.desc_en : ev.desc_ar;
+                const evDate = lang === 'en' ? `${ev.date[1]}/${ev.date[0]}` : H.toArabicNumerals(`${ev.date[1]}/${ev.date[0]}`);
+                html += `<div class="dv-enrich-astro-item">${ev.icon} <strong>${evName}</strong> (${evDate})<br><span class="dv-enrich-astro-desc">${evDesc}</span></div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // 5. هجرة الطيور
+        const birdsMigration = H.getActiveBirdMigration(gMonth, gDay);
+        if (birdsMigration.length > 0) {
+            html += `<div class="dv-enrich-card dv-enrich-birds">`;
+            html += `<div class="dv-enrich-icon">🦅</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Bird Migration' : 'هجرة الطيور'}</div>`;
+            birdsMigration.forEach(b => {
+                const bName = lang === 'en' ? b.en : b.ar;
+                const bDesc = lang === 'en' ? b.desc_en : b.desc_ar;
+                const dirIcon = b.direction === 'south' ? '⬇️' : b.direction === 'north' ? '⬆️' : '📍';
+                html += `<div class="dv-enrich-bird-item">${dirIcon} <strong>${bName}</strong>: ${bDesc}</div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        // 6. اقتران الثريا القادم
+        const nextConj = H.getNextThurayaConjunction(gMonth, gDay);
+        if (nextConj) {
+            const cName = lang === 'en' ? nextConj.en : nextConj.ar;
+            const cNick = lang === 'en' ? nextConj.nickname_en : nextConj.nickname_ar;
+            const cDesc = lang === 'en' ? nextConj.desc_en : nextConj.desc_ar;
+            const cDate = _fmtDateRange(nextConj.from, nextConj.to, lang);
+            html += `<div class="dv-enrich-card dv-enrich-thuraya">`;
+            html += `<div class="dv-enrich-icon">✨</div>`;
+            html += `<div class="dv-enrich-body">`;
+            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Next Pleiades Conjunction' : 'اقتران الثريا القادم'}</div>`;
+            html += `<div class="dv-enrich-desc"><strong>${cName}</strong> — ${cNick}<br>${cDate}<br>${cDesc}</div>`;
+            html += `</div></div>`;
+        }
+
+        html += `</div>`; // close durur-enrich-section
+        return html;
+    }
+
     function _renderDururCircle(gMonth, gDay, gYear, lang) {
+        // ضبط السنة الميلادية لحساب زوايا الديرة (يدعم السنة الكبيسة)
+        _diratYear = gYear;
+
+        let html = '';
+        // Help popup for English users (appears at top of compass)
+        if (lang === 'en') {
+            html += `<div class="info-help-popup" id="dirat-help-popup"><h4>${H.t('dururExplainTitle')}</h4><p>${H.t('dururExplain').replace(/\n/g, '<br>')}</p></div>`;
+        }
+
         const cx = 540, cy = 540;
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const RC = _RING_COLORS;
         const todayAngle = _dateToAngle(gMonth, gDay);
 
-        let svg = `<svg viewBox="0 0 1080 1080" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
+        let svg = `<svg viewBox="-130 -130 1340 1340" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
         // جعل كل العناصر غير التفاعلية شفافة للنقر، فقط .durur-segment تستقبل الأحداث
         svg += `<style>
-            .durur-circle-svg circle, .durur-circle-svg line, .durur-circle-svg text,
+            .durur-circle-svg circle, .durur-circle-svg line, .durur-circle-svg polygon, .durur-circle-svg text,
             .durur-circle-svg foreignObject, .durur-circle-svg foreignObject * { pointer-events: none; }
             .durur-circle-svg .durur-segment { pointer-events: all; cursor: pointer; }
+            .durur-circle-svg .needle-drag-handle { pointer-events: all; cursor: grab; }
+            .dirat-needle-group:hover .needle-arrow { opacity: 0.8; }
         </style>`;
+        // ─── تدرجات الإبرة الفولاذية ───
+        svg += `<defs>`;
+        svg += `<linearGradient id="needle-steel" x1="0" y1="0" x2="1" y2="0">`;
+        svg += `<stop offset="0%" stop-color="${isDark ? '#606878' : '#a0a8b4'}"/>`;
+        svg += `<stop offset="35%" stop-color="${isDark ? '#909aa8' : '#d0d4dc'}"/>`;
+        svg += `<stop offset="50%" stop-color="${isDark ? '#b0b8c4' : '#eef0f4'}"/>`;
+        svg += `<stop offset="65%" stop-color="${isDark ? '#909aa8' : '#d0d4dc'}"/>`;
+        svg += `<stop offset="100%" stop-color="${isDark ? '#606878' : '#a0a8b4'}"/>`;
+        svg += `</linearGradient>`;
+        svg += `<radialGradient id="needle-pivot">`;
+        svg += `<stop offset="0%" stop-color="${isDark ? '#c0c8d0' : '#f0f2f6'}"/>`;
+        svg += `<stop offset="70%" stop-color="${isDark ? '#808890' : '#b8bcc4'}"/>`;
+        svg += `<stop offset="100%" stop-color="${isDark ? '#585e68' : '#909498'}"/>`;
+        svg += `</radialGradient>`;
+        svg += `<radialGradient id="needle-grip">`;
+        svg += `<stop offset="0%" stop-color="${isDark ? '#a8b0b8' : '#e8ecf0'}"/>`;
+        svg += `<stop offset="100%" stop-color="${isDark ? '#707880' : '#b0b8c0'}"/>`;
+        svg += `</radialGradient>`;
+        svg += `<filter id="needle-shadow" x="-20%" y="-10%" width="140%" height="120%">`;
+        svg += `<feDropShadow dx="1.5" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.25"/>`;
+        svg += `</filter>`;
+        svg += `</defs>`;
 
         // ─── خلفيات الحلقات ───
         const _bgRing = (innerR, outerR, fill) => {
@@ -3777,7 +4478,17 @@ tr:nth-child(even) { background: #fafafa; }
                     : (isDark ? RC.durrMiaDark[mia][d] : RC.durrMia[mia][d]);
                 svg += `<path d="${_arcPath(arcS, arcE, 222, 280, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="durr" data-index="${mia * 10 + d}" data-name="${label}" data-mia="${mia}"/>`;
                 const midDeg = (arcS + (arcE - arcS) / 2) % 360;
-                svg += _radialTextVertical(label, midDeg, 226, 276, cx, cy, 12, isDurrCurrent);
+                // رقم الدر مع حرف علوي للمئة — المساريق يبقى باسمه النصي
+                const hasAlias = H.DUROR_ALIASES && H.DUROR_ALIASES[lang] && H.DUROR_ALIASES[lang][aliasKey];
+                let durrDisplayLabel;
+                if (hasAlias) {
+                    durrDisplayLabel = hasAlias;
+                } else {
+                    const durrNum = (d + 1) * 10;
+                    const numStr = lang === 'en' ? String(durrNum) : H.toArabicNumerals(String(durrNum));
+                    durrDisplayLabel = _SUPERSCRIPTS[mia] + numStr;
+                }
+                svg += _radialTextVertical(durrDisplayLabel, midDeg, 226, 276, cx, cy, 12, isDurrCurrent);
                 durrDayStart = endDay;
             }
         }
@@ -3858,6 +4569,43 @@ tr:nth-child(even) { background: #fafafa; }
                        `</foreignObject>`;
             }
         });
+
+        // ─── ضربة الأحيمر البحرية (11/1-11/10) — قطاع أحمر داخل حلقة الرياح ───
+        // تُرسم في نفس lane ضربة الأحيمر الريح (index 6, lane 0) لتوضيح فترة الذروة
+        {
+            const ahimarStrike = { from: [11,1], to: [11,10] };
+            const asFrom = _dateToAngle(ahimarStrike.from[0], ahimarStrike.from[1]);
+            const asTo = _dateToAngleEnd(ahimarStrike.to[0], ahimarStrike.to[1]);
+            let as1 = asTo, as2 = asFrom;
+            if (as2 < as1) as2 += 360;
+            const ahimarLane = laneAssignment[6]; // lane ضربة الأحيمر الريح
+            const asLr = laneRadii[ahimarLane];
+            const asFill = isDark ? '#6a2020' : '#e0a0a0';
+            svg += `<path d="${_arcPath(as1, as2, asLr.inner, asLr.outer, cx, cy)}" fill="${asFill}" fill-opacity="0.85" stroke="${_darkenColor(asFill)}" stroke-width="0.5" class="durur-segment" data-ring="sea-strike-wind" data-index="0" data-name="${lang === 'en' ? 'Ahimar Strike (Sea)' : 'ضربة الأحيمر (بحرية)'}" cursor="pointer"/>`;
+            // خطوط شعاعية
+            const toRadS = d => (d - 90) * Math.PI / 180;
+            const rS1 = toRadS(as1), rS2 = toRadS(as2 % 360);
+            svg += `<line x1="${cx + asLr.inner * Math.cos(rS1)}" y1="${cy + asLr.inner * Math.sin(rS1)}" x2="${cx + asLr.outer * Math.cos(rS1)}" y2="${cy + asLr.outer * Math.sin(rS1)}" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            svg += `<line x1="${cx + asLr.inner * Math.cos(rS2)}" y1="${cy + asLr.inner * Math.sin(rS2)}" x2="${cx + asLr.outer * Math.cos(rS2)}" y2="${cy + asLr.outer * Math.sin(rS2)}" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            // نص
+            const asSpan = as2 - as1;
+            if (asSpan >= 5) {
+                const asMidR = (asLr.inner + asLr.outer) / 2;
+                const asMidDeg = (as1 + asSpan / 2) % 360;
+                const asMRad = (asMidDeg - 90) * Math.PI / 180;
+                const asMx = cx + asMidR * Math.cos(asMRad);
+                const asMy = cy + asMidR * Math.sin(asMRad);
+                const asArcLen = (asSpan / 360) * 2 * Math.PI * asMidR;
+                const asLaneH = asLr.outer - asLr.inner;
+                let asRot = asMidDeg;
+                if (asMidDeg > 90 && asMidDeg < 270) asRot += 180;
+                const asFoW = Math.max(asArcLen * 0.85, 50);
+                svg += `<foreignObject x="${asMx - asFoW / 2}" y="${asMy - asLaneH / 2}" width="${asFoW}" height="${asLaneH}" transform="rotate(${asRot},${asMx},${asMy})">` +
+                       `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:8px;color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:visible;line-height:1;pointer-events:none;">${lang === 'en' ? 'Ahimar Strike' : 'ضربة الأحيمر'}</div>` +
+                       `</foreignObject>`;
+            }
+        }
+
         svg += `<circle cx="${cx}" cy="${cy}" r="361" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
 
         // ═══════════════════════════════════════════════════
@@ -3895,7 +4643,7 @@ tr:nth-child(even) { background: #fafafa; }
         // Lane 0 (كامل العرض): المواسم العادية
         // Lane 1 (خارجية): كنة الثريا (تتداخل مع الذراعين)
         // Lane 2 (داخلية): الذراعين (أسفل الكنة)
-        // ⚠️ مُقفل — لا يجوز تعديل ترتيب الحارات — DURUR_CIRCLE_SPEC.md
+        // ⚠️ مُقفل — لا يجوز تعديل ترتيب الحارات — DIRAT_DUROR_SPEC.md
         const SEASON_LANES = [0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0];
         const seasonLane0Inner = 376, seasonLane0Outer = 398;
         const seasonLane1Inner = 398, seasonLane1Outer = 420;
@@ -3915,11 +4663,11 @@ tr:nth-child(even) { background: #fafafa; }
 
         // تحديد لون الموسم بناءً على فترته
         const _seasonColor = (s, current) => {
-            const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-            const doy1 = DOY[s.from[0] - 1] + s.from[1];
-            let doy2 = DOY[s.to[0] - 1] + s.to[1];
-            if (doy2 < doy1) doy2 += 365;
-            const midDoy = ((doy1 + doy2) / 2) % 365;
+            const totalDays = _isLeapGregorian(_diratYear) ? 366 : 365;
+            const doy1 = _doyOf(s.from[0], s.from[1]);
+            let doy2 = _doyOf(s.to[0], s.to[1]);
+            if (doy2 < doy1) doy2 += totalDays;
+            const midDoy = ((doy1 + doy2) / 2) % totalDays;
 
             let season;
             if (midDoy >= 172 && midDoy <= 265) season = 'Summer';
@@ -3933,10 +4681,9 @@ tr:nth-child(even) { background: #fafafa; }
 
         // هل الموسم الحالي؟
         const _isSeasonCurrent = (s) => {
-            const DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-            const today = DOY[gMonth - 1] + gDay;
-            const start = DOY[s.from[0] - 1] + s.from[1];
-            let end = DOY[s.to[0] - 1] + s.to[1];
+            const today = _doyOf(gMonth, gDay);
+            const start = _doyOf(s.from[0], s.from[1]);
+            let end = _doyOf(s.to[0], s.to[1]);
             if (end >= start) return today >= start && today <= end;
             return today >= start || today <= end;
         };
@@ -3977,7 +4724,8 @@ tr:nth-child(even) { background: #fafafa; }
         // ═══════════════════════════════════════════════════
         // ─── Ring 6: علامات الأيام ───
         // ═══════════════════════════════════════════════════
-        const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const febDays = _isLeapGregorian(gYear) ? 29 : 28;
+        const monthDays = [31, febDays, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const tickColor = isDark ? '#a09080' : '#4a3520';
         const tickColorLight = isDark ? '#807060' : '#6a5540';
         // ─── Ring 6a: الخطوط (أشرطة الأيام) ───
@@ -4015,12 +4763,16 @@ tr:nth-child(even) { background: #fafafa; }
         const monthLineColor = isDark ? '#a09080' : '#4a3520';
         for (let m = 0; m < 12; m++) {
             const aFirst = _dateToAngle(m + 1, 1);
-            const aLast = _dateToAngle(m + 1, monthDays[m]);
+            const aLast = _dateToAngleEnd(m + 1, monthDays[m]);
             let arcStart = aLast, arcEnd = aFirst;
             if (arcEnd < arcStart) arcEnd += 360;
-            // خط شعاعي عند بداية كل شهر (يمتد عبر كل الحلقات الخارجية)
-            const rad1 = (aFirst - 90) * Math.PI / 180;
-            svg += `<line x1="${cx + 422 * Math.cos(rad1)}" y1="${cy + 422 * Math.sin(rad1)}" x2="${cx + 519 * Math.cos(rad1)}" y2="${cy + 519 * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5"/>`;
+            // قطاع شفاف قابل للنقر
+            svg += `<path d="${_arcPath(arcStart, arcEnd, 422, 519, cx, cy)}" fill="transparent" stroke="none" class="durur-segment" data-ring="month" data-index="${m}" data-name="${gMonthNames[m]}" style="cursor:pointer"/>`;
+            // خط شعاعي عند بداية كل شهر
+            {
+                const rad1 = (aFirst - 90) * Math.PI / 180;
+                svg += `<line x1="${cx + 422 * Math.cos(rad1)}" y1="${cy + 422 * Math.sin(rad1)}" x2="${cx + 519 * Math.cos(rad1)}" y2="${cy + 519 * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5" pointer-events="none"/>`;
+            }
             // اسم الشهر في منتصف القوس
             const midDeg = (arcStart + (arcEnd - arcStart) / 2) % 360;
             svg += _radialText(gMonthNames[m], midDeg, 497, cx, cy, 22, false);
@@ -4028,10 +4780,150 @@ tr:nth-child(even) { background: #fafafa; }
         svg += `<circle cx="${cx}" cy="${cy}" r="520" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
 
         // ═══════════════════════════════════════════════════
+        // ─── Ring 8: الشهور الهجرية (حلقة متغيرة) ───
+        // ═══════════════════════════════════════════════════
+        {
+            // ─── ألوان الحلقة الهجرية ───
+            // لونان مختلفان للسنتين الهجريتين: الأقدم (دافئ) والأحدث (بارد)
+            const hijriOlderBase = isDark ? '#3a3028' : '#8a7a5a';   // السنة الأقدم — بني دافئ
+            const hijriNewerBase = isDark ? '#2a4038' : '#5a8a6a';   // السنة الأحدث — أخضر بارد
+            const hijriOlderCurrent = isDark ? '#504030' : '#a89870'; // الشهر الحالي (أقدم)
+            const hijriNewerCurrent = isDark ? '#3a6050' : '#7ab890'; // الشهر الحالي (أحدث)
+            const hijriOlderStroke = isDark ? '#5a4a38' : '#6a5a40';
+            const hijriNewerStroke = isDark ? '#3a5a48' : '#3a5a48';
+            const hijriCurrent = isDark ? '#3a6050' : '#7ab890';
+            const hijriText = isDark ? '#c0d8c8' : '#2a4030';
+            const hijriTickColor = isDark ? '#7a9a88' : '#3a5a48';
+            const hijriTickLight = isDark ? '#5a7a68' : '#5a7a68';
+            const hijriLineColor = isDark ? '#7a9a88' : '#3a5a48';
+
+            // ─── حساب الشهور الهجرية التي تقع في السنة الميلادية ───
+            const hStart = H.gregorianToHijri(gYear, 1, 1);
+            const hEnd = H.gregorianToHijri(gYear, 12, 31);
+
+            // بناء قائمة كل الشهور الهجرية في النطاق
+            const hijriMonths = [];
+            let hY = hStart.year, hM = hStart.month;
+            while (hY < hEnd.year || (hY === hEnd.year && hM <= hEnd.month)) {
+                hijriMonths.push({ year: hY, month: hM });
+                hM++;
+                if (hM > 12) { hM = 1; hY++; }
+            }
+
+            // أنصاف الأقطار
+            const hTickInner = 524, hTickOuter = 548;
+            const hNumR = 557;
+            const hSepR = 565;
+            const hNameR = 587;
+            const hOuterR = 607;
+
+            // خلفية الحلقة
+            svg += `<circle cx="${cx}" cy="${cy}" r="${(hTickInner + hOuterR) / 2}" fill="none" stroke="${isDark ? 'rgba(42,64,56,0.3)' : 'rgba(90,138,106,0.12)'}" stroke-width="${hOuterR - hTickInner}"/>`;
+
+            // الهجري الحالي
+            const todayHijri = H.gregorianToHijri(gMonth, gDay, gYear);
+
+            // سنوات هجرية فريدة (لعنوان السنة)
+            const hijriYears = [...new Set(hijriMonths.map(m => m.year))];
+
+            hijriMonths.forEach((hm, idx) => {
+                const numDays = H.daysInMonth(hm.year, hm.month);
+
+                // أول يوم ميلادي للشهر الهجري
+                let firstG = H.hijriToGregorian(hm.year, hm.month, 1);
+                // آخر يوم ميلادي للشهر الهجري
+                let lastG = H.hijriToGregorian(hm.year, hm.month, numDays);
+
+                // قص: لا نعرض ما يقع خارج السنة الميلادية
+                let firstDay = 1, lastDay = numDays;
+                let isClippedStart = false, isClippedEnd = false;
+                if (firstG.year < gYear) {
+                    // الشهر يبدأ في السنة السابقة
+                    const jan1H = H.gregorianToHijri(gYear, 1, 1);
+                    firstDay = jan1H.day;
+                    firstG = { year: gYear, month: 1, day: 1 };
+                    isClippedStart = true;
+                }
+                if (lastG.year > gYear) {
+                    // الشهر ينتهي في السنة التالية
+                    const dec31H = H.gregorianToHijri(gYear, 12, 31);
+                    lastDay = dec31H.day;
+                    lastG = { year: gYear, month: 12, day: 31 };
+                    isClippedEnd = true;
+                }
+
+                // حساب الزوايا
+                const aFirst = _dateToAngle(firstG.month, firstG.day);
+                const aLast = _dateToAngleEnd(lastG.month, lastG.day);
+                // القوس: من نهاية آخر يوم (CCW) إلى أول يوم
+                let arcStart = aLast, arcEnd = aFirst;
+                if (arcEnd < arcStart) arcEnd += 360;
+
+                // هل هذا الشهر الحالي؟ وهل هو من السنة الأقدم أم الأحدث؟
+                const isCurrent = (hm.year === todayHijri.year && hm.month === todayHijri.month);
+                const isOlderYear = hijriYears.length > 1 && hm.year === hijriYears[0];
+                const baseColor = isOlderYear ? hijriOlderBase : hijriNewerBase;
+                const currentColor = isOlderYear ? hijriOlderCurrent : hijriNewerCurrent;
+                const strokeColor = isOlderYear ? hijriOlderStroke : hijriNewerStroke;
+                const fillColor = isCurrent ? currentColor : baseColor;
+
+                // القطاع التفاعلي
+                const mName = lang === 'en' ? H.MONTH_NAMES_EN[hm.month - 1] : H.MONTH_NAMES[hm.month - 1];
+                svg += `<path d="${_arcPath(arcStart, arcEnd, hTickInner, hOuterR, cx, cy)}" fill="${fillColor}" fill-opacity="${isCurrent ? 0.5 : 0.25}" stroke="${strokeColor}" stroke-width="1.2" class="durur-segment" data-ring="hijri-month" data-index="${idx}" data-name="${mName}" data-hyear="${hm.year}" data-hmonth="${hm.month}"/>`;
+
+                // ─── أشرطة الأيام الهجرية ───
+                for (let d = firstDay; d <= lastDay; d++) {
+                    const dG = H.hijriToGregorian(hm.year, hm.month, d);
+                    if (dG.year !== gYear) continue;
+                    const angle = _dateToAngle(dG.month, dG.day);
+                    const rad = (angle - 90) * Math.PI / 180;
+                    const isFive = d % 5 === 0;
+                    if (d === 1) {
+                        svg += `<line x1="${cx + hTickInner * Math.cos(rad)}" y1="${cy + hTickInner * Math.sin(rad)}" x2="${cx + hTickOuter * Math.cos(rad)}" y2="${cy + hTickOuter * Math.sin(rad)}" stroke="${hijriTickColor}" stroke-width="2"/>`;
+                    } else if (isFive) {
+                        svg += `<line x1="${cx + (hTickInner + 2) * Math.cos(rad)}" y1="${cy + (hTickInner + 2) * Math.sin(rad)}" x2="${cx + (hTickOuter - 2) * Math.cos(rad)}" y2="${cy + (hTickOuter - 2) * Math.sin(rad)}" stroke="${hijriTickColor}" stroke-width="1.2"/>`;
+                    } else {
+                        svg += `<line x1="${cx + (hTickInner + 6) * Math.cos(rad)}" y1="${cy + (hTickInner + 6) * Math.sin(rad)}" x2="${cx + (hTickOuter - 4) * Math.cos(rad)}" y2="${cy + (hTickOuter - 4) * Math.sin(rad)}" stroke="${hijriTickLight}" stroke-width="0.6" opacity="0.7"/>`;
+                    }
+                }
+
+                // ─── أرقام الأيام (كل 5) ───
+                for (let d = firstDay; d <= lastDay; d++) {
+                    if (d % 5 === 0) {
+                        const dG = H.hijriToGregorian(hm.year, hm.month, d);
+                        if (dG.year !== gYear) continue;
+                        const angle = _dateToAngle(dG.month, dG.day);
+                        svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, hNumR, cx, cy, 9, false);
+                    }
+                }
+
+                // ─── خط فاصل عند بداية الشهر ───
+                {
+                    const radFirst = (aFirst - 90) * Math.PI / 180;
+                    svg += `<line x1="${cx + hTickInner * Math.cos(radFirst)}" y1="${cy + hTickInner * Math.sin(radFirst)}" x2="${cx + hOuterR * Math.cos(radFirst)}" y2="${cy + hOuterR * Math.sin(radFirst)}" stroke="${hijriLineColor}" stroke-width="1.5"/>`;
+                }
+
+                // ─── اسم الشهر الهجري + السنة على يساره ───
+                const span = arcEnd - arcStart;
+                if (span >= 6) {
+                    const midDeg = (arcStart + span / 2) % 360;
+                    const yearNum = lang === 'en' ? String(hm.year) : H.toArabicNumerals(String(hm.year));
+                    const label = span >= 10 ? `${mName}  ${yearNum}` : mName;
+                    svg += _radialText(label, midDeg, hNameR, cx, cy, 18, isCurrent);
+                }
+            });
+
+            // ─── خطوط إطار الحلقة الهجرية ───
+            svg += `<circle cx="${cx}" cy="${cy}" r="${hTickInner}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${hSepR}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${hOuterR}" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
+        }
+
+        // ═══════════════════════════════════════════════════
         // ─── الإطار الذهبي الخارجي المزخرف ───
         // ═══════════════════════════════════════════════════
-        const goldInner = 522;
-        const goldOuter = 530;
+        const goldInner = 610;
+        const goldOuter = 618;
         const goldMid = (goldInner + goldOuter) / 2;
         const goldColor1 = isDark ? '#8a7030' : '#c8a040';
         const goldColor2 = isDark ? '#a08838' : '#d4b050';
@@ -4062,149 +4954,79 @@ tr:nth-child(even) { background: #fafafa; }
         }
 
         // ═══════════════════════════════════════════════════
-        // ─── مؤشر اليوم (خط أحمر شعاعي) ───
+        // ─── مؤشر اليوم (إبرة فولاذية — قابلة للسحب) ───
         // ═══════════════════════════════════════════════════
-        const needleRad = (todayAngle - 90) * Math.PI / 180;
-        const nx = cx + (goldOuter + 3) * Math.cos(needleRad);
-        const ny = cy + (goldOuter + 3) * Math.sin(needleRad);
-        svg += `<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#e74c3c" stroke-width="2.5" opacity="0.7" stroke-dasharray="6,4" class="today-needle"/>`;
-        svg += `<circle cx="${nx}" cy="${ny}" r="7" fill="#e74c3c" opacity="0.9"/>`;
-        svg += `<circle cx="${cx}" cy="${cy}" r="5" fill="#e74c3c" opacity="0.9"/>`;
+        const needleLen = goldOuter + 40;   // تتجاوز الإطار الذهبي بوضوح
+        const tipY = cy - needleLen;        // = 540 - 658 = -118
+        const baseHW = 3.5;
+        const tipHW = 0.8;
+        const strkCol = isDark ? '#505860' : '#8a8e96';
+        const fistY = tipY;                // مركز القبضة عند طرف الإبرة
+        const wingY = fistY + 22;          // الأجنحة أسفل القبضة
+
+        svg += `<g id="dirat-needle" class="dirat-needle-group" transform="rotate(${todayAngle}, ${cx}, ${cy})" data-today-angle="${todayAngle}" data-current-angle="${todayAngle}" data-needle-len="${needleLen}">`;
+
+        // ── ظل الإبرة ──
+        svg += `<polygon points="${cx - baseHW + 1.5},${cy + 1.5} ${cx + baseHW + 1.5},${cy + 1.5} ${cx + tipHW + 1.5},${tipY + 20} ${cx - tipHW + 1.5},${tipY + 20}" fill="rgba(0,0,0,0.10)" class="today-needle"/>`;
+        // ── جسم الإبرة المدبب — فولاذ فضي ──
+        svg += `<polygon points="${cx - baseHW},${cy} ${cx + baseHW},${cy} ${cx + tipHW},${tipY + 18} ${cx - tipHW},${tipY + 18}" fill="url(#needle-steel)" filter="url(#needle-shadow)" class="today-needle"/>`;
+        // خط لمعة
+        svg += `<line x1="${cx - baseHW + 0.5}" y1="${cy}" x2="${cx - tipHW + 0.3}" y2="${tipY + 18}" stroke="${isDark ? 'rgba(200,210,220,0.3)' : 'rgba(255,255,255,0.5)'}" stroke-width="0.5" class="today-needle"/>`;
+
+        // ── محور دوران معدني ──
+        svg += `<circle cx="${cx}" cy="${cy}" r="8" fill="url(#needle-pivot)" stroke="${strkCol}" stroke-width="0.8"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="3" fill="${isDark ? '#e0e4e8' : '#f8f9fa'}" opacity="0.6"/>`;
+
+        // ═══ قبضة اليد (✊) عند الطرف ═══
+        svg += `<g class="needle-grip-group">`;
+        // ── الكف / القبضة — شكل بيضاوي مع أصابع ──
+        // جسم القبضة الرئيسي (شكل بيضاوي)
+        svg += `<ellipse cx="${cx}" cy="${fistY}" rx="10" ry="12" fill="url(#needle-grip)" stroke="${strkCol}" stroke-width="0.8"/>`;
+        // الإبهام (جانب أيمن من القبضة)
+        svg += `<ellipse cx="${cx + 8}" cy="${fistY + 2}" rx="4" ry="5.5" fill="url(#needle-grip)" stroke="${strkCol}" stroke-width="0.6" transform="rotate(-15,${cx + 8},${fistY + 2})"/>`;
+        // أصابع مطوية (4 خطوط مقوسة أفقية)
+        svg += `<path d="M${cx - 7},${fistY - 7} Q${cx},${fistY - 9} ${cx + 6},${fistY - 7}" fill="none" stroke="${strkCol}" stroke-width="0.7" opacity="0.5"/>`;
+        svg += `<path d="M${cx - 7},${fistY - 3.5} Q${cx},${fistY - 5.5} ${cx + 6},${fistY - 3.5}" fill="none" stroke="${strkCol}" stroke-width="0.7" opacity="0.5"/>`;
+        svg += `<path d="M${cx - 7},${fistY + 0.5} Q${cx},${fistY - 1.5} ${cx + 6},${fistY + 0.5}" fill="none" stroke="${strkCol}" stroke-width="0.6" opacity="0.4"/>`;
+        svg += `<path d="M${cx - 6},${fistY + 4} Q${cx},${fistY + 2.5} ${cx + 5},${fistY + 4}" fill="none" stroke="${strkCol}" stroke-width="0.6" opacity="0.35"/>`;
+
+        // ═══ جناحا طير مفرودان — أسفل القبضة ═══
+        // الجناح الأيسر (يشير لليسار = عكس عقارب الساعة)
+        svg += `<path d="M${cx - 3},${wingY} C${cx - 18},${wingY - 8} ${cx - 32},${wingY - 4} ${cx - 42},${wingY - 12} C${cx - 36},${wingY - 2} ${cx - 22},${wingY + 4} ${cx - 3},${wingY + 3} Z" fill="${isDark ? '#808890' : '#b0b8c4'}" stroke="${strkCol}" stroke-width="0.5" opacity="0.6" class="needle-arrow"/>`;
+        // ريشات الجناح الأيسر
+        svg += `<line x1="${cx - 12}" y1="${wingY - 1}" x2="${cx - 20}" y2="${wingY - 5}" stroke="${strkCol}" stroke-width="0.4" opacity="0.35"/>`;
+        svg += `<line x1="${cx - 20}" y1="${wingY - 2}" x2="${cx - 30}" y2="${wingY - 7}" stroke="${strkCol}" stroke-width="0.4" opacity="0.3"/>`;
+        svg += `<line x1="${cx - 28}" y1="${wingY - 3}" x2="${cx - 38}" y2="${wingY - 9}" stroke="${strkCol}" stroke-width="0.3" opacity="0.25"/>`;
+
+        // الجناح الأيمن (يشير لليمين = مع عقارب الساعة)
+        svg += `<path d="M${cx + 3},${wingY} C${cx + 18},${wingY - 8} ${cx + 32},${wingY - 4} ${cx + 42},${wingY - 12} C${cx + 36},${wingY - 2} ${cx + 22},${wingY + 4} ${cx + 3},${wingY + 3} Z" fill="${isDark ? '#808890' : '#b0b8c4'}" stroke="${strkCol}" stroke-width="0.5" opacity="0.6" class="needle-arrow"/>`;
+        // ريشات الجناح الأيمن
+        svg += `<line x1="${cx + 12}" y1="${wingY - 1}" x2="${cx + 20}" y2="${wingY - 5}" stroke="${strkCol}" stroke-width="0.4" opacity="0.35"/>`;
+        svg += `<line x1="${cx + 20}" y1="${wingY - 2}" x2="${cx + 30}" y2="${wingY - 7}" stroke="${strkCol}" stroke-width="0.4" opacity="0.3"/>`;
+        svg += `<line x1="${cx + 28}" y1="${wingY - 3}" x2="${cx + 38}" y2="${wingY - 9}" stroke="${strkCol}" stroke-width="0.3" opacity="0.25"/>`;
+
+        svg += `</g>`;
+        // مقبض سحب شفاف (منطقة لمس واسعة تغطي القبضة والأجنحة)
+        svg += `<circle cx="${cx}" cy="${fistY + 5}" r="45" fill="transparent" class="needle-drag-handle"/>`;
+        svg += `</g>`;
 
         svg += `</svg>`;
 
         // ─── Info panel + أقسام إضافية ───
-        let html = `<div class="durur-circle-container">${svg}</div>`;
+        html += `<div class="durur-circle-container">${svg}</div>`;
         html += `<div class="durur-info-panel" id="durur-info-panel" style="display:none"></div>`;
 
-        // ─── الأسماك / المحاصيل / الحياة الفطرية (الموسمية فقط) ───
-        const fishActive = H.getSeasonalFish(gMonth, gDay).filter(f => f.inSeason);
-        const cropsActive = H.getSeasonalCrops(gMonth, gDay).filter(c => c.inSeason);
-        const wildlifeActive = H.getSeasonalWildlife(gMonth, gDay).filter(w => w.inSeason);
+        // ─── الأقسام الموسمية + بطاقات الإثراء (قابلة للتحديث عند النقر) ───
+        html += `<div id="durur-seasonal-section" data-orig-month="${gMonth}" data-orig-day="${gDay}" data-orig-year="${gYear}">`;
+        html += _buildSeasonalHTML(gMonth, gDay, gYear, lang);
+        html += `</div>`;
 
-        if (fishActive.length > 0) {
-            html += `<div class="durur-list-section">`;
-            html += `<div class="durur-list-title">${H.t('anwaAllFish')}</div>`;
-            html += `<div class="durur-list-grid">`;
-            fishActive.forEach(f => {
-                html += `<span class="durur-list-tag in-season">${f.name}</span>`;
-            });
-            html += `</div></div>`;
-        }
-
-        if (cropsActive.length > 0) {
-            html += `<div class="durur-list-section">`;
-            html += `<div class="durur-list-title">${H.t('anwaAllCrops')}</div>`;
-            html += `<div class="durur-list-grid">`;
-            cropsActive.forEach(c => {
-                html += `<span class="durur-list-tag in-season">${c.name}</span>`;
-            });
-            html += `</div></div>`;
-        }
-
-        if (wildlifeActive.length > 0) {
-            html += `<div class="durur-list-section">`;
-            html += `<div class="durur-list-title">${H.t('anwaAllWildlife')}</div>`;
-            html += `<div class="durur-list-grid">`;
-            wildlifeActive.forEach(w => {
-                html += `<span class="durur-list-tag in-season">${w.name}</span>`;
-            });
-            html += `</div></div>`;
-        }
-
-        html += `<div class="durur-source">${H.t('anwaSource')}</div>`;
-
-        // ─── بطاقات الإثراء من كتاب الدرور والطوالع ───
-        html += `<div class="durur-enrich-section">`;
-
-        // 1. وصف الدر الحالي
-        const durrDetails = H.getDurrDetails(gMonth, gDay, gYear);
-        if (durrDetails && durrDetails.desc_ar) {
-            const durrDesc = lang === 'en' ? durrDetails.desc_en : durrDetails.desc_ar;
-            html += `<div class="dv-enrich-card dv-enrich-durr">`;
-            html += `<div class="dv-enrich-icon">📜</div>`;
-            html += `<div class="dv-enrich-body">`;
-            html += `<div class="dv-enrich-title">${durrDetails.durr} — ${durrDetails.mia}</div>`;
-            html += `<div class="dv-enrich-desc">${durrDesc}</div>`;
-            html += `</div></div>`;
-        }
-
-        // 2. المواسم الخاصة النشطة
-        const activeSeasons = H.getActiveSeasons(gMonth, gDay);
-        if (activeSeasons.length > 0) {
-            html += `<div class="dv-enrich-card dv-enrich-seasons">`;
-            html += `<div class="dv-enrich-icon">🗓️</div>`;
-            html += `<div class="dv-enrich-body">`;
-            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Active Seasons' : 'المواسم الحالية'}</div>`;
-            activeSeasons.forEach(s => {
-                const sName = lang === 'en' ? s.en : s.ar;
-                const sDesc = lang === 'en' ? s.desc_en : s.desc_ar;
-                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> <strong>${sName}</strong>: ${sDesc}</div>`;
-            });
-            html += `</div></div>`;
-        }
-
-        // 3. أمثال اليوم
-        const proverbs = H.getSeasonalProverbs(gMonth, gDay, gYear);
-        if (proverbs.length > 0) {
-            const randomProverb = proverbs[Math.floor(Math.random() * proverbs.length)];
-            html += `<div class="dv-enrich-card dv-enrich-proverb">`;
-            html += `<div class="dv-enrich-icon">💬</div>`;
-            html += `<div class="dv-enrich-body">`;
-            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Proverb of the Day' : 'مثل اليوم'}</div>`;
-            html += `<div class="dv-enrich-quote">"${lang === 'en' ? randomProverb.en : randomProverb.ar}"</div>`;
-            if (lang === 'ar' && randomProverb.en) html += `<div class="dv-enrich-quote-sub">${randomProverb.en}</div>`;
-            html += `</div></div>`;
-        }
-
-        // 4. أحداث فلكية قريبة
-        const upcomingAstro = H.getUpcomingAstroEvents(gMonth, gDay);
-        if (upcomingAstro.length > 0) {
-            html += `<div class="dv-enrich-card dv-enrich-astro">`;
-            html += `<div class="dv-enrich-icon">🔭</div>`;
-            html += `<div class="dv-enrich-body">`;
-            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Upcoming Astronomical Events' : 'أحداث فلكية قريبة'}</div>`;
-            upcomingAstro.forEach(ev => {
-                const evName = lang === 'en' ? ev.en : ev.ar;
-                const evDesc = lang === 'en' ? ev.desc_en : ev.desc_ar;
-                const evDate = lang === 'en' ? `${ev.date[1]}/${ev.date[0]}` : H.toArabicNumerals(`${ev.date[1]}/${ev.date[0]}`);
-                html += `<div class="dv-enrich-astro-item">${ev.icon} <strong>${evName}</strong> (${evDate})<br><span class="dv-enrich-astro-desc">${evDesc}</span></div>`;
-            });
-            html += `</div></div>`;
-        }
-
-        // 5. هجرة الطيور الحالية
-        const birdsMigration = H.getActiveBirdMigration(gMonth, gDay);
-        if (birdsMigration.length > 0) {
-            html += `<div class="dv-enrich-card dv-enrich-birds">`;
-            html += `<div class="dv-enrich-icon">🦅</div>`;
-            html += `<div class="dv-enrich-body">`;
-            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Bird Migration' : 'هجرة الطيور'}</div>`;
-            birdsMigration.forEach(b => {
-                const bName = lang === 'en' ? b.en : b.ar;
-                const bDesc = lang === 'en' ? b.desc_en : b.desc_ar;
-                const dirIcon = b.direction === 'south' ? '⬇️' : b.direction === 'north' ? '⬆️' : '📍';
-                html += `<div class="dv-enrich-bird-item">${dirIcon} <strong>${bName}</strong>: ${bDesc}</div>`;
-            });
-            html += `</div></div>`;
-        }
-
-        // 6. اقتران الثريا القادم
-        const nextConj = H.getNextThurayaConjunction(gMonth, gDay);
-        if (nextConj) {
-            const cName = lang === 'en' ? nextConj.en : nextConj.ar;
-            const cNick = lang === 'en' ? nextConj.nickname_en : nextConj.nickname_ar;
-            const cDesc = lang === 'en' ? nextConj.desc_en : nextConj.desc_ar;
-            const cDate = _fmtDateRange(nextConj.from, nextConj.to, lang);
-            html += `<div class="dv-enrich-card dv-enrich-thuraya">`;
-            html += `<div class="dv-enrich-icon">✨</div>`;
-            html += `<div class="dv-enrich-body">`;
-            html += `<div class="dv-enrich-title">${lang === 'en' ? 'Next Pleiades Conjunction' : 'اقتران الثريا القادم'}</div>`;
-            html += `<div class="dv-enrich-desc"><strong>${cName}</strong> — ${cNick}<br>${cDate}<br>${cDesc}</div>`;
-            html += `</div></div>`;
-        }
-
-        html += `</div>`; // close durur-enrich-section
+        // ─── معلومات التذييل ───
+        html += `<div class="dv-credits" style="opacity:0.5">`;
+        html += `<div class="dv-credits-name">${H.t('footer')}</div>`;
+        html += `<div class="dv-credits-version">${H.t('version')}</div>`;
+        html += `<div class="dv-credits-tech">${H.t('credit')}</div>`;
+        html += `</div>`;
 
         return html;
     }
@@ -4224,35 +5046,26 @@ tr:nth-child(even) { background: #fafafa; }
                 const idx = parseInt(seg.dataset.index);
                 const name = seg.dataset.name;
                 let detail = '';
+                let ringFrom = null, ringTo = null; // لحساب ملخص الحلقات
 
                 if (ring === 'star') {
                     const star = H.TAWALIE[idx];
                     if (star) {
                         const weather = lang === 'en' ? star.weatherEn : star.weatherAr;
                         detail = `<strong>${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(star.from, star.to, lang)}</span><br><span class="durur-info-desc">${weather}</span>`;
+                        ringFrom = star.from; ringTo = star.to;
                     }
                 } else if (ring === 'zodiac') {
                     const z = H.ZODIAC[idx];
                     if (z) {
                         detail = `<strong>${z.symbol} ${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(z.from, z.to, lang)}</span>`;
-                        const climate = H.CLIMATE_DATA[idx];
-                        if (climate) {
-                            const tempLabel = lang === 'en' ? 'Temp' : 'الحرارة';
-                            const humLabel = lang === 'en' ? 'Humidity' : 'الرطوبة';
-                            const rainLabel = lang === 'en' ? 'Rain' : 'أمطار';
-                            const windLabel = lang === 'en' ? 'Wind' : 'رياح';
-                            detail += `<br><span class="durur-info-desc" style="margin-top:6px;display:block;font-size:12px;line-height:1.8">`;
-                            detail += `🌡️ ${tempLabel}: ${climate.minTemp}° — ${climate.maxTemp}°`;
-                            detail += `<br>💧 ${humLabel}: ${climate.humidity}%`;
-                            detail += climate.rain > 0 ? `<br>🌧️ ${rainLabel}: ${climate.rain}mm` : '';
-                            detail += `<br>💨 ${windLabel}: ${climate.maxWind} km/h`;
-                            detail += `</span>`;
-                        }
+                        ringFrom = z.from; ringTo = z.to;
                     }
                 } else if (ring === 'durr') {
                     const miaIdx = parseInt(seg.dataset.mia || '0');
                     const miaName = H.DUROR_MIA[lang][miaIdx];
-                    const durrKey = miaIdx + '-' + idx;
+                    const durrIdxInMia = idx % 10;
+                    const durrKey = miaIdx + '-' + durrIdxInMia;
                     const durrInfo = H.DURR_DETAILS[durrKey];
                     detail = `<strong>${name}</strong><br><span class="durur-info-desc">${miaName}</span>`;
                     if (durrInfo) {
@@ -4261,48 +5074,320 @@ tr:nth-child(even) { background: #fafafa; }
                         detail += dateStr ? `<br><span class="durur-info-dates">${dateStr}</span>` : '';
                         detail += `<br><span class="durur-info-desc" style="margin-top:6px;display:block;font-size:13px;line-height:1.6;opacity:0.9">${desc}</span>`;
                     }
+                    // حساب نطاق الدر الزمني: كل در 10 أيام ابتداءً من 15 أغسطس
+                    const durrOrder = idx; // الترتيب العام (0-36)
+                    const _durrGy = _diratYear || new Date().getFullYear();
+                    const durrBase = new Date(_durrGy, 7, 15); // Aug 15
+                    const durrStart = new Date(durrBase.getTime() + durrOrder * 10 * 86400000);
+                    const durrDays = (miaIdx === 3 && durrIdxInMia === 6) ? 5 : 10; // المساريق = 5 أيام
+                    const durrEnd = new Date(durrStart.getTime() + (durrDays - 1) * 86400000);
+                    ringFrom = [durrStart.getMonth() + 1, durrStart.getDate()];
+                    ringTo = [durrEnd.getMonth() + 1, durrEnd.getDate()];
                 } else if (ring === 'wind') {
                     const w = H.ANWA_ENRICHMENT.seasonalWinds[idx];
                     if (w) {
                         const desc = lang === 'en' ? w.desc_en : w.desc_ar;
                         detail = `<strong>${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(w.from, w.to, lang)}</span><br><span class="durur-info-desc">${desc}</span>`;
+                        ringFrom = w.from; ringTo = w.to;
                     }
                 } else if (ring === 'season') {
                     const s = H.SEASONS[idx];
                     if (s) {
                         const sName = lang === 'en' ? s.en : s.ar;
                         detail = `<strong>${sName}</strong><br><span class="durur-info-dates">${_fmtDateRange(s.from, s.to, lang)}</span>`;
+                        ringFrom = s.from; ringTo = s.to;
                     }
+                } else if (ring === 'sea-strike-wind') {
+                    detail = `<strong>${name}</strong><br><span class="durur-info-dates">${_fmtDateRange([11,1], [11,10], lang)}</span><br><span class="durur-info-desc" style="margin-top:4px;display:block;font-size:13px;line-height:1.5;opacity:0.9;color:#c06060">${lang === 'en' ? 'Peak sea storm period — fishing and sailing not recommended' : 'فترة ذروة العواصف البحرية — لا يُنصح بالصيد أو الإبحار'}</span>`;
+                    ringFrom = [11,1]; ringTo = [11,10];
                 } else if (ring === 'sea-strike') {
                     const ss = H.ANWA_ENRICHMENT.seaStrikes[idx];
                     if (ss) {
                         const ssName = lang === 'en' ? ss.en : ss.ar;
                         detail = `<strong>${ssName}</strong><br><span class="durur-info-dates">${_fmtDateRange(ss.from, ss.to, lang)}</span><br><span class="durur-info-desc" style="margin-top:4px;display:block;font-size:13px;line-height:1.5;opacity:0.9;color:#c06060">${lang === 'en' ? 'Dangerous sea storm period — fishing and sailing not recommended' : 'فترة عواصف بحرية خطرة — لا يُنصح بالصيد أو الإبحار'}</span>`;
+                        ringFrom = ss.from; ringTo = ss.to;
                     }
+                } else if (ring === 'hijri-month') {
+                    const hYear = parseInt(seg.dataset.hyear);
+                    const hMonth = parseInt(seg.dataset.hmonth);
+                    const numDays = H.daysInMonth(hYear, hMonth);
+                    const firstG = H.hijriToGregorian(hYear, hMonth, 1);
+                    const lastG = H.hijriToGregorian(hYear, hMonth, numDays);
+                    const yearStr = lang === 'en' ? String(hYear) : H.toArabicNumerals(String(hYear));
+                    const daysStr = lang === 'en' ? `${numDays} days` : `${H.toArabicNumerals(String(numDays))} يوم`;
+                    const mNamesG = lang === 'en'
+                        ? ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+                        : ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+                    const d1 = `${firstG.day} ${mNamesG[firstG.month]} ${firstG.year}`;
+                    const d2 = `${lastG.day} ${mNamesG[lastG.month]} ${lastG.year}`;
+                    const gy = firstG.year;
+                    const ringSummary = _buildRingSummaryHTML(firstG.month, firstG.day, lastG.month, lastG.day, gy, lang);
+                    detail = `<strong>${name} ${yearStr}</strong><br><span class="durur-info-dates">${d1}</span><br><span class="durur-info-dates">${d2}</span><br><span class="durur-info-desc">${daysStr}</span><div style="margin-top:8px;border-top:1px solid var(--papyrus-border,#ccc);padding-top:8px;font-size:13px;line-height:1.7">${ringSummary}</div>`;
                 } else if (ring === 'month') {
                     const gMonthNames = lang === 'en' ? H.GREGORIAN_MONTH_NAMES_EN : H.GREGORIAN_MONTH_NAMES;
-                    detail = `<strong>${gMonthNames[idx]}</strong>`;
+                    const gMonthIdx = idx; // 0-based
+                    const gm = gMonthIdx + 1; // 1-based month
+                    const gy = _diratYear || new Date().getFullYear();
+                    const febDaysG = _isLeapGregorian(gy) ? 29 : 28;
+                    const mDaysArr = [31, febDaysG, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                    const numDaysG = mDaysArr[gMonthIdx];
+                    const firstH = H.gregorianToHijri(gy, gm, 1);
+                    const lastH = H.gregorianToHijri(gy, gm, numDaysG);
+                    const hMonthNames = lang === 'en' ? H.MONTH_NAMES_EN : H.MONTH_NAMES;
+                    const h1 = `${firstH.day} ${hMonthNames[firstH.month - 1]} ${firstH.year}`;
+                    const h2 = `${lastH.day} ${hMonthNames[lastH.month - 1]} ${lastH.year}`;
+                    const daysStrG = lang === 'en' ? `${numDaysG} days` : `${numDaysG} يوم`;
+                    const ringSummaryG = _buildRingSummaryHTML(gm, 1, gm, numDaysG, gy, lang);
+                    detail = `<strong>${gMonthNames[idx]} ${gy}</strong><br><span class="durur-info-dates">${h1}</span><br><span class="durur-info-dates">${h2}</span><br><span class="durur-info-desc">${daysStrG}</span><div style="margin-top:8px;border-top:1px solid var(--papyrus-border,#ccc);padding-top:8px;font-size:13px;line-height:1.7">${ringSummaryG}</div>`;
                 } else if (ring === 'mia') {
-                    const miaName = H.DUROR_MIA[lang][idx];
-                    detail = `<strong>${name}</strong><br><span class="durur-info-desc">${miaName}</span>`;
+                    // الفصول الأربعة (Ring 0): الربيع، الصيف، الخريف، الشتاء
+                    const seasonRanges = [
+                        { from: [3,21], to: [6,20] },   // 0: الربيع (الصيف)
+                        { from: [6,21], to: [9,22] },   // 1: الصيف (القيظ)
+                        { from: [9,23], to: [12,21] },  // 2: الخريف (الصفري)
+                        { from: [12,22], to: [3,20] },  // 3: الشتاء
+                    ];
+                    const sr = seasonRanges[idx];
+                    detail = `<strong>${name}</strong><br><span class="durur-info-dates">${_fmtDateRange(sr.from, sr.to, lang)}</span>`;
+                    ringFrom = sr.from; ringTo = sr.to;
                 } else {
                     detail = `<strong>${name}</strong>`;
+                }
+
+                // ─── إلحاق ملخص الحلقات لجميع العناصر ذات النطاق الزمني ───
+                if (detail && ringFrom && ringTo) {
+                    const _gy = _diratYear || new Date().getFullYear();
+                    const summary = _buildRingSummaryHTML(ringFrom[0], ringFrom[1], ringTo[0], ringTo[1], _gy, lang, ring);
+                    detail += `<div style="margin-top:8px;border-top:1px solid var(--papyrus-border,#ccc);padding-top:8px;font-size:13px;line-height:1.7">${summary}</div>`;
                 }
 
                 if (detail) {
                     infoPanel.innerHTML = detail;
                     infoPanel.style.display = '';
                 }
+
+                // ─── تحديث الأقسام الموسمية + بطاقات الإثراء بناءً على القطاع المحدد ───
+                let segFrom = null, segTo = null;
+                if (ring === 'star') {
+                    const star = H.TAWALIE[idx];
+                    if (star) { segFrom = star.from; segTo = star.to; }
+                } else if (ring === 'zodiac') {
+                    const z = H.ZODIAC[idx];
+                    if (z) { segFrom = z.from; segTo = z.to; }
+                } else if (ring === 'durr') {
+                    // حساب تاريخ الدر من ترتيبه: كل در = 10 أيام ابتداءً من 15 أغسطس
+                    // idx هو الترتيب العام (0-36) من data-index
+                    const durrOrder = idx;
+                    const startDay = durrOrder * 10; // أيام من 15 أغسطس
+                    const gYear = _diratYear || new Date().getFullYear();
+                    const base = new Date(gYear, 7, 15); // Aug 15
+                    const d1 = new Date(base.getTime() + startDay * 86400000);
+                    const d2 = new Date(d1.getTime() + 9 * 86400000); // +9 أيام
+                    segFrom = [d1.getMonth() + 1, d1.getDate()];
+                    segTo = [d2.getMonth() + 1, d2.getDate()];
+                } else if (ring === 'wind') {
+                    const w2 = H.ANWA_ENRICHMENT.seasonalWinds[idx];
+                    if (w2) { segFrom = w2.from; segTo = w2.to; }
+                } else if (ring === 'season') {
+                    const s2 = H.SEASONS[idx];
+                    if (s2) { segFrom = s2.from; segTo = s2.to; }
+                } else if (ring === 'sea-strike-wind') {
+                    segFrom = [11,1]; segTo = [11,10];
+                } else if (ring === 'sea-strike') {
+                    const ss2 = H.ANWA_ENRICHMENT.seaStrikes[idx];
+                    if (ss2) { segFrom = ss2.from; segTo = ss2.to; }
+                } else if (ring === 'hijri-month') {
+                    const hYear = parseInt(seg.dataset.hyear);
+                    const hMonth = parseInt(seg.dataset.hmonth);
+                    const firstG = H.hijriToGregorian(hYear, hMonth, 1);
+                    const numDays = H.daysInMonth(hYear, hMonth);
+                    const lastG = H.hijriToGregorian(hYear, hMonth, numDays);
+                    segFrom = [firstG.month, firstG.day];
+                    segTo = [lastG.month, lastG.day];
+                } else if (ring === 'month') {
+                    const febDaysM = _isLeapGregorian(_diratYear || new Date().getFullYear()) ? 29 : 28;
+                    const mDays = [31, febDaysM, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                    segFrom = [idx + 1, 1]; segTo = [idx + 1, mDays[idx]];
+                }
+
+                if (segFrom && segTo) {
+                    const gYear = _diratYear || new Date().getFullYear();
+                    const seasonalEl = container.querySelector('#durur-seasonal-section');
+                    if (seasonalEl) {
+                        if (ring === 'hijri-month' || ring === 'month') {
+                            // ─── تجميع بيانات كامل نطاق الشهر ───
+                            seasonalEl.innerHTML = _buildSeasonalRangeHTML(segFrom, segTo, gYear, lang);
+                        } else {
+                            const [midM, midD] = _getMidDate(segFrom, segTo);
+                            seasonalEl.innerHTML = _buildSeasonalHTML(midM, midD, gYear, lang);
+                        }
+                    }
+                }
             });
         });
 
-        // إخفاء اللوحة عند النقر في مكان فارغ
+        // إخفاء اللوحة عند النقر في مكان فارغ + إعادة الأقسام للتاريخ الأصلي
         container.addEventListener('click', (e) => {
-            if (!e.target.closest('.durur-segment') && !e.target.closest('#durur-info-panel')) {
+            if (_needleJustReleased) return;
+            if (!e.target.closest('.durur-segment') && !e.target.closest('#durur-info-panel') && !e.target.closest('#dirat-needle')) {
                 container.querySelectorAll('.durur-segment-active').forEach(el => el.classList.remove('durur-segment-active'));
                 infoPanel.style.display = 'none';
+
+                // إعادة الأقسام الموسمية للتاريخ الأصلي
+                const seasonalEl = container.querySelector('#durur-seasonal-section');
+                if (seasonalEl) {
+                    const origMonth = parseInt(seasonalEl.dataset.origMonth);
+                    const origDay = parseInt(seasonalEl.dataset.origDay);
+                    const origYear = parseInt(seasonalEl.dataset.origYear);
+                    const gYear = origYear || _diratYear || new Date().getFullYear();
+                    seasonalEl.innerHTML = _buildSeasonalHTML(origMonth, origDay, gYear, lang);
+                }
             }
         });
+
+        // إعداد سحب الإبرة
+        _setupNeedleDrag(container, lang);
+    }
+
+    // ─── سحب إبرة الديرة ───
+    function _setupNeedleDrag(container, lang) {
+        // تنظيف الأحداث السابقة
+        if (_needleDragCleanup) _needleDragCleanup();
+
+        const svgEl = container.querySelector('.durur-circle-svg');
+        const needleGroup = container.querySelector('#dirat-needle');
+        const dragHandle = container.querySelector('.needle-drag-handle');
+        const infoPanel = container.querySelector('#durur-info-panel');
+        if (!svgEl || !needleGroup || !dragHandle) return;
+
+        const cx = 540, cy = 540;
+        let isDragging = false;
+
+        // إنشاء تلميح التاريخ (HTML div)
+        const tooltip = document.createElement('div');
+        tooltip.className = 'needle-tooltip';
+        tooltip.style.display = 'none';
+        const circleContainer = container.querySelector('.durur-circle-container');
+        if (circleContainer) {
+            circleContainer.appendChild(tooltip);
+        }
+
+        const mNames = lang === 'en'
+            ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            : ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+        // تحويل إحداثيات الشاشة إلى SVG
+        function screenToSVG(clientX, clientY) {
+            const rect = svgEl.getBoundingClientRect();
+            return {
+                x: -130 + (clientX - rect.left) / rect.width * 1340,
+                y: -130 + (clientY - rect.top) / rect.height * 1340
+            };
+        }
+
+        // حساب الزاوية من المركز إلى نقطة (0° = أعلى، اتجاه الساعة)
+        function pointToAngle(svgX, svgY) {
+            const dx = svgX - cx;
+            const dy = svgY - cy;
+            let angleDeg = Math.atan2(dx, -dy) * (180 / Math.PI);
+            return ((angleDeg % 360) + 360) % 360;
+        }
+
+        function onDragStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+            svgEl.classList.add('needle-dragging');
+            tooltip.style.display = '';
+        }
+
+        function onDragMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const svgPt = screenToSVG(clientX, clientY);
+            const rawAngle = pointToAngle(svgPt.x, svgPt.y);
+
+            // ── سلوك كوارتز: قفز إلى أقرب يوم ──
+            const dateInfo = _angleToDate(rawAngle);
+            const snappedAngle = _dateToAngle(dateInfo.month, dateInfo.day);
+
+            // تدوير الإبرة
+            needleGroup.setAttribute('transform', `rotate(${snappedAngle}, ${cx}, ${cy})`);
+            needleGroup.dataset.currentAngle = snappedAngle;
+
+            // تحديث التلميح
+            tooltip.textContent = `${dateInfo.day} ${mNames[dateInfo.month - 1]}`;
+
+            // موقع التلميح — قرب طرف الإبرة
+            if (circleContainer) {
+                const rect = svgEl.getBoundingClientRect();
+                const scale = rect.width / 1340;
+                const radians = (snappedAngle - 90) * Math.PI / 180;
+                const nLen = parseFloat(needleGroup.dataset.needleLen) || 658;
+                const tipSvgX = cx + nLen * Math.cos(radians);
+                const tipSvgY = cy + nLen * Math.sin(radians);
+                tooltip.style.left = ((tipSvgX + 130) * scale) + 'px';
+                tooltip.style.top = ((tipSvgY + 130) * scale - 28) + 'px';
+            }
+        }
+
+        function onDragEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            svgEl.classList.remove('needle-dragging');
+            tooltip.style.display = 'none';
+
+            // حماية من تداخل مع click handler
+            _needleJustReleased = true;
+            setTimeout(() => { _needleJustReleased = false; }, 100);
+
+            const currentAngle = parseFloat(needleGroup.dataset.currentAngle);
+            const dateInfo = _angleToDate(currentAngle);
+
+            // إزالة تمييز الحلقات المحددة
+            container.querySelectorAll('.durur-segment-active').forEach(el => el.classList.remove('durur-segment-active'));
+
+            // عرض بطاقة المعلومات
+            _showNeedleDateCard(dateInfo.month, dateInfo.day, lang, infoPanel, container);
+        }
+
+        // أحداث الماوس
+        dragHandle.addEventListener('mousedown', onDragStart);
+        // أحداث اللمس
+        dragHandle.addEventListener('touchstart', onDragStart, { passive: false });
+        // الحركة والإفلات على document
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('mouseup', onDragEnd);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('touchend', onDragEnd);
+
+        // نقر مزدوج = إعادة الإبرة لليوم
+        needleGroup.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            const todayAngle = parseFloat(needleGroup.dataset.todayAngle);
+            needleGroup.setAttribute('transform', `rotate(${todayAngle}, ${cx}, ${cy})`);
+            needleGroup.dataset.currentAngle = todayAngle;
+            infoPanel.style.display = 'none';
+            // إعادة الأقسام الموسمية للتاريخ الأصلي
+            const seasonalEl = container.querySelector('#durur-seasonal-section');
+            if (seasonalEl) {
+                const origMonth = parseInt(seasonalEl.dataset.origMonth);
+                const origDay = parseInt(seasonalEl.dataset.origDay);
+                const origYear = parseInt(seasonalEl.dataset.origYear);
+                seasonalEl.innerHTML = _buildSeasonalHTML(origMonth, origDay, origYear || _diratYear, lang);
+            }
+        });
+
+        // تنظيف
+        _needleDragCleanup = () => {
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+            document.removeEventListener('touchmove', onDragMove);
+            document.removeEventListener('touchend', onDragEnd);
+        };
     }
 
     // ─── Palette System ───
@@ -4408,7 +5493,7 @@ tr:nth-child(even) { background: #fafafa; }
         if (todayBtn) todayBtn.addEventListener('click', () => showDayView(null));
         // Calendar view: back to day view
         const cvBackBtn = document.getElementById('cv-back-btn');
-        if (cvBackBtn) cvBackBtn.addEventListener('click', () => showDayView(null));
+        if (cvBackBtn) cvBackBtn.addEventListener('click', () => showDayView(_selectedDate));
         // Navigation arrows
         const nextBtn = document.getElementById('dv-nav-next');
         const prevBtn = document.getElementById('dv-nav-prev');

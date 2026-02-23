@@ -81,7 +81,7 @@ const HijriCalendar = (() => {
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            version: 'الإصدار 2.0',
+            version: 'الإصدار 3.0',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
@@ -148,7 +148,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'بسيط', shareThemeIslami: 'إسلامي', shareThemeArabi: 'عربي كلاسيكي',
             shareThemeMashr: 'المشربية', shareThemeQubba: 'القبة', shareThemeMakh: 'المخطوطة',
             creditsName: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            creditsVersion: 'الإصدار 2.0', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            creditsVersion: 'الإصدار 3.0', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
             // قوس الشمس
             sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
             arabicTime: 'الساعة العربية', arabicTimeNow: 'الساعة العربية الآن',
@@ -179,8 +179,8 @@ const HijriCalendar = (() => {
             anwaAllFish: 'الأسماك الموسمية', anwaAllCrops: 'المحاصيل والفواكه', anwaAllWildlife: 'الحياة الفطرية',
             anwaSuhailDay: 'يوم سهيل', anwaInSeason: 'في الموسم', anwaOutSeason: 'خارج الموسم',
             anwaSource: 'المصدر: كتاب الدرور والطوالع — مركز جامع الشيخ زايد الكبير',
-            dururCircleTitle: 'دائرة الدرور والأنواء',
-            dururCircleMore: 'دائرة الدرور والأنواء',
+            dururCircleTitle: 'ديرة الدرور',
+            dururCircleMore: 'ديرة الدرور',
             dururZodiac: 'البرج',
             tideMovements: 'حركات المد والجزر',
             tideHigh: 'مد', tideLow: 'جزر',
@@ -189,6 +189,12 @@ const HijriCalendar = (() => {
             weatherPrecip: 'هطول', weatherMm: 'مم', weatherHigh: 'العظمى', weatherLow: 'الصغرى',
             weatherRainChance: 'احتمال أمطار', weatherUV: 'الأشعة فوق البنفسجية',
             locationBased: 'بحسب موقع المستخدم',
+            welcomeTitle: 'مرحباً بك',
+            welcomeMsg: 'حدد موقعك للحصول على مواقيت صلاة دقيقة وأحوال الطقس والمزيد',
+            welcomeDetect: 'تحديد موقعي',
+            welcomeSkip: 'تخطي',
+            welcomeDetecting: 'جارٍ تحديد الموقع...',
+            needleReset: 'انقر مرتين لإعادة الإبرة لليوم',
             // المحتوى الذكي (AI)
             aiSectionTitle: 'تأمل اليوم',
             aiVerse: 'آية',
@@ -223,7 +229,7 @@ const HijriCalendar = (() => {
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'Eisa Rashid ALSHAMSI - UAE',
-            version: 'Version 2.0',
+            version: 'Version 3.0',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
@@ -310,7 +316,7 @@ const HijriCalendar = (() => {
             paletteAmethyst: 'Amethyst', paletteGold: 'Gold', paletteRuby: 'Ruby',
             paletteSnow: 'Snow', paletteNoir: 'Noir',
             weatherTitle: 'Weather',
-            anwaSeasons: 'Seasons & Stars',
+            anwaSeasons: 'Duror, Anwa & Seasons',
             // Extra anwa elements
             windLabel: 'Winds', fishLabel: 'Fish', cropsLabel: 'Crops', wildlifeLabel: 'Wildlife',
             // Detail pages
@@ -321,8 +327,12 @@ const HijriCalendar = (() => {
             anwaAllFish: 'Seasonal Fish', anwaAllCrops: 'Crops & Fruits', anwaAllWildlife: 'Wildlife & Plants',
             anwaSuhailDay: 'Suhail Day', anwaInSeason: 'In season', anwaOutSeason: 'Off season',
             anwaSource: 'Source: Duroor & Tawalie Book — Sheikh Zayed Grand Mosque Center',
-            dururCircleTitle: 'Durur & Anwa Circle',
-            dururCircleMore: 'Durur & Anwa Circle',
+            dururCircleTitle: 'Duror Compass',
+            dururCircleMore: 'Duror Compass',
+            dururExplainTitle: 'What is the Duror Compass?',
+            dururExplain: 'The Duror Compass (Arabic: ديرة الدرور) is a traditional Arabian seasonal calendar used by Gulf Arabs for centuries to track weather patterns, agriculture, fishing, and navigation.\n\n• <strong>Duror</strong> (singular: Darr) — Climatic periods of 10–13 days dividing the year, each with distinct weather traits.\n• <strong>Anwa</strong> — The 28 lunar mansions (star groups) whose rising and setting mark seasonal shifts.\n• <strong>Seasons</strong> — Traditional Arabian seasons like Suhail, Wasm, Marbaa\'niyya, and Sarayat.\n\nThe compass visualizes 10 concentric rings: zodiac signs, star mansions, duror, winds, sea conditions, agriculture, and Gregorian months — all aligned to show how they relate on any given day.\n\nSource: Duroor & Tawalie Book — Sheikh Zayed Grand Mosque Center.',
+            anwaExplainTitle: 'What are Duror, Anwa & Seasons?',
+            anwaExplain: '<strong>Duror</strong> — Climatic periods (10–13 days each) that divide the year. Each darr has unique weather, wind, and agricultural characteristics.\n\n<strong>Anwa</strong> — The 28 lunar mansions (star groups) used by Arabs to predict weather changes based on stellar positions.\n\n<strong>Seasons</strong> — Traditional markers like Suhail (the cooling star), Wasm (autumn rains), and Marbaa\'niyya (the 40-day cold).',
             dururZodiac: 'Zodiac',
             tideMovements: 'Tide Movements',
             tideHigh: 'high', tideLow: 'low',
@@ -331,6 +341,12 @@ const HijriCalendar = (() => {
             weatherPrecip: 'Precip', weatherMm: 'mm', weatherHigh: 'High', weatherLow: 'Low',
             weatherRainChance: 'Rain chance', weatherUV: 'UV',
             locationBased: 'Based on your location',
+            welcomeTitle: 'Welcome',
+            welcomeMsg: 'Set your location for accurate prayer times, weather, and more',
+            welcomeDetect: 'Detect My Location',
+            welcomeSkip: 'Skip',
+            welcomeDetecting: 'Detecting location...',
+            needleReset: 'Double-tap to reset to today',
             // AI Content
             aiSectionTitle: 'Daily Reflection',
             aiVerse: 'Verse',
@@ -390,9 +406,9 @@ const HijriCalendar = (() => {
     }
 
     // ══════════════════════════════════════════════════════════════
-    // ⚠️  بيانات دائرة الدرور — مُقفلة (LOCKED v4.58)
+    // ⚠️  بيانات ديرة الدرور — مُقفلة (LOCKED v4.58)
     //     لا يجوز تعديل الأسماء أو التواريخ أو الترتيب
-    //     المرجع: DURUR_CIRCLE_SPEC.md
+    //     المرجع: DIRAT_DUROR_SPEC.md
     //     المصدر: كتاب الدرور والطوالع — مركز جامع الشيخ زايد الكبير
     // ══════════════════════════════════════════════════════════════
 
@@ -539,6 +555,38 @@ const HijriCalendar = (() => {
         en: ['1st Hundred (Safari)','2nd Hundred (Winter)','3rd Hundred (Summer)','4th Hundred (Qaiz)']
     };
 
+    // ─── أسماء الأزمنة العربية (ساعات النهار والليل) ────
+    // المصدر: كتاب فقه اللغة وسر العربية — أبو منصور الثعالبي
+    // هذه أزمنة (فترات) وليست ساعات متساوية — تتغير مدتها حسب الفصل
+    const ARAB_DAY_TIMES = [
+        { ar: 'الشروق', en: 'Sunrise', descAr: 'بداية بزوغ الشمس من الأفق', descEn: 'The moment the sun begins to appear above the horizon' },
+        { ar: 'البكور', en: 'Early Morning', descAr: 'أول النهار، وقت النشاط والبكور إلى العمل', descEn: 'The earliest active hours, when people head out to work' },
+        { ar: 'الغدوة', en: 'Forenoon', descAr: 'ما بين الصبح وطلوع الشمس، وقت الغدو والانطلاق', descEn: 'The time of setting out, between early morning and mid-morning' },
+        { ar: 'الضحى', en: 'Mid-Morning', descAr: 'ارتفاع الشمس واشتداد ضوئها', descEn: 'When the sun rises high and its light grows strong' },
+        { ar: 'الهاجرة', en: 'Midday Heat', descAr: 'اشتداد الحر عند منتصف النهار، يهجر الناس بيوتهم', descEn: 'The intense midday heat when people seek shelter' },
+        { ar: 'الظهيرة', en: 'High Noon', descAr: 'ذروة النهار حين تتوسط الشمس السماء', descEn: 'The peak of day when the sun is at its zenith' },
+        { ar: 'الرواح', en: 'Afternoon', descAr: 'بعد الزوال، وقت الرواح والعودة من العمل', descEn: 'After noon, the time of returning from work' },
+        { ar: 'العصر', en: 'Late Afternoon', descAr: 'آخر النهار، من العَصْر أي الضغط على بقية الوقت', descEn: 'Late day, squeezing the remaining daylight hours' },
+        { ar: 'القصر', en: 'Declining Sun', descAr: 'قصر النهار وميل الشمس نحو الغروب', descEn: 'The day grows short as the sun tilts toward setting' },
+        { ar: 'الأصيل', en: 'Pre-Sunset', descAr: 'اصفرار الشمس وتحوّل لونها قبيل الغروب', descEn: 'The sun turns golden shortly before setting' },
+        { ar: 'العشي', en: 'Dusk', descAr: 'آخر النهار حين يبدأ ظلام العشاء', descEn: 'The final daylight as evening darkness begins' },
+        { ar: 'الغروب', en: 'Sunset', descAr: 'اختفاء قرص الشمس تحت الأفق', descEn: 'The sun disappears below the horizon' }
+    ];
+    const ARAB_NIGHT_TIMES = [
+        { ar: 'الشفق', en: 'Twilight', descAr: 'الحمرة الباقية في الأفق بعد غروب الشمس', descEn: 'The red glow lingering on the horizon after sunset' },
+        { ar: 'الغسق', en: 'Nightfall', descAr: 'إقبال الظلام وامتزاجه ببقايا الضوء', descEn: 'Darkness creeping in as the last light fades' },
+        { ar: 'العتمة', en: 'Deep Dark', descAr: 'ظلام الليل الأول حين يشتد السواد', descEn: 'The first deep darkness of the night' },
+        { ar: 'السُّدفة', en: 'Mixed Light', descAr: 'اختلاط الضوء بالظلمة، لا ليل تام ولا نهار', descEn: 'A blend of faint light and darkness' },
+        { ar: 'الفحمة', en: 'Darkest Hour', descAr: 'أشد الليل سواداً كلون الفحم', descEn: 'The blackest hour of the night, dark as coal' },
+        { ar: 'الزُّلّة', en: 'Full Dark', descAr: 'منتصف الليل حين يزلّ النوم على الأعين', descEn: 'Deep midnight when sleep overtakes the eyes' },
+        { ar: 'الزُّلفة', en: 'Late Night', descAr: 'ساعة التقرب والتهجد في جوف الليل', descEn: 'The still hours of devotion in the depths of night' },
+        { ar: 'البُهرة', en: 'Midnight', descAr: 'وسط الليل، من البهر وهو الامتلاء', descEn: 'The very middle of the night, at its fullest depth' },
+        { ar: 'السَّحَر', en: 'Pre-Dawn', descAr: 'آخر الليل قبيل الفجر، وقت السحور', descEn: 'The final stretch of night before dawn, time of the pre-dawn meal' },
+        { ar: 'الفجر', en: 'Dawn', descAr: 'انفجار النور الأول في الأفق', descEn: 'The first light breaking through the horizon' },
+        { ar: 'الصبح', en: 'Daybreak', descAr: 'انتشار الضوء واتضاح الأشياء', descEn: 'Light spreading and objects becoming visible' },
+        { ar: 'الصباح', en: 'Morning Light', descAr: 'إشراق النور التام قبيل شروق الشمس', descEn: 'Full brightness just before the sun rises' }
+    ];
+
     // ─── بيانات إثرائية من كتاب الدرور والطوالع ⚠️ مُقفل ────
     // (مركز جامع الشيخ زايد الكبير)
     const ANWA_ENRICHMENT = {
@@ -589,7 +637,7 @@ const HijriCalendar = (() => {
         // ضربات بحرية — اضطرابات جوية يتجنبها البحارة
         seaStrikes: [
             { ar: 'ضربة الأكيذب', en: 'Akidhib strike', from: [10,10], to: [10,20] },
-            { ar: 'ضربة الأحيمر', en: 'Ahimar strike', from: [11,1], to: [11,10] },
+            // ضربة الأحيمر (11/1-11/10) نُقلت إلى حلقة الرياح بجانب ضربة الأحيمر الريح
             { ar: 'ضربة الكوي', en: 'Kawi strike', from: [12,10], to: [12,20] },
             { ar: 'ضربة الإكليل', en: 'Iklil strike', from: [5,10], to: [5,20] },
             { ar: 'ضربة الثريا', en: 'Thuraya strike', from: [6,1], to: [6,10] },
@@ -1064,6 +1112,7 @@ const HijriCalendar = (() => {
         return {
             suhailDay: sDay,
             mia: DUROR_MIA[lang][mia],
+            miaIdx: mia,
             durr: DUROR_LABELS[lang][durrIdx],
             durrNum: (durrIdx + 1) * 10
         };
@@ -1225,6 +1274,36 @@ const HijriCalendar = (() => {
     function getGlossaryTerm(term) {
         const lang = currentLang;
         return HERITAGE_GLOSSARY[lang] ? HERITAGE_GLOSSARY[lang][term] : null;
+    }
+
+    // ─── الزمن العربي ─────────────────────────────────────────
+    /** تحديد اسم الزمن العربي الحالي بناءً على الوقت وأوقات الشروق والغروب */
+    function getArabicTimeName(nowDec, sunriseDec, maghribDec) {
+        const lang = currentLang;
+        const isDay = nowDec >= sunriseDec && nowDec < maghribDec;
+        let idx, progress;
+        if (isDay) {
+            const dayLen = maghribDec - sunriseDec;
+            const period = dayLen / 12;
+            const elapsed = nowDec - sunriseDec;
+            idx = Math.min(Math.floor(elapsed / period), 11);
+            progress = (elapsed - idx * period) / period;
+            const t = ARAB_DAY_TIMES[idx];
+            return { name: t[lang] || t.ar, nameEn: t.en, nameAr: t.ar, descAr: t.descAr, descEn: t.descEn, index: idx, isDay: true, progress };
+        } else {
+            const nightLen = 24 - (maghribDec - sunriseDec);
+            const period = nightLen / 12;
+            let elapsed;
+            if (nowDec >= maghribDec) {
+                elapsed = nowDec - maghribDec;
+            } else {
+                elapsed = (24 - maghribDec) + nowDec;
+            }
+            idx = Math.min(Math.floor(elapsed / period), 11);
+            progress = (elapsed - idx * period) / period;
+            const t = ARAB_NIGHT_TIMES[idx];
+            return { name: t[lang] || t.ar, nameEn: t.en, nameAr: t.ar, descAr: t.descAr, descEn: t.descEn, index: idx, isDay: false, progress };
+        }
     }
 
     // ─── أطوار القمر ──────────────────────────────────────────
@@ -2392,6 +2471,9 @@ const HijriCalendar = (() => {
         THURAYA_CONJUNCTIONS, CLIMATE_DATA, BIRD_MIGRATION, HERITAGE_GLOSSARY,
         getDurrDetails, getActiveSeasons, getUpcomingAstroEvents, getSeasonalProverbs,
         getNextThurayaConjunction, getClimateData, getActiveBirdMigration, getGlossaryTerm,
+
+        // الأزمنة العربية
+        getArabicTimeName, ARAB_DAY_TIMES, ARAB_NIGHT_TIMES,
 
         // مساعدات
         toArabicNumerals,
