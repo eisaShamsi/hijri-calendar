@@ -376,6 +376,7 @@ const HijriCalendar = (() => {
     function monthName(i) { return currentLang === 'en' ? MONTH_NAMES_EN[i] : MONTH_NAMES[i]; }
     function dayName(i) { return currentLang === 'en' ? DAY_NAMES_EN[i] : DAY_NAMES[i]; }
     function gregMonthName(i) { return currentLang === 'en' ? GREGORIAN_MONTH_NAMES_EN[i] : GREGORIAN_MONTH_NAMES[i]; }
+    function isSacredMonth(m) { return m === 1 || m === 7 || m === 11 || m === 12; }
 
     // ─── المناسبات الإسلامية ─────────────────────────────────
     const ISLAMIC_EVENTS = {
@@ -2442,7 +2443,7 @@ const HijriCalendar = (() => {
 
         // اللغة
         t, setLang, getLang, _saveLang,
-        monthName, dayName, gregMonthName,
+        monthName, dayName, gregMonthName, isSacredMonth,
 
         // التصحيحات
         setCorrection, getCorrection, clearCorrections, getAllCorrections,

@@ -581,8 +581,11 @@ const App = (() => {
     function renderCalendar() {
         const data = H.getMonthData(currentYear, currentMonth);
 
-        document.getElementById('month-title').textContent =
-            `${data.monthName} ${data.year} ${H.t('hSuffix')}`;
+        const lang = H.getLang();
+        const yearStr = lang === 'ar' ? H.toArabicNumerals(data.year) : data.year;
+        const monthTitleEl = document.getElementById('month-title');
+        monthTitleEl.textContent = `${data.monthName} ${yearStr} ${H.t('hSuffix')}`;
+        document.querySelector('.nav-bar')?.classList.toggle('sacred-month', H.isSacredMonth(currentMonth));
 
         document.getElementById('gregorian-range').textContent = data.gregorianRange;
 
@@ -690,12 +693,22 @@ const App = (() => {
         const jdn = H.todayJDN();
         const dow = H.dayOfWeek(jdn);
 
-        let hijriText = `${H.dayName(dow)}، ${today.day} ${H.monthName(today.month-1)} ${today.year} ${H.t('hSuffix')}`;
+        const tLang = H.getLang();
+        const tDay = tLang === 'ar' ? H.toArabicNumerals(today.day) : today.day;
+        const tYear = tLang === 'ar' ? H.toArabicNumerals(today.year) : today.year;
+        let hijriText = `${H.dayName(dow)}، ${tDay} ${H.monthName(today.month-1)} ${tYear} ${H.t('hSuffix')}`;
         const event = H.getEvent(today.month, today.day);
         if (event) {
             hijriText += ` — ${event.name}`;
         }
-        document.getElementById('today-hijri').textContent = hijriText;
+        const todayHijriEl = document.getElementById('today-hijri');
+        if (H.isSacredMonth(today.month)) {
+            todayHijriEl.innerHTML = hijriText + '<span class="sacred-month-badge"> ✦</span>';
+            todayHijriEl.closest('.today-card')?.classList.add('sacred-month');
+        } else {
+            todayHijriEl.textContent = hijriText;
+            todayHijriEl.closest('.today-card')?.classList.remove('sacred-month');
+        }
 
         document.getElementById('today-gregorian').textContent =
             `${now.getDate()} ${H.gregMonthName(now.getMonth())} ${now.getFullYear()}${H.t('gSuffix')}`;
@@ -3066,6 +3079,13 @@ tr:nth-child(even) { background: #fafafa; }
         document.getElementById('dv-hijri-day').textContent = lang === 'ar' ? H.toArabicNumerals(hijri.day) : hijri.day;
         document.getElementById('dv-hijri-month').textContent = H.monthName(hijri.month - 1);
         document.getElementById('dv-hijri-year').textContent = lang === 'ar' ? H.toArabicNumerals(hijri.year) : hijri.year;
+        const dvHijriCol = document.querySelector('.dv-hijri');
+        if (dvHijriCol) {
+            const isSacred = H.isSacredMonth(hijri.month);
+            dvHijriCol.classList.toggle('sacred-month', isSacred);
+            dvHijriCol.dataset.sacredLabel = lang === 'ar' ? 'شهر حرام' : 'SM';
+            dvHijriCol.title = isSacred && lang === 'en' ? 'Sacred Month — one of the four inviolable months in Islam' : '';
+        }
 
         // Gregorian date
         document.getElementById('dv-greg-day').textContent = lang === 'ar' ? H.toArabicNumerals(gDay) : gDay;
