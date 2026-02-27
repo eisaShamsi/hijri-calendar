@@ -3134,6 +3134,103 @@ html[dir="ltr"] .anwa-card {
     margin-top: 4px;
 }
 [data-theme="dark"] .dv-moon-label { color: var(--text-secondary); }
+.dv-moon-illumination {
+    font-size: 0.75rem;
+    color: var(--papyrus-text-secondary);
+    margin-top: 2px;
+    opacity: 0.8;
+}
+[data-theme="dark"] .dv-moon-illumination { color: var(--text-secondary); }
+.dv-moon-clickable { cursor: pointer; }
+.dv-moon-clickable:active { opacity: 0.7; }
+
+/* ─── Moon Phases Detail Page ─── */
+/* ─── شبكة أطوار القمر — يوم بيوم ─── */
+.moon-phases-timeline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 8px;
+}
+.moon-daily-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+    gap: 6px;
+    padding: 12px 8px;
+}
+.moon-daily-item {
+    text-align: center;
+    background: rgba(255,248,235,0.6);
+    border: 1px solid rgba(139,90,43,0.15);
+    border-radius: 10px;
+    padding: 8px 4px 6px;
+}
+.moon-daily-day {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #4a3520;
+    margin-bottom: 4px;
+}
+[data-theme="dark"] .moon-daily-day { color: #f5edd8; }
+[data-theme="dark"] .moon-daily-item {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+.moon-daily-item.current {
+    border: 2px solid #c49440;
+    background: rgba(196,148,64,0.12);
+    box-shadow: 0 0 10px rgba(196,148,64,0.18);
+}
+[data-theme="dark"] .moon-daily-item.current {
+    background: rgba(196,148,64,0.15);
+    border-color: #d4a84a;
+}
+.moon-phase-visual { margin: 0 auto 4px; }
+.moon-phase-visual img,
+.moon-phase-visual canvas {
+    display: block;
+    margin: 0 auto;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+.moon-phase-name {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #4a3520;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+[data-theme="dark"] .moon-phase-name { color: #f5edd8; }
+.moon-phase-hijri-date {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #4a3520;
+}
+[data-theme="dark"] .moon-phase-hijri-date { color: #f5edd8; }
+.moon-phase-greg-date {
+    font-size: 0.55rem;
+    color: #a09080;
+    margin-top: 2px;
+}
+[data-theme="dark"] .moon-phase-greg-date { color: rgba(255,255,255,0.5); }
+.moon-phase-illum {
+    font-size: 0.6rem;
+    color: #c49440;
+    font-weight: 600;
+    margin-top: 2px;
+}
+[data-theme="dark"] .moon-phase-illum { color: #d4a84a; }
+@media (max-width: 600px) {
+    .moon-daily-grid {
+        grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+        gap: 4px;
+        padding: 8px 4px;
+    }
+    .moon-daily-item { padding: 6px 2px 4px; }
+    .moon-phase-visual canvas { width: 34px; height: 34px; }
+}
 
 /* ─── Tide ─── */
 .dv-tide-section {

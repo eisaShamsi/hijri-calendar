@@ -2446,7 +2446,7 @@ tr:nth-child(even) { background: #fafafa; }
 
     // ─── واجهة اليوم (الشاشة الرئيسية) ──────────────────────
 
-    function renderMoonSVG(phaseFraction, size) {
+    function renderMoonSVG(phaseFraction, size, tiltAngle) {
         size = size || 90;
         const canvas = document.createElement('canvas');
         canvas.width = size * 2;  // 2x for retina
@@ -2493,24 +2493,28 @@ tr:nth-child(even) { background: #fafafa; }
         ];
 
         // --- Illumination geometry (Lambertian lighting for curved crescent) ---
-        // Sun direction in viewer frame, parameterized by phase fraction f:
-        // f=0 (new moon): sun behind moon → sunDir = (0, 0, -1)
-        // f=0.25 (Q1):    sun to right   → sunDir = (1, 0, 0)
-        // f=0.5 (full):   sun behind us  → sunDir = (0, 0, 1)
-        // f=0.75 (Q3):    sun to left    → sunDir = (-1, 0, 0)
+        // f=0 (new moon): sun behind → sunZ=-1
+        // f=0.25 (Q1):    sun lateral  → |lateral|=1, sunZ=0
+        // f=0.5 (full):   sun in front → sunZ=+1
         const theta = Math.PI * 2 * f;
-        // Tilt the sun direction ~20° downward to match real crescent appearance
-        // at tropical/subtropical latitudes (UAE ~25°N). This makes the crescent
-        // horns point more upward and the lit edge tilt toward the bottom.
-        const tilt = 20 * Math.PI / 180; // 20° tilt for tropical latitude appearance
-        const rawSunX = Math.sin(theta);
-        const rawSunZ = -Math.cos(theta);
-        // Rotate sun direction around z-axis by tilt angle:
-        // new sunX = rawSunX * cos(tilt) - 0 * sin(tilt)  [y component is 0]
-        // new sunY = rawSunX * sin(tilt) + 0 * cos(tilt)  [creates y from x]
-        const sunX = rawSunX * Math.cos(tilt);
-        const sunY = rawSunX * Math.sin(tilt);
-        const sunZ = rawSunZ;
+        const sunZ = -Math.cos(theta);
+        let sunX, sunY;
+
+        if (typeof tiltAngle === 'number') {
+            // tiltAngle = zenith position angle of bright limb (χ = PAB - parallactic)
+            // χ measured from zenith (up), counterclockwise on the sky:
+            //   0° = up, 90° = left, 180° = down, 270° = right
+            // Screen mapping: direction = (-sin(χ), -cos(χ))
+            const lateralMag = Math.abs(Math.sin(theta));
+            sunX = lateralMag * (-Math.sin(tiltAngle));
+            sunY = lateralMag * (-Math.cos(tiltAngle));
+        } else {
+            // القيمة الافتراضية: ميلان بسيط ٢٠° (للرسوم التوضيحية بدون بيانات فلكية)
+            const rawSunX = Math.sin(theta);
+            const defaultTilt = 20 * Math.PI / 180;
+            sunX = rawSunX * Math.cos(defaultTilt);
+            sunY = rawSunX * Math.sin(defaultTilt);
+        }
 
         // --- Render pixel by pixel ---
         const imgData = ctx.createImageData(S, S);
@@ -3222,9 +3226,18 @@ tr:nth-child(even) { background: #fafafa; }
         const moonContainer = document.getElementById('dv-moon-container');
         const moon = H.getMoonPhase(gYear, gMonth, gDay);
         if (moon) {
-            let moonHtml = `<div class="dv-moon-face">${renderMoonSVG(moon.phaseFraction, 90)}</div>`;
+            const now = new Date();
+            let mLat = 0, mLng = 0;
+            if (typeof PT !== 'undefined' && PT.getSettings) { const ps = PT.getSettings(); mLat = ps.lat || 0; mLng = ps.lng || 0; }
+            const moonTilt = H.getMoonTiltAngle(gYear, gMonth, gDay, now.getHours() + now.getMinutes() / 60, mLat, mLng);
+            let moonHtml = `<div class="dv-moon-face">${renderMoonSVG(moon.phaseFraction, 90, moonTilt)}</div>`;
             moonHtml += `<div class="dv-moon-label">${moon.name}</div>`;
+            moonHtml += `<div class="dv-moon-illumination">${H.t('moonIllumination')} ${moon.illumination}%</div>`;
             moonContainer.innerHTML = moonHtml;
+            moonContainer.classList.add('dv-moon-clickable');
+            moonContainer.onclick = () => {
+                showAnwaDetail('moon-phases', { year: gYear, month: gMonth, day: gDay });
+            };
         }
 
         // Tide
@@ -3377,6 +3390,77 @@ tr:nth-child(even) { background: #fafafa; }
         });
     }
 
+    // ── حساب أطوار القمر لشهر هجري معين ──
+    function _getMoonPhasesForMonth(hijriYear, hijriMonth) {
+        const SYNODIC = 29.530588861;
+        const PHASE_FRACTIONS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875];
+        const NAMES_AR = ['محاق', 'هلال أول', 'تربيع أول', 'أحدب متزايد', 'بدر', 'أحدب متناقص', 'تربيع أخير', 'هلال أخير'];
+        const NAMES_EN = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'];
+        // نسب الإضاءة المعتمدة لكل طور
+        const STD_ILLUMINATION = [0, 25, 50, 75, 100, 75, 50, 25];
+
+        // إيجاد اقتران القمر (المحاق) لهذا الشهر
+        // نستخدم أول يوم من الشهر الهجري كمرجع لإيجاد الاقتران الصحيح
+        const monthStart = H.Astronomical.monthStartJDN(hijriYear, hijriMonth);
+        const approxK = H.Astronomical._approxK(hijriYear, hijriMonth);
+        const k0 = Math.round(approxK);
+        let bestK = k0, bestDist = Infinity;
+        for (let dk = -1; dk <= 1; dk++) {
+            const testJDE = H.Astronomical.newMoonJDE(k0 + dk);
+            const dist = monthStart - Math.round(testJDE);
+            if (dist >= 0 && dist < bestDist) { bestDist = dist; bestK = k0 + dk; }
+        }
+        const newMoonJDE = H.Astronomical.newMoonJDE(bestK);
+
+        return PHASE_FRACTIONS.map((frac, idx) => {
+            const phaseJDE = newMoonJDE + frac * SYNODIC;
+            const phaseJDN = Math.round(phaseJDE);
+            const greg = H.jdnToGregorian(phaseJDN);
+            const hijri = H.jdnToHijri(phaseJDN);
+            const moonData = H.getMoonPhase(greg.year, greg.month, greg.day);
+            return {
+                phaseIndex: idx,
+                phaseFraction: frac,
+                jdn: phaseJDN,
+                greg, hijri,
+                illumination: STD_ILLUMINATION[idx],
+                nameAr: NAMES_AR[idx],
+                nameEn: NAMES_EN[idx]
+            };
+        });
+    }
+
+    // ── عرض صفحة أطوار القمر — يوم بيوم ──
+    function _renderMoonPhasesDetail(hijriYear, hijriMonth, currentGYear, currentGMonth, currentGDay, lang) {
+        const totalDays = H.daysInMonth(hijriYear, hijriMonth);
+        const currentJDN = H.gregorianToJDN(currentGYear, currentGMonth, currentGDay);
+
+        // الحصول على إحداثيات المراقب
+        let pLat = 0, pLng = 0;
+        if (typeof PT !== 'undefined' && PT.getSettings) { const ps = PT.getSettings(); pLat = ps.lat || 0; pLng = ps.lng || 0; }
+
+        let html = '<div class="moon-phases-timeline moon-daily-grid">';
+        for (let day = 1; day <= totalDays; day++) {
+            const greg = H.hijriToGregorian(hijriYear, hijriMonth, day);
+            const jdn = H.gregorianToJDN(greg.year, greg.month, greg.day);
+            const moonData = H.getMoonPhase(greg.year, greg.month, greg.day);
+            const tilt = H.getMoonTiltAngle(greg.year, greg.month, greg.day, 20, pLat, pLng);
+            const isCurrent = jdn === currentJDN;
+            const phaseName = lang === 'en' ? moonData.nameEn : moonData.nameAr;
+            const hDayStr = lang === 'en' ? String(day) : H.toArabicNumerals(String(day));
+            const gDayMonth = greg.day + ' ' + H.gregMonthName(greg.month - 1);
+
+            html += `<div class="moon-phase-item moon-daily-item${isCurrent ? ' current' : ''}">`;
+            html += `<div class="moon-daily-day">${hDayStr}</div>`;
+            html += `<div class="moon-phase-visual">${renderMoonSVG(moonData.phaseFraction, 40, tilt)}</div>`;
+            html += `<div class="moon-phase-illum">${moonData.illumination}%</div>`;
+            html += `<div class="moon-phase-greg-date">${gDayMonth}</div>`;
+            html += `</div>`;
+        }
+        html += '</div>';
+        return html;
+    }
+
     function showAnwaDetail(type, gregDate) {
         const { year: gYear, month: gMonth, day: gDay } = gregDate;
         const lang = H.getLang();
@@ -3420,6 +3504,11 @@ tr:nth-child(even) { background: #fafafa; }
                 titleEl.innerHTML = H.t('dururCircleTitle') + '  ' + _yearLabel + ' <button class="info-help-btn" id="dirat-help-btn" aria-label="What is this?">?</button>';
             }
             html = _renderDururCircle(gMonth, gDay, gYear, lang);
+        } else if (type === 'moon-phases') {
+            const hijri = H.gregorianToHijri(gYear, gMonth, gDay);
+            const monthLabel = H.monthName(hijri.month - 1) + ' ' + (lang === 'en' ? hijri.year : H.toArabicNumerals(String(hijri.year)));
+            titleEl.textContent = H.t('moonPhasesTitle') + ' — ' + monthLabel;
+            html = _renderMoonPhasesDetail(hijri.year, hijri.month, gYear, gMonth, gDay, lang);
         }
 
         // توسيط وتكبير عنوان ديرة الدرور
@@ -3449,9 +3538,9 @@ tr:nth-child(even) { background: #fafafa; }
         }
 
         // Scroll to current item
-        const current = container.querySelector('.anwa-detail-item.current');
+        const current = container.querySelector('.anwa-detail-item.current') || container.querySelector('.moon-daily-item.current');
         if (current) {
-            setTimeout(() => current.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+            setTimeout(() => current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }), 150);
         }
     }
 

@@ -81,7 +81,7 @@ const HijriCalendar = (() => {
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            version: 'الإصدار 3.0',
+            version: 'الإصدار 3.2',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
@@ -94,6 +94,7 @@ const HijriCalendar = (() => {
             moonIllumination: 'الإضاءة',
             moonNextPhase: 'القادم',
             moonDaysLeft: 'بعد',
+            moonPhasesTitle: 'أطوار القمر',
             tideLabel: 'المد والجزر',
             hilalTitle: 'ولادة الهلال',
             hilalConjunction: 'الاقتران',
@@ -229,7 +230,7 @@ const HijriCalendar = (() => {
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'Eisa Rashid ALSHAMSI - UAE',
-            version: 'Version 3.0',
+            version: 'Version 3.2',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
@@ -242,6 +243,7 @@ const HijriCalendar = (() => {
             moonIllumination: 'Illumination',
             moonNextPhase: 'Next',
             moonDaysLeft: 'in',
+            moonPhasesTitle: 'Moon Phases',
             tideLabel: 'Tides',
             hilalTitle: 'Crescent Birth',
             hilalConjunction: 'Conjunction',
@@ -1518,6 +1520,82 @@ const HijriCalendar = (() => {
         };
     }
 
+    // ─── زاوية ميلان إضاءة القمر (Position Angle of Bright Limb - Parallactic Angle) ──
+
+    /**
+     * حساب زاوية ميلان الجزء المضيء من القمر كما يراها المراقب
+     * تعتمد على موقع الشمس والقمر في السماء وخط عرض المراقب
+     * @param {number} gYear - السنة الميلادية
+     * @param {number} gMonth - الشهر الميلادي
+     * @param {number} gDay - اليوم
+     * @param {number} hour - الساعة (بالتوقيت المحلي، عشري: 20.5 = 8:30 مساءً)
+     * @param {number} lat - خط العرض (بالدرجات)
+     * @param {number} lng - خط الطول (بالدرجات)
+     * @returns {number} زاوية الميلان بالراديان (0 = رأسي، π/2 = أفقي "ابتسامة")
+     */
+    function getMoonTiltAngle(gYear, gMonth, gDay, hour, lat, lng) {
+        const DEG = Math.PI / 180;
+        const mod360 = x => ((x % 360) + 360) % 360;
+
+        // تحويل التوقيت المحلي إلى UTC (تقريب من خط الطول)
+        const tzApprox = lng / 15;
+        const hourUT = hour - tzApprox;
+
+        // أيام جوليان منذ J2000.0 بالتوقيت العالمي
+        const jdn = gregorianToJDN(gYear, gMonth, gDay);
+        const D = jdn - 2451545.0 + (hourUT - 12) / 24;
+        const T = D / 36525;
+
+        // ── إحداثيات الشمس الاستوائية (RA, Dec) ──
+        const L0s = mod360(280.46646 + 36000.76983 * T);
+        const Ms = mod360(357.52911 + 35999.05029 * T) * DEG;
+        const Cs = (1.914602 - 0.004817 * T) * Math.sin(Ms)
+                 + 0.019993 * Math.sin(2 * Ms);
+        const lambdaSun = mod360(L0s + Cs) * DEG;
+        const eps = (23.439291 - 0.013004167 * T) * DEG;
+        const sunRA = Math.atan2(Math.cos(eps) * Math.sin(lambdaSun), Math.cos(lambdaSun));
+        const sunDec = Math.asin(Math.sin(eps) * Math.sin(lambdaSun));
+
+        // ── إحداثيات القمر الاستوائية (RA, Dec) — تقريب دقيق ──
+        const Lm = mod360(218.3165 + 481267.8813 * T) * DEG;
+        const Mm = mod360(134.9634 + 477198.8676 * T) * DEG;
+        const Fm = mod360(93.2721 + 483202.0175 * T) * DEG;
+        const Dm = mod360(297.8502 + 445267.1115 * T) * DEG;
+        const lambdaMoon = Lm
+            + 6.289 * DEG * Math.sin(Mm)
+            - 1.274 * DEG * Math.sin(2 * Dm - Mm)
+            + 0.658 * DEG * Math.sin(2 * Dm)
+            + 0.214 * DEG * Math.sin(2 * Mm)
+            - 0.186 * DEG * Math.sin(Ms);
+        const betaMoon = 5.128 * DEG * Math.sin(Fm);
+        const moonRA = Math.atan2(
+            Math.sin(lambdaMoon) * Math.cos(eps) - Math.tan(betaMoon) * Math.sin(eps),
+            Math.cos(lambdaMoon)
+        );
+        const moonDec = Math.asin(
+            Math.sin(betaMoon) * Math.cos(eps) + Math.cos(betaMoon) * Math.sin(eps) * Math.sin(lambdaMoon)
+        );
+
+        // ── زاوية موضع الطرف المضيء (PAB) — Meeus Ch.48 ──
+        const dRA = sunRA - moonRA;
+        const PAB = Math.atan2(
+            Math.cos(sunDec) * Math.sin(dRA),
+            Math.sin(sunDec) * Math.cos(moonDec) - Math.cos(sunDec) * Math.sin(moonDec) * Math.cos(dRA)
+        );
+
+        // ── الزاوية البارالاكتية ──
+        const LST = mod360(280.46061837 + 360.98564736629 * D + lng) * DEG;
+        const HA = LST - moonRA;
+        const latRad = lat * DEG;
+        const parallactic = Math.atan2(
+            Math.sin(HA),
+            Math.tan(latRad) * Math.cos(moonDec) - Math.sin(moonDec) * Math.cos(HA)
+        );
+
+        // زاوية الميلان المرئية
+        return PAB - parallactic;
+    }
+
     // ─── ولادة الهلال ──────────────────────────────────────────
 
     /**
@@ -2460,7 +2538,7 @@ const HijriCalendar = (() => {
         ISLAMIC_EVENTS, getEvent,
 
         // الأنواء والمواسم والأبراج والدرور وأطوار القمر والهلال
-        getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getHilalInfo,
+        getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getMoonTiltAngle, getHilalInfo,
 
         // بيانات إثرائية + مصفوفات مكشوفة
         TAWALIE, SEASONS, DUROR_LABELS, DUROR_MIA, DUROR_ALIASES, ANWA_ENRICHMENT, ZODIAC,
