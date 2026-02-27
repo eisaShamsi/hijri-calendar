@@ -149,7 +149,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'بسيط', shareThemeIslami: 'إسلامي', shareThemeArabi: 'عربي كلاسيكي',
             shareThemeMashr: 'المشربية', shareThemeQubba: 'القبة', shareThemeMakh: 'المخطوطة',
             creditsName: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            creditsVersion: 'الإصدار 3.0', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            creditsVersion: 'الإصدار 3.2', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
             // قوس الشمس
             sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
             arabicTime: 'الساعة العربية', arabicTimeNow: 'الساعة العربية الآن',
@@ -298,7 +298,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'Simple', shareThemeIslami: 'Islamic', shareThemeArabi: 'Classic Arabic',
             shareThemeMashr: 'Mashrabiya', shareThemeQubba: 'Dome', shareThemeMakh: 'Manuscript',
             creditsName: 'Eisa Rashid ALSHAMSI - UAE',
-            creditsVersion: 'Version 2.0', creditsTech: 'Designed with Claude Code (Opus 4.6)',
+            creditsVersion: 'Version 3.2', creditsTech: 'Designed with Claude Code (Opus 4.6)',
             // Sun arc
             sunArcDay: 'Day Length', sunArcNight: 'Night Length',
             arabicTime: 'Arabic Hour', arabicTimeNow: 'Arabic Hour Now',
