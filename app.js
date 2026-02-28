@@ -3505,7 +3505,7 @@ tr:nth-child(even) { background: #fafafa; }
         const toAr = (v) => isAr ? H.toArabicNumerals(String(v)) : v;
         let html = '<div class="climate-bar">';
         html += `<span class="climate-pill" title="${isAr ? 'متوسط الحرارة' : 'Avg Temperature'}">🌡️ ${toAr(cs.temp.aMin)}°–${toAr(cs.temp.aMax)}°</span>`;
-        html += `<span class="climate-pill" title="${isAr ? 'احتمال المطر' : 'Rain prob.'}">🌧️ ${toAr(Math.round(cs.rain.prob * 100))}%</span>`;
+        html += `<span class="climate-pill" title="${isAr ? 'احتمالات تساقط المطر' : 'Rain prob.'}">🌧️ ${toAr(Math.round(cs.rain.prob * 100))}%</span>`;
         html += `<span class="climate-pill" title="${isAr ? 'سرعة الرياح' : 'Wind speed'}">💨 ${toAr(cs.wind.aMax)} ${isAr ? 'كم/س' : 'km/h'}</span>`;
         html += `<span class="climate-pill" title="${isAr ? 'الرطوبة' : 'Humidity'}">💧 ${toAr(Math.round(cs.hum))}%</span>`;
         if (cs.match != null) html += _renderMatchBadge(cs.match, lang);
@@ -4580,7 +4580,7 @@ tr:nth-child(even) { background: #fafafa; }
             // ── دليل الرموز ──
             html += `<div class="archive-legend">`;
             html += `<span>🌡️ ${isAr ? 'الحرارة' : 'Temp.'}</span>`;
-            html += `<span>🌧️ ${isAr ? 'احتمال المطر' : 'Rain prob.'}</span>`;
+            html += `<span>🌧️ ${isAr ? 'احتمالات تساقط المطر' : 'Rain prob.'}</span>`;
             html += `<span>💨 ${isAr ? 'سرعة الرياح' : 'Wind'}</span>`;
             html += `<span>💧 ${isAr ? 'الرطوبة' : 'Humidity'}</span>`;
             html += `<span>✓ ${isAr ? 'تطابق الوصف التراثي' : 'Heritage match'}</span>`;
