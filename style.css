@@ -4683,8 +4683,29 @@ html[dir="ltr"] .anwa-card {
     font-size: 0.65rem;
     text-align: center;
     color: var(--papyrus-text-secondary, #a09080);
-    margin-bottom: 14px;
+    margin-bottom: 6px;
     opacity: 0.7;
+}
+.archive-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 8px 10px;
+    background: rgba(139,90,43,0.05);
+    border-radius: 10px;
+}
+.archive-legend > span {
+    font-size: 0.62rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    white-space: nowrap;
+}
+[data-theme="dark"] .archive-legend {
+    background: rgba(255,255,255,0.04);
+}
+[data-theme="dark"] .archive-legend > span {
+    color: rgba(255,255,255,0.45);
 }
 .archive-row {
     padding: 10px 0;

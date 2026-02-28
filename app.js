@@ -4577,6 +4577,15 @@ tr:nth-child(even) { background: #fafafa; }
             html += `<div class="archive-card-title">${isAr ? 'الأنماط الأرشيفية' : 'Archival Patterns'}</div>`;
             html += `<div class="archive-card-subtitle">${isAr ? 'إحصائيات مناخية مبنية على أرشيف ' + toAr(cs.meta.years[1] - cs.meta.years[0]) + ' سنة — الإمارات' : cs.meta.years[1] - cs.meta.years[0] + ' years of climate data — UAE'}</div>`;
 
+            // ── دليل الرموز ──
+            html += `<div class="archive-legend">`;
+            html += `<span>🌡️ ${isAr ? 'الحرارة' : 'Temp.'}</span>`;
+            html += `<span>🌧️ ${isAr ? 'احتمال المطر' : 'Rain prob.'}</span>`;
+            html += `<span>💨 ${isAr ? 'سرعة الرياح' : 'Wind'}</span>`;
+            html += `<span>💧 ${isAr ? 'الرطوبة' : 'Humidity'}</span>`;
+            html += `<span>✓ ${isAr ? 'تطابق الوصف التراثي' : 'Heritage match'}</span>`;
+            html += `</div>`;
+
             // ── 1. اليوم ──
             const dayOfYear = Math.floor((new Date(gYear, gMonth - 1, gDay) - new Date(gYear, 0, 1)) / 86400000) + 1;
             const daily = cs.daily[String(dayOfYear)];
