@@ -4572,6 +4572,7 @@ tr:nth-child(even) { background: #fafafa; }
 
         _loadClimateStats().then(cs => {
             if (!cs) return;
+            try {
 
             let html = `<div class="archive-card">`;
             html += `<div class="archive-card-title">${isAr ? 'الأنماط الأرشيفية' : 'Archival Patterns'}</div>`;
@@ -4681,7 +4682,7 @@ tr:nth-child(even) { background: #fafafa; }
             if (cs.strikes) {
                 const allStrikes = H.ANWA_ENRICHMENT.seaStrikes;
                 allStrikes.forEach((st, i) => {
-                    if (H._matchRange(gMonth, gDay, st.from[0], st.from[1], st.to[0], st.to[1])) {
+                    if (H._matchRange(gMonth, gDay, st.from, st.to)) {
                         const stcs = cs.strikes[i];
                         if (stcs) {
                             html += `<div class="archive-row archive-row-sub">`;
@@ -4695,6 +4696,7 @@ tr:nth-child(even) { background: #fafafa; }
 
             html += `</div>`; // close archive-card
             card.innerHTML = html;
+            } catch(e) { console.error('Archive card error:', e); }
         });
     }
 
