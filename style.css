@@ -4599,6 +4599,141 @@ html[dir="ltr"] .anwa-card {
     margin-top: 4px;
 }
 
+/* ── Climate Statistics Bar (80-year data) ── */
+.climate-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--papyrus-border, rgba(139,90,43,0.15));
+    align-items: center;
+}
+.climate-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(139,90,43,0.08);
+    color: var(--papyrus-text-secondary, #a09080);
+    white-space: nowrap;
+}
+[data-theme="dark"] .climate-pill {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.55);
+}
+.climate-note {
+    font-size: 0.58rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    opacity: 0.5;
+    margin-inline-start: auto;
+}
+.match-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+}
+.match-high { background: rgba(76,175,80,0.15); color: #2e7d32; }
+.match-mid  { background: rgba(212,160,23,0.15); color: #a88620; }
+.match-low  { background: rgba(239,108,0,0.15); color: #bf360c; }
+[data-theme="dark"] .match-high { background: rgba(76,175,80,0.2); color: #81c784; }
+[data-theme="dark"] .match-mid  { background: rgba(212,160,23,0.2); color: #ffd54f; }
+[data-theme="dark"] .match-low  { background: rgba(239,108,0,0.2); color: #ffab91; }
+.anwa-detail-durr-stats {
+    font-size: 0.62rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.match-badge-sm {
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: 8px;
+}
+.climate-wind-stat {
+    font-size: 0.72rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-top: 4px;
+    opacity: 0.85;
+}
+
+/* ── بطاقة الأنماط الأرشيفية ── */
+.archive-card {
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--papyrus-card, rgba(255,248,235,0.6));
+    border: 1px solid var(--papyrus-border, rgba(139,90,43,0.25));
+    border-radius: 14px;
+}
+.archive-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 4px;
+    color: var(--papyrus-text, #3e2a14);
+}
+.archive-card-subtitle {
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-bottom: 14px;
+    opacity: 0.7;
+}
+.archive-row {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(139,90,43,0.1);
+}
+.archive-row:last-child { border-bottom: none; }
+.archive-row-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--papyrus-text, #3e2a14);
+    margin-bottom: 2px;
+}
+.archive-row-detail {
+    font-size: 0.72rem;
+    color: var(--papyrus-text-secondary, #a09080);
+    margin-bottom: 6px;
+}
+.archive-row-sub .archive-row-label {
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+.archive-row-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.archive-row-stats > span {
+    font-size: 0.68rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(139,90,43,0.06);
+    color: var(--papyrus-text-secondary, #a09080);
+    white-space: nowrap;
+}
+[data-theme="dark"] .archive-card {
+    background: rgba(30,24,14,0.5);
+    border-color: rgba(139,90,43,0.2);
+}
+[data-theme="dark"] .archive-card-title { color: var(--text-primary, #f5e6c8); }
+[data-theme="dark"] .archive-card-subtitle { color: var(--text-secondary, rgba(255,255,255,0.5)); }
+[data-theme="dark"] .archive-row { border-bottom-color: rgba(255,255,255,0.06); }
+[data-theme="dark"] .archive-row-label { color: var(--text-primary, #f5e6c8); }
+[data-theme="dark"] .archive-row-detail { color: var(--text-secondary, rgba(255,255,255,0.5)); }
+[data-theme="dark"] .archive-row-stats > span {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.55);
+}
+
 /* ── Durr System ── */
 .anwa-detail-suhail {
     text-align: center;

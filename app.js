@@ -17,6 +17,7 @@ const App = (() => {
     let _arabicClockTimer = null;
     let _arabTimeTimer = null;
     let _needleJustReleased = false;
+    let _climateStats = null;
     let _needleDragCleanup = null;
 
     // ─── شاشة الترحيب ──────────────────────────────────────
@@ -3488,6 +3489,110 @@ tr:nth-child(even) { background: #fafafa; }
         return html;
     }
 
+    // ─── تحميل وعرض البيانات المناخية التاريخية ─────────────
+    async function _loadClimateStats() {
+        if (_climateStats) return _climateStats;
+        try {
+            const r = await fetch('./climate-stats.json');
+            if (r.ok) _climateStats = await r.json();
+        } catch (e) { /* ملف غير متوفر — offline أو غير موجود */ }
+        return _climateStats;
+    }
+
+    function _renderClimateBar(cs, lang) {
+        if (!cs || !cs.temp) return '';
+        const isAr = lang !== 'en';
+        const toAr = (v) => isAr ? H.toArabicNumerals(String(v)) : v;
+        let html = '<div class="climate-bar">';
+        html += `<span class="climate-pill" title="${isAr ? 'متوسط الحرارة' : 'Avg Temperature'}">🌡️ ${toAr(cs.temp.aMin)}°–${toAr(cs.temp.aMax)}°</span>`;
+        html += `<span class="climate-pill" title="${isAr ? 'احتمال المطر' : 'Rain prob.'}">🌧️ ${toAr(Math.round(cs.rain.prob * 100))}%</span>`;
+        html += `<span class="climate-pill" title="${isAr ? 'سرعة الرياح' : 'Wind speed'}">💨 ${toAr(cs.wind.aMax)} ${isAr ? 'كم/س' : 'km/h'}</span>`;
+        html += `<span class="climate-pill" title="${isAr ? 'الرطوبة' : 'Humidity'}">💧 ${toAr(Math.round(cs.hum))}%</span>`;
+        if (cs.match != null) html += _renderMatchBadge(cs.match, lang);
+        html += `<span class="climate-note">${isAr ? '٨٠ سنة' : '80yr'}</span>`;
+        html += '</div>';
+        return html;
+    }
+
+    function _renderMatchBadge(score, lang) {
+        if (score == null) return '';
+        const isAr = lang !== 'en';
+        const colorClass = score >= 80 ? 'match-high' : score >= 60 ? 'match-mid' : 'match-low';
+        const val = isAr ? H.toArabicNumerals(String(score)) : score;
+        return `<span class="match-badge ${colorClass}" title="${isAr ? 'نسبة التطابق' : 'Match score'}">✓ ${val}%</span>`;
+    }
+
+    function _enrichAnwaWithClimate(container, lang) {
+        const cs = _climateStats;
+        if (!cs || !cs.anwa) return;
+        const items = container.querySelectorAll('.anwa-detail-item');
+        items.forEach((el, i) => {
+            if (cs.anwa[i]) {
+                const bar = document.createElement('div');
+                bar.innerHTML = _renderClimateBar(cs.anwa[i], lang);
+                el.appendChild(bar.firstElementChild || bar);
+            }
+        });
+    }
+
+    function _enrichDurrWithClimate(container, lang) {
+        const cs = _climateStats;
+        if (!cs || !cs.duror) return;
+        const isAr = lang !== 'en';
+        const toAr = (v) => isAr ? H.toArabicNumerals(String(v)) : v;
+        const miaGroups = container.querySelectorAll('.anwa-detail-mia');
+        miaGroups.forEach((miaEl, miaIdx) => {
+            const durrs = miaEl.querySelectorAll('.anwa-detail-durr');
+            durrs.forEach((dEl, dIdx) => {
+                const key = `${miaIdx}-${dIdx}`;
+                const d = cs.duror[key];
+                if (d) {
+                    const statsEl = document.createElement('div');
+                    statsEl.className = 'anwa-detail-durr-stats';
+                    statsEl.textContent = `${toAr(d.temp.aMean)}° | 🌧${toAr(Math.round(d.rain.prob * 100))}%`;
+                    if (d.match != null) {
+                        const badge = document.createElement('span');
+                        badge.className = 'match-badge-sm ' + (d.match >= 80 ? 'match-high' : d.match >= 60 ? 'match-mid' : 'match-low');
+                        badge.textContent = `${toAr(d.match)}%`;
+                        statsEl.appendChild(badge);
+                    }
+                    dEl.appendChild(statsEl);
+                }
+            });
+        });
+    }
+
+    function _enrichWindWithClimate(container, lang) {
+        const cs = _climateStats;
+        if (!cs || !cs.winds) return;
+        const isAr = lang !== 'en';
+        const toAr = (v) => isAr ? H.toArabicNumerals(String(v)) : v;
+        // الرياح الموسمية — تبدأ بعد البوصلة
+        const windItems = container.querySelectorAll('.anwa-detail-list:last-of-type .anwa-detail-item');
+        windItems.forEach((el, i) => {
+            if (cs.winds[i]) {
+                const w = cs.winds[i];
+                const stat = document.createElement('div');
+                stat.className = 'climate-wind-stat';
+                stat.innerHTML = `💨 ${toAr(w.wind.aMax)} ${isAr ? 'كم/س' : 'km/h'} | ${isAr ? 'السائد' : 'Dom.'}: ${w.wind.dirAr}`;
+                el.appendChild(stat);
+            }
+        });
+    }
+
+    function _enrichSeasonWithClimate(container, lang) {
+        const cs = _climateStats;
+        if (!cs || !cs.seasons) return;
+        const items = container.querySelectorAll('.anwa-detail-item');
+        items.forEach((el, i) => {
+            if (cs.seasons[i]) {
+                const bar = document.createElement('div');
+                bar.innerHTML = _renderClimateBar(cs.seasons[i], lang);
+                el.appendChild(bar.firstElementChild || bar);
+            }
+        });
+    }
+
     function showAnwaDetail(type, gregDate) {
         const { year: gYear, month: gMonth, day: gDay } = gregDate;
         const lang = H.getLang();
@@ -3561,13 +3666,27 @@ tr:nth-child(even) { background: #fafafa; }
 
         // Setup durur circle interactivity after DOM insertion
         if (type === 'durur-circle') {
-            setTimeout(() => _setupDururCircleEvents(container), 50);
+            setTimeout(() => {
+                _setupDururCircleEvents(container);
+                _populateArchiveCard(container);
+            }, 50);
         }
 
         // Scroll to current item
         const current = container.querySelector('.anwa-detail-item.current') || container.querySelector('.moon-daily-item.current');
         if (current) {
             setTimeout(() => current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }), 150);
+        }
+
+        // إثراء بالبيانات المناخية (لاحق — async)
+        if (['tale3', 'durr', 'wind', 'season'].includes(type)) {
+            _loadClimateStats().then(stats => {
+                if (!stats) return;
+                if (type === 'tale3') _enrichAnwaWithClimate(container, lang);
+                else if (type === 'durr') _enrichDurrWithClimate(container, lang);
+                else if (type === 'wind') _enrichWindWithClimate(container, lang);
+                else if (type === 'season') _enrichSeasonWithClimate(container, lang);
+            });
         }
     }
 
@@ -4061,6 +4180,7 @@ tr:nth-child(even) { background: #fafafa; }
         const seasonalEl = container.querySelector('#durur-seasonal-section');
         if (seasonalEl) {
             seasonalEl.innerHTML = _buildSeasonalHTML(gMonth, gDay, gYear, lang);
+            _populateArchiveCard(seasonalEl);
         }
     }
 
@@ -4434,6 +4554,153 @@ tr:nth-child(even) { background: #fafafa; }
         }
 
         html += `</div>`; // close durur-enrich-section
+
+        // ─── حاوية بطاقة الأنماط الأرشيفية (تُملأ غير متزامنياً) ───
+        html += `<div id="archive-patterns-card" data-gm="${gMonth}" data-gd="${gDay}" data-gy="${gYear}"></div>`;
+
+        return html;
+    }
+
+    // ─── بطاقة الأنماط الأرشيفية ─────────────────────────────
+    function _populateArchiveCard(container) {
+        const card = container.querySelector('#archive-patterns-card');
+        if (!card) return;
+        const gMonth = +card.dataset.gm, gDay = +card.dataset.gd, gYear = +card.dataset.gy;
+        const lang = H.getLang();
+        const isAr = lang !== 'en';
+        const toAr = (v) => isAr ? H.toArabicNumerals(String(v)) : v;
+
+        _loadClimateStats().then(cs => {
+            if (!cs) return;
+
+            let html = `<div class="archive-card">`;
+            html += `<div class="archive-card-title">${isAr ? 'الأنماط الأرشيفية' : 'Archival Patterns'}</div>`;
+            html += `<div class="archive-card-subtitle">${isAr ? 'إحصائيات مناخية مبنية على أرشيف ' + toAr(cs.meta.years[1] - cs.meta.years[0]) + ' سنة — الإمارات' : cs.meta.years[1] - cs.meta.years[0] + ' years of climate data — UAE'}</div>`;
+
+            // ── 1. اليوم ──
+            const dayOfYear = Math.floor((new Date(gYear, gMonth - 1, gDay) - new Date(gYear, 0, 1)) / 86400000) + 1;
+            const daily = cs.daily[String(dayOfYear)];
+            if (daily) {
+                html += `<div class="archive-row">`;
+                html += `<div class="archive-row-label">${isAr ? '📅 هذا اليوم' : '📅 This Day'}</div>`;
+                html += `<div class="archive-row-detail">${toAr(gDay)}/${toAr(gMonth)}</div>`;
+                html += `<div class="archive-row-stats">`;
+                html += `<span>🌡️ ${toAr(daily.tMin)}°–${toAr(daily.tMax)}°</span>`;
+                html += `<span>🌧️ ${toAr(Math.round(daily.rain * 100) / 100)} ${isAr ? 'مم' : 'mm'}</span>`;
+                html += `<span>💧 ${toAr(Math.round(daily.hum))}%</span>`;
+                html += `</div></div>`;
+            }
+
+            // ── 2. الطالع (النوء) ──
+            const tale3 = H.getTale3(gMonth, gDay);
+            if (tale3) {
+                const tIdx = H.TAWALIE.findIndex(x => x.ar === tale3.nameAr);
+                const tcs = tIdx >= 0 ? cs.anwa[tIdx] : null;
+                if (tcs) {
+                    html += `<div class="archive-row">`;
+                    html += `<div class="archive-row-label">${isAr ? '⭐ الطالع' : '⭐ Mansion'}</div>`;
+                    html += `<div class="archive-row-detail">${tale3.name}</div>`;
+                    html += _archiveStats(tcs, isAr, toAr);
+                    html += `</div>`;
+                }
+            }
+
+            // ── 3. الدر ──
+            const durr = H.getDurr(gMonth, gDay, gYear);
+            if (durr) {
+                const miaStart = durr.miaIdx * 100 + 1;
+                const durrIdx = Math.floor((durr.suhailDay - miaStart) / 10);
+                const dKey = durr.miaIdx + '-' + durrIdx;
+                const dcs = cs.duror[dKey];
+                if (dcs) {
+                    html += `<div class="archive-row">`;
+                    html += `<div class="archive-row-label">${isAr ? '🔢 الدر' : '🔢 Durr'}</div>`;
+                    html += `<div class="archive-row-detail">${_formatDurrName(durr)}</div>`;
+                    html += _archiveStats(dcs, isAr, toAr);
+                    html += `</div>`;
+                }
+            }
+
+            // ── 4. الموسم ──
+            const season = H.getSeason(gMonth, gDay);
+            if (season) {
+                const sIdx = H.SEASONS.findIndex(x => x.ar === season.nameAr);
+                const scs = sIdx >= 0 ? cs.seasons[sIdx] : null;
+                if (scs) {
+                    html += `<div class="archive-row">`;
+                    html += `<div class="archive-row-label">${isAr ? '🌿 الموسم' : '🌿 Season'}</div>`;
+                    html += `<div class="archive-row-detail">${season.name}</div>`;
+                    html += _archiveStats(scs, isAr, toAr);
+                    html += `</div>`;
+                }
+            }
+
+            // ── 5. الرياح الموسمية ──
+            const winds = H.getSeasonalWinds(gMonth, gDay);
+            if (winds.length > 0) {
+                const allWinds = H.ANWA_ENRICHMENT.seasonalWinds;
+                const wIdx = allWinds.findIndex(aw => aw.ar === winds[0].name || aw.ar === winds[0].nameAr);
+                const wcs = wIdx >= 0 ? cs.winds[wIdx] : null;
+                if (wcs) {
+                    html += `<div class="archive-row">`;
+                    html += `<div class="archive-row-label">${isAr ? '💨 الرياح' : '💨 Winds'}</div>`;
+                    html += `<div class="archive-row-detail">${winds[0].name}</div>`;
+                    html += `<div class="archive-row-stats">`;
+                    html += `<span>💨 ${toAr(wcs.wind.aMax)} ${isAr ? 'كم/س' : 'km/h'}</span>`;
+                    html += `<span>${isAr ? 'السائد' : 'Dominant'}: ${isAr ? wcs.wind.dirAr : wcs.wind.dirAr}</span>`;
+                    html += `</div></div>`;
+                }
+            }
+
+            // ── 6. المواسم الخاصة النشطة ──
+            const activeSpecial = H.getActiveSeasons(gMonth, gDay);
+            if (activeSpecial.length > 0 && cs.special) {
+                const allSpecial = H.SPECIAL_SEASONS;
+                activeSpecial.forEach(sp => {
+                    const spIdx = allSpecial.findIndex(x => x.ar === (sp.nameAr || sp.ar));
+                    const spcs = spIdx >= 0 ? cs.special[spIdx] : null;
+                    if (spcs) {
+                        html += `<div class="archive-row archive-row-sub">`;
+                        html += `<div class="archive-row-label">${sp.icon || '🗓️'} ${isAr ? (sp.ar || sp.nameAr) : (sp.en || sp.nameEn)}</div>`;
+                        html += _archiveStats(spcs, isAr, toAr);
+                        html += `</div>`;
+                    }
+                });
+            }
+
+            // ── 7. الضربات البحرية ──
+            if (cs.strikes) {
+                const allStrikes = H.ANWA_ENRICHMENT.seaStrikes;
+                allStrikes.forEach((st, i) => {
+                    if (H._matchRange(gMonth, gDay, st.from[0], st.from[1], st.to[0], st.to[1])) {
+                        const stcs = cs.strikes[i];
+                        if (stcs) {
+                            html += `<div class="archive-row archive-row-sub">`;
+                            html += `<div class="archive-row-label">🌊 ${isAr ? st.ar : st.en}</div>`;
+                            html += _archiveStats(stcs, isAr, toAr);
+                            html += `</div>`;
+                        }
+                    }
+                });
+            }
+
+            html += `</div>`; // close archive-card
+            card.innerHTML = html;
+        });
+    }
+
+    function _archiveStats(cs, isAr, toAr) {
+        if (!cs || !cs.temp) return '';
+        let html = `<div class="archive-row-stats">`;
+        html += `<span>🌡️ ${toAr(cs.temp.aMin)}°–${toAr(cs.temp.aMax)}°</span>`;
+        html += `<span>🌧️ ${toAr(Math.round(cs.rain.prob * 100))}%</span>`;
+        html += `<span>💨 ${toAr(cs.wind.aMax)} ${isAr ? 'كم/س' : 'km/h'}</span>`;
+        html += `<span>💧 ${toAr(Math.round(cs.hum))}%</span>`;
+        if (cs.match != null) {
+            const cls = cs.match >= 80 ? 'match-high' : cs.match >= 60 ? 'match-mid' : 'match-low';
+            html += `<span class="match-badge-sm ${cls}">${isAr ? '✓' : '✓'} ${toAr(cs.match)}%</span>`;
+        }
+        html += `</div>`;
         return html;
     }
 

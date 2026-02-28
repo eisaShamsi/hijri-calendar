@@ -3,7 +3,7 @@
  * Cache-first strategy for offline support
  */
 
-const CACHE_NAME = 'hijri-calendar-v5.38';
+const CACHE_NAME = 'hijri-calendar-v5.40';
 const CORE_ASSETS = [
     './',
     './index.html',
@@ -15,6 +15,7 @@ const CORE_ASSETS = [
     './manifest.json',
     './icon-192.svg',
     './icon-512.svg',
+    './climate-stats.json',
     './fonts/amiri-400-arabic.woff2',
     './fonts/amiri-400-latin.woff2',
     './fonts/amiri-700-arabic.woff2',
