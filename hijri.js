@@ -81,7 +81,7 @@ const HijriCalendar = (() => {
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            version: 'الإصدار 3.2',
+            version: 'الإصدار 3.3',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
@@ -95,6 +95,7 @@ const HijriCalendar = (() => {
             moonNextPhase: 'القادم',
             moonDaysLeft: 'بعد',
             moonPhasesTitle: 'أطوار القمر',
+            moonriseLabel: 'شروق القمر', moonsetLabel: 'غروب القمر',
             tideLabel: 'المد والجزر',
             hilalTitle: 'ولادة الهلال',
             hilalConjunction: 'الاقتران',
@@ -149,7 +150,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'بسيط', shareThemeIslami: 'إسلامي', shareThemeArabi: 'عربي كلاسيكي',
             shareThemeMashr: 'المشربية', shareThemeQubba: 'القبة', shareThemeMakh: 'المخطوطة',
             creditsName: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            creditsVersion: 'الإصدار 3.2', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            creditsVersion: 'الإصدار 3.3', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
             // قوس الشمس
             sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
             arabicTime: 'الساعة العربية', arabicTimeNow: 'الساعة العربية الآن',
@@ -230,7 +231,7 @@ const HijriCalendar = (() => {
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'Eisa Rashid ALSHAMSI - UAE',
-            version: 'Version 3.2',
+            version: 'Version 3.3',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
@@ -244,6 +245,7 @@ const HijriCalendar = (() => {
             moonNextPhase: 'Next',
             moonDaysLeft: 'in',
             moonPhasesTitle: 'Moon Phases',
+            moonriseLabel: 'Moonrise', moonsetLabel: 'Moonset',
             tideLabel: 'Tides',
             hilalTitle: 'Crescent Birth',
             hilalConjunction: 'Conjunction',
@@ -298,7 +300,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'Simple', shareThemeIslami: 'Islamic', shareThemeArabi: 'Classic Arabic',
             shareThemeMashr: 'Mashrabiya', shareThemeQubba: 'Dome', shareThemeMakh: 'Manuscript',
             creditsName: 'Eisa Rashid ALSHAMSI - UAE',
-            creditsVersion: 'Version 3.2', creditsTech: 'Designed with Claude Code (Opus 4.6)',
+            creditsVersion: 'Version 3.3', creditsTech: 'Designed with Claude Code (Opus 4.6)',
             // Sun arc
             sunArcDay: 'Day Length', sunArcNight: 'Night Length',
             arabicTime: 'Arabic Hour', arabicTimeNow: 'Arabic Hour Now',
@@ -1596,6 +1598,99 @@ const HijriCalendar = (() => {
         return PAB - parallactic;
     }
 
+    // ─── شروق وغروب القمر ─────────────────────────────────────
+
+    /**
+     * حساب ارتفاع القمر فوق الأفق في لحظة معينة
+     * @param {number} jde - اليوم الجولياني
+     * @param {number} lat - خط العرض
+     * @param {number} lng - خط الطول
+     * @returns {object} { alt, az } بالدرجات
+     */
+    function _moonAltAz(jde, lat, lng) {
+        const pos = _moonPosition(jde);
+        return _equatorialToHorizontal(pos.ra, pos.dec, jde, lat, lng);
+    }
+
+    /**
+     * حساب أوقات شروق وغروب القمر لتاريخ معين وموقع المراقب
+     * @param {number} gYear - السنة الميلادية
+     * @param {number} gMonth - الشهر الميلادي
+     * @param {number} gDay - اليوم
+     * @param {number} lat - خط العرض
+     * @param {number} lng - خط الطول
+     * @param {number} tz - فرق التوقيت عن UTC بالساعات
+     * @returns {object} { rise: {time, hour, az, dir}|null, set: {time, hour, az, dir}|null }
+     */
+    function getMoonriseMoonset(gYear, gMonth, gDay, lat, lng, tz) {
+        if (!lat && !lng) return { rise: null, set: null };
+        if (tz === undefined) tz = 0;
+
+        const jdn = gregorianToJDN(gYear, gMonth, gDay);
+        // بداية اليوم بالتوقيت المحلي (منتصف الليل) كـ JDE
+        // JDN = ظهر UT، فمنتصف ليل UT = JDN - 0.5، ومنتصف ليل محلي = منتصف ليل UT - tz/24
+        const jde0 = jdn - 0.5 - tz / 24; // JDE عند 00:00 محلي
+        // سطح الأفق للقمر: المنظر الأفقي (~57') − نصف القطر الظاهري (~16') − الانكسار (~34') ≈ +0.125°
+        const HORIZON = 0.125;
+        const STEP = 0.5; // فحص كل نصف ساعة (بالساعات)
+        const STEPS = 48; // 24 ساعة / 0.5
+
+        let rise = null, set = null;
+
+        // فحص ارتفاع القمر كل نصف ساعة لإيجاد عبور الأفق
+        let prevAlt = _moonAltAz(jde0, lat, lng).alt;
+
+        for (let i = 1; i <= STEPS; i++) {
+            const t = i * STEP; // ساعات من منتصف الليل
+            const jde = jde0 + t / 24;
+            const curAlt = _moonAltAz(jde, lat, lng).alt;
+
+            // عبور من تحت الأفق إلى فوقه = شروق
+            if (!rise && prevAlt < HORIZON && curAlt >= HORIZON) {
+                rise = _bisectMoonCrossing(jde0, t - STEP, t, lat, lng, tz, HORIZON);
+            }
+            // عبور من فوق الأفق إلى تحته = غروب
+            if (!set && prevAlt >= HORIZON && curAlt < HORIZON) {
+                set = _bisectMoonCrossing(jde0, t - STEP, t, lat, lng, tz, HORIZON);
+            }
+
+            if (rise && set) break;
+            prevAlt = curAlt;
+        }
+
+        return { rise, set };
+    }
+
+    /**
+     * بحث ثنائي لتحديد اللحظة الدقيقة لعبور القمر ارتفاعاً محدداً
+     */
+    function _bisectMoonCrossing(jde0, h1, h2, lat, lng, tz, targetAlt) {
+        // 15 تكراراً → دقة ≈ 1 ثانية (0.5 ساعة / 2^15)
+        for (let i = 0; i < 15; i++) {
+            const hMid = (h1 + h2) / 2;
+            const alt = _moonAltAz(jde0 + hMid / 24, lat, lng).alt;
+            if (alt < targetAlt) h1 = hMid;
+            else h2 = hMid;
+        }
+        const hFinal = (h1 + h2) / 2;
+        const jdeFinal = jde0 + hFinal / 24;
+        const { az } = _moonAltAz(jdeFinal, lat, lng);
+
+        // تحويل الساعة العشرية إلى hh:mm
+        const localHour = hFinal;
+        let hh = Math.floor(localHour);
+        let mm = Math.round((localHour - hh) * 60);
+        if (mm >= 60) { mm = 0; hh++; }
+        const timeStr = String(hh % 24).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+
+        return {
+            time: timeStr,
+            hour: Math.round(localHour * 100) / 100,
+            az: Math.round(az * 10) / 10,
+            dir: _azimuthDirection(az, currentLang)
+        };
+    }
+
     // ─── ولادة الهلال ──────────────────────────────────────────
 
     /**
@@ -2538,7 +2633,7 @@ const HijriCalendar = (() => {
         ISLAMIC_EVENTS, getEvent,
 
         // الأنواء والمواسم والأبراج والدرور وأطوار القمر والهلال
-        getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getMoonTiltAngle, getHilalInfo,
+        getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getMoonTiltAngle, getMoonriseMoonset, getHilalInfo,
 
         // بيانات إثرائية + مصفوفات مكشوفة
         TAWALIE, SEASONS, DUROR_LABELS, DUROR_MIA, DUROR_ALIASES, ANWA_ENRICHMENT, ZODIAC,

@@ -2845,7 +2845,7 @@ tr:nth-child(even) { background: #fafafa; }
                 lat = s.lat; lng = s.lng;
             }
         } catch (e) {}
-        if (!lat && !lng) { el.innerHTML = ''; return; }
+        if (!lat && !lng) { el.innerHTML = ''; const sec = document.getElementById('dv-weather-section'); if (sec) sec.style.display = 'none'; return; }
 
         const lang = H.getLang();
         const dateStr = `${gYear}-${String(gMonth).padStart(2, '0')}-${String(gDay).padStart(2, '0')}`;
@@ -2873,6 +2873,8 @@ tr:nth-child(even) { background: #fafafa; }
             renderWeatherData(el, data, lang);
         } catch (err) {
             el.innerHTML = '';
+            const sec = document.getElementById('dv-weather-section');
+            if (sec) sec.style.display = 'none';
         }
     }
 
@@ -3225,10 +3227,10 @@ tr:nth-child(even) { background: #fafafa; }
         // Moon phase
         const moonContainer = document.getElementById('dv-moon-container');
         const moon = H.getMoonPhase(gYear, gMonth, gDay);
+        let mLat = 0, mLng = 0;
+        if (typeof PT !== 'undefined' && PT.getSettings) { const ps = PT.getSettings(); mLat = ps.lat || 0; mLng = ps.lng || 0; }
         if (moon) {
             const now = new Date();
-            let mLat = 0, mLng = 0;
-            if (typeof PT !== 'undefined' && PT.getSettings) { const ps = PT.getSettings(); mLat = ps.lat || 0; mLng = ps.lng || 0; }
             const moonTilt = H.getMoonTiltAngle(gYear, gMonth, gDay, now.getHours() + now.getMinutes() / 60, mLat, mLng);
             let moonHtml = `<div class="dv-moon-face">${renderMoonSVG(moon.phaseFraction, 90, moonTilt)}</div>`;
             moonHtml += `<div class="dv-moon-label">${moon.name}</div>`;
@@ -3238,6 +3240,31 @@ tr:nth-child(even) { background: #fafafa; }
             moonContainer.onclick = () => {
                 showAnwaDetail('moon-phases', { year: gYear, month: gMonth, day: gDay });
             };
+        }
+
+        // Moonrise / Moonset
+        const moonriseEl = document.getElementById('dv-moonrise-section');
+        if (mLat || mLng) {
+            const mTz = -(new Date(gYear, gMonth - 1, gDay).getTimezoneOffset()) / 60;
+            const mrs = H.getMoonriseMoonset(gYear, gMonth, gDay, mLat, mLng, mTz);
+            if (mrs && (mrs.rise || mrs.set)) {
+                let mrsHtml = '<div class="dv-moonrise-row">';
+                if (mrs.rise) {
+                    const rAz = lang === 'en' ? mrs.rise.az + '°' : H.toArabicNumerals(String(mrs.rise.az)) + '°';
+                    mrsHtml += `<span class="dv-moonrise-item"><span class="dv-moonrise-icon">🌒</span> ${H.t('moonriseLabel')} <strong>${mrs.rise.time}</strong> <span class="dv-moonrise-dir">${mrs.rise.dir} ${rAz}</span></span>`;
+                }
+                if (mrs.set) {
+                    const sAz = lang === 'en' ? mrs.set.az + '°' : H.toArabicNumerals(String(mrs.set.az)) + '°';
+                    mrsHtml += `<span class="dv-moonrise-item"><span class="dv-moonrise-icon">🌘</span> ${H.t('moonsetLabel')} <strong>${mrs.set.time}</strong> <span class="dv-moonrise-dir">${mrs.set.dir} ${sAz}</span></span>`;
+                }
+                mrsHtml += '</div>';
+                moonriseEl.innerHTML = mrsHtml;
+                moonriseEl.style.display = '';
+            } else {
+                moonriseEl.style.display = 'none';
+            }
+        } else {
+            moonriseEl.style.display = 'none';
         }
 
         // Tide

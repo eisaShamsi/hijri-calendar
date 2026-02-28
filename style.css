@@ -3232,6 +3232,34 @@ html[dir="ltr"] .anwa-card {
     .moon-phase-visual canvas { width: 34px; height: 34px; }
 }
 
+/* ─── Moonrise / Moonset ─── */
+.dv-moonrise-section {
+    max-width: 420px;
+    margin: 8px auto;
+}
+.dv-moonrise-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.dv-moonrise-item {
+    background: rgba(245,230,200,0.5);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--papyrus-text-secondary);
+}
+[data-theme="dark"] .dv-moonrise-item {
+    background: rgba(30,24,14,0.5);
+    color: var(--gray-500);
+}
+.dv-moonrise-icon { margin-inline-end: 4px; }
+.dv-moonrise-dir {
+    font-size: 0.72rem;
+    opacity: 0.7;
+}
+
 /* ─── Tide ─── */
 .dv-tide-section {
     max-width: 420px;
