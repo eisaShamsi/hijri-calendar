@@ -81,7 +81,7 @@ const HijriCalendar = (() => {
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            version: 'الإصدار 3.4',
+            version: 'الإصدار 3.5',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
@@ -150,7 +150,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'بسيط', shareThemeIslami: 'إسلامي', shareThemeArabi: 'عربي كلاسيكي',
             shareThemeMashr: 'المشربية', shareThemeQubba: 'القبة', shareThemeMakh: 'المخطوطة',
             creditsName: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            creditsVersion: 'الإصدار 3.4', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            creditsVersion: 'الإصدار 3.5', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
             // قوس الشمس
             sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
             arabicTime: 'الساعة العربية', arabicTimeNow: 'الساعة العربية الآن',
@@ -196,7 +196,41 @@ const HijriCalendar = (() => {
             welcomeDetect: 'تحديد موقعي',
             welcomeSkip: 'تخطي',
             welcomeDetecting: 'جارٍ تحديد الموقع...',
+            suhailCalcTitle: 'حاسبة طلوع سهيل',
+            suhailDay1Label: 'غرة سهيل',
+            suhailRegion: 'منطقة',
+            suhailManualAdj: 'تعديل يدوي',
+            suhailApplyBtn: 'تطبيق',
+            suhailResetBtn: 'إعادة تعيين',
+            suhailNotVisible: 'سهيل لا يُرى في هذا الموقع',
+            suhailInfoTitle: 'نظامان فلكيان في ديرة الدرور',
+            suhailInfoSolar: 'الأنواء (٢٨ منزلة) والأبراج والفصول الأربعة — مرتبطة بموقع الشمس الظاهري، ثابتة في التقويم الميلادي.',
+            suhailInfoStellar: 'الدرور (٣٦ درّاً) والرياح والمواسم والضربات البحرية — تُحسب من طلوع سهيل، ويختلف موعده بحسب خط العرض.',
+            suhailInfoEffect: 'عند تغيير تاريخ سهيل، تتبعه الحلقات المرتبطة به (الدرور، الرياح، المواسم، الضربات) بينما تبقى الأنواء والأبراج والفصول ثابتة.',
+            suhailRegionInfoTitle: 'كيف تُحدَّد غرة سهيل؟',
+            suhailRegionInfoBody: 'نجم سهيل (Canopus) هو ثاني ألمع نجم في السماء. يظهر في أوقات مختلفة بحسب خط العرض: كلما اتجهت جنوباً بان سهيل أبكر، وكلما اتجهت شمالاً تأخر ظهوره حتى يختفي تماماً عند خط عرض ٣٧° شمالاً تقريباً.',
+            suhailRegionInfoMethod: 'يُحدَّد التاريخ بناءً على موقعك الجغرافي ومطابقته بأقرب مدينة مرجعية من جدول مواعيد الطلوع المعتمد في كتاب الدرور والطوالع.',
             needleReset: 'انقر مرتين لإعادة الإبرة لليوم',
+            // الكسوف والخسوف
+            eclipseAlert: 'تنبيه فلكي',
+            eclipseSaros: 'دورة ساروس',
+            eclipseMagnitude: 'القدر',
+            eclipseVisibility: 'مناطق الرؤية',
+            eclipseContactTimes: 'مراحل الحدث',
+            eclipseTotalityDuration: 'مدة الكلية',
+            eclipseAnnularityDuration: 'مدة الحلقية',
+            eclipseP1: 'بداية شبه الظل',
+            eclipseU1: 'بداية الجزئي',
+            eclipseU2: 'بداية الكلي',
+            eclipseMax: 'الذروة',
+            eclipseU3: 'نهاية الكلي',
+            eclipseU4: 'نهاية الجزئي',
+            eclipseP4: 'نهاية شبه الظل',
+            eclipseC1: 'الاتصال الأول',
+            eclipseC2: 'الاتصال الثاني',
+            eclipseC3: 'الاتصال الثالث',
+            eclipseC4: 'الاتصال الرابع',
+            eclipseLocalTime: 'التوقيت المحلي',
             // المحتوى الذكي (AI)
             aiSectionTitle: 'تأمل اليوم',
             aiVerse: 'آية',
@@ -231,7 +265,7 @@ const HijriCalendar = (() => {
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'Eisa Rashid ALSHAMSI - UAE',
-            version: 'Version 3.4',
+            version: 'Version 3.5',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
@@ -300,7 +334,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'Simple', shareThemeIslami: 'Islamic', shareThemeArabi: 'Classic Arabic',
             shareThemeMashr: 'Mashrabiya', shareThemeQubba: 'Dome', shareThemeMakh: 'Manuscript',
             creditsName: 'Eisa Rashid ALSHAMSI - UAE',
-            creditsVersion: 'Version 3.4', creditsTech: 'Designed with Claude Code (Opus 4.6)',
+            creditsVersion: 'Version 3.5', creditsTech: 'Designed with Claude Code (Opus 4.6)',
             // Sun arc
             sunArcDay: 'Day Length', sunArcNight: 'Night Length',
             arabicTime: 'Arabic Hour', arabicTimeNow: 'Arabic Hour Now',
@@ -350,7 +384,41 @@ const HijriCalendar = (() => {
             welcomeDetect: 'Detect My Location',
             welcomeSkip: 'Skip',
             welcomeDetecting: 'Detecting location...',
+            suhailCalcTitle: 'Suhail Rising Calculator',
+            suhailDay1Label: 'Suhail Rising',
+            suhailRegion: 'Region',
+            suhailManualAdj: 'Manual adjustment',
+            suhailApplyBtn: 'Apply',
+            suhailResetBtn: 'Reset',
+            suhailNotVisible: 'Suhail not visible at this location',
+            suhailInfoTitle: 'Two Astronomical Systems in Dirat al-Duror',
+            suhailInfoSolar: 'Anwa (28 star mansions) and zodiac signs and four seasons — tied to the sun\'s apparent position, fixed in the Gregorian calendar.',
+            suhailInfoStellar: 'Duror (36 periods) and winds and seasons and sea strikes — calculated from Suhail\'s rising, which varies by latitude.',
+            suhailInfoEffect: 'When Suhail\'s date changes, its dependent rings shift (Duror, winds, seasons, strikes) while Anwa, zodiac, and seasons remain fixed.',
+            suhailRegionInfoTitle: 'How is Suhail\'s rising date determined?',
+            suhailRegionInfoBody: 'Suhail (Canopus) is the second brightest star in the sky. It rises at different times depending on latitude: farther south it appears earlier, farther north it appears later, until it becomes invisible above ~37°N.',
+            suhailRegionInfoMethod: 'The date is determined by matching your geographic location to the nearest reference city from the rising dates table in the Book of Duror and Tawalie.',
             needleReset: 'Double-tap to reset to today',
+            // Eclipse
+            eclipseAlert: 'Astronomical Alert',
+            eclipseSaros: 'Saros Cycle',
+            eclipseMagnitude: 'Magnitude',
+            eclipseVisibility: 'Visibility',
+            eclipseContactTimes: 'Eclipse Phases',
+            eclipseTotalityDuration: 'Totality Duration',
+            eclipseAnnularityDuration: 'Annularity Duration',
+            eclipseP1: 'Penumbral Start',
+            eclipseU1: 'Partial Start',
+            eclipseU2: 'Totality Start',
+            eclipseMax: 'Greatest Eclipse',
+            eclipseU3: 'Totality End',
+            eclipseU4: 'Partial End',
+            eclipseP4: 'Penumbral End',
+            eclipseC1: 'First Contact',
+            eclipseC2: 'Second Contact',
+            eclipseC3: 'Third Contact',
+            eclipseC4: 'Fourth Contact',
+            eclipseLocalTime: 'Local Time',
             // AI Content
             aiSectionTitle: 'Daily Reflection',
             aiVerse: 'Verse',
@@ -408,6 +476,89 @@ const HijriCalendar = (() => {
         const ev = ISLAMIC_EVENTS[key];
         if (!ev) return null;
         return { ...ev, name: currentLang === 'en' ? ev.nameEn : ev.nameAr };
+    }
+
+    // ─── بيانات الكسوف والخسوف (2024–2035) — مصدر: NASA Eclipse Catalog ───
+    const ECLIPSE_DATA = [
+        // ══ 2024 ══
+        { date:[2024,3,25], type:'penumbral-lunar', mag:0.956, contacts:{p1:'04:53',max:'07:13',p4:'09:33'}, saros:113, duration:null, visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2024,4,8], type:'total-solar', mag:1.057, contacts:{c1:'15:42',c2:'16:38',max:'18:17',c3:'19:55',c4:'20:52'}, saros:139, duration:'4m28s', visAr:'أمريكا الشمالية', visEn:'North America' },
+        { date:[2024,9,18], type:'partial-lunar', mag:0.085, contacts:{p1:'00:41',u1:'02:12',max:'02:44',u4:'03:16',p4:'04:47'}, saros:118, duration:null, visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2024,10,2], type:'annular-solar', mag:0.933, contacts:{c1:'15:42',c2:'16:58',max:'18:45',c3:'20:32',c4:'21:47'}, saros:144, duration:'7m25s', visAr:'أمريكا الجنوبية', visEn:'S. South America' },
+        // ══ 2025 ══
+        { date:[2025,3,14], type:'total-lunar', mag:1.178, contacts:{p1:'03:57',u1:'05:09',u2:'06:25',max:'06:58',u3:'07:31',u4:'08:47',p4:'09:59'}, saros:123, duration:'1h05m', visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2025,3,29], type:'partial-solar', mag:0.938, contacts:{c1:'09:48',max:'10:47',c4:'11:46'}, saros:149, duration:null, visAr:'شمال غرب أفريقيا، أوروبا', visEn:'NW Africa, Europe' },
+        { date:[2025,9,7], type:'total-lunar', mag:1.362, contacts:{p1:'15:27',u1:'16:27',u2:'17:29',max:'18:11',u3:'18:53',u4:'19:56',p4:'20:56'}, saros:128, duration:'1h22m', visAr:'أوروبا، أفريقيا، آسيا، أستراليا', visEn:'Europe, Africa, Asia, Australia' },
+        { date:[2025,9,21], type:'partial-solar', mag:0.855, contacts:{c1:'17:29',max:'19:42',c4:'21:54'}, saros:154, duration:null, visAr:'أستراليا، نيوزيلندا', visEn:'Australia, NZ' },
+        // ══ 2026 ══
+        { date:[2026,2,17], type:'annular-solar', mag:0.963, contacts:{c1:'09:23',c2:'11:02',max:'12:47',c3:'14:32',c4:'16:12'}, saros:121, duration:'2m20s', visAr:'أنتاركتيكا، جنوب الأرجنتين', visEn:'Antarctica, S. Argentina' },
+        { date:[2026,3,3], type:'total-lunar', mag:1.150, contacts:{p1:'08:44',u1:'09:50',u2:'11:04',max:'11:33',u3:'12:02',u4:'13:17',p4:'14:23'}, saros:133, duration:'58m', visAr:'شرق آسيا، أستراليا، المحيط الهادئ، الأمريكتان', visEn:'E. Asia, Australia, Pacific, Americas' },
+        { date:[2026,8,12], type:'total-solar', mag:1.039, contacts:{c1:'14:43',c2:'16:20',max:'17:46',c3:'19:12',c4:'20:48'}, saros:126, duration:'2m18s', visAr:'شمال روسيا، غرينلاند، شمال إسبانيا', visEn:'N. Russia, Greenland, N. Spain' },
+        { date:[2026,8,28], type:'partial-lunar', mag:0.930, contacts:{p1:'02:53',u1:'04:06',max:'04:13',u4:'04:20',p4:'05:35'}, saros:138, duration:null, visAr:'أوروبا، أفريقيا، الشرق الأوسط', visEn:'Europe, Africa, Middle East' },
+        // ══ 2027 ══
+        { date:[2027,2,6], type:'penumbral-lunar', mag:0.928, contacts:{p1:'14:45',max:'16:52',p4:'18:58'}, saros:143, duration:null, visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2027,2,20], type:'annular-solar', mag:0.928, contacts:{c1:'13:04',c2:'14:55',max:'16:00',c3:'17:05',c4:'18:56'}, saros:131, duration:'7m51s', visAr:'أمريكا الجنوبية، أفريقيا', visEn:'S. South America, Africa' },
+        { date:[2027,7,18], type:'penumbral-lunar', mag:0.718, contacts:{p1:'12:03',max:'14:03',p4:'16:04'}, saros:148, duration:null, visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2027,8,2], type:'total-solar', mag:1.079, contacts:{c1:'07:06',c2:'08:13',max:'10:07',c3:'12:01',c4:'13:08'}, saros:136, duration:'6m23s', visAr:'شمال أفريقيا، جنوب أوروبا، الشرق الأوسط', visEn:'N. Africa, S. Europe, Middle East' },
+        // ══ 2028 ══
+        { date:[2028,1,12], type:'partial-lunar', mag:0.066, contacts:{p1:'02:26',u1:'03:51',max:'04:13',u4:'04:35',p4:'06:00'}, saros:153, duration:null, visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2028,1,26], type:'annular-solar', mag:0.921, contacts:{c1:'13:26',c2:'14:57',max:'15:08',c3:'15:19',c4:'16:50'}, saros:141, duration:'10m27s', visAr:'أمريكا الشمالية والوسطى', visEn:'N. & Central America' },
+        { date:[2028,7,6], type:'partial-lunar', mag:0.389, contacts:{p1:'20:22',u1:'21:33',max:'22:19',u4:'23:05',p4:'00:16'}, saros:158, duration:null, visAr:'آسيا، أستراليا', visEn:'Asia, Australia' },
+        { date:[2028,7,22], type:'total-solar', mag:1.056, contacts:{c1:'01:53',c2:'02:56',max:'04:55',c3:'06:55',c4:'07:58'}, saros:146, duration:'5m10s', visAr:'أستراليا، جنوب شرق آسيا', visEn:'Australia, SE Asia' },
+        { date:[2028,12,31], type:'total-lunar', mag:1.243, contacts:{p1:'14:36',u1:'15:43',u2:'16:51',max:'16:52',u3:'16:53',u4:'18:02',p4:'19:09'}, saros:125, duration:'1h27m', visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        // ══ 2029 ══
+        { date:[2029,1,14], type:'partial-solar', mag:0.871, contacts:{c1:'15:04',max:'17:13',c4:'19:22'}, saros:151, duration:null, visAr:'أمريكا الشمالية', visEn:'North America' },
+        { date:[2029,6,12], type:'partial-solar', mag:0.458, contacts:{c1:'02:35',max:'04:06',c4:'05:37'}, saros:156, duration:null, visAr:'القطب الشمالي', visEn:'Arctic' },
+        { date:[2029,6,26], type:'total-lunar', mag:1.844, contacts:{p1:'01:24',u1:'02:31',u2:'03:36',max:'03:22',u3:'04:08',u4:'05:12',p4:'06:19'}, saros:130, duration:'1h42m', visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2029,7,11], type:'partial-solar', mag:0.230, contacts:{c1:'13:35',max:'15:37',c4:'17:39'}, saros:156, duration:null, visAr:'أمريكا الجنوبية', visEn:'S. South America' },
+        { date:[2029,12,5], type:'partial-solar', mag:0.562, contacts:{c1:'13:17',max:'15:04',c4:'16:50'}, saros:161, duration:null, visAr:'أنتاركتيكا', visEn:'Antarctica' },
+        { date:[2029,12,20], type:'total-lunar', mag:1.117, contacts:{p1:'20:43',u1:'22:00',u2:'22:54',max:'22:42',u3:'23:30',u4:'00:23',p4:'01:41'}, saros:135, duration:'1h01m', visAr:'الأمريكتان، أوروبا، أفريقيا، غرب آسيا', visEn:'Americas, Europe, Africa, W. Asia' },
+        // ══ 2030 ══
+        { date:[2030,6,1], type:'annular-solar', mag:0.944, contacts:{c1:'04:36',max:'06:29',c4:'08:21'}, saros:128, duration:'5m21s', visAr:'شمال أفريقيا، أوروبا، شمال آسيا', visEn:'N. Africa, Europe, N. Asia' },
+        { date:[2030,6,15], type:'partial-lunar', mag:0.502, contacts:{p1:'16:15',u1:'17:28',max:'18:33',u4:'19:37',p4:'20:50'}, saros:140, duration:null, visAr:'آسيا، أستراليا، شرق أفريقيا', visEn:'Asia, Australia, E. Africa' },
+        { date:[2030,11,25], type:'total-solar', mag:1.047, contacts:{c1:'03:51',max:'06:51',c4:'09:50'}, saros:133, duration:'3m44s', visAr:'جنوب أفريقيا، أستراليا', visEn:'S. Africa, Australia' },
+        { date:[2030,12,9], type:'penumbral-lunar', mag:0.972, contacts:{p1:'20:16',max:'22:27',p4:'00:39'}, saros:145, duration:null, visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        // ══ 2031–2035 ══
+        { date:[2031,5,7], type:'annular-solar', mag:0.959, contacts:{c1:'03:06',max:'05:16',c4:'07:26'}, saros:138, duration:'5m26s', visAr:'جنوب آسيا', visEn:'South Asia' },
+        { date:[2031,5,21], type:'penumbral-lunar', mag:0.855, contacts:{p1:'03:15',max:'05:25',p4:'07:35'}, saros:150, duration:null, visAr:'آسيا، أستراليا', visEn:'Asia, Australia' },
+        { date:[2031,10,30], type:'hybrid-solar', mag:1.010, contacts:{c1:'03:18',max:'07:42',c4:'12:06'}, saros:143, duration:'0m51s', visAr:'المحيط الهادئ', visEn:'Pacific Ocean' },
+        { date:[2031,11,14], type:'penumbral-lunar', mag:0.871, contacts:{p1:'03:45',max:'05:45',p4:'07:45'}, saros:155, duration:null, visAr:'الأمريكتان، أوروبا', visEn:'Americas, Europe' },
+        { date:[2032,4,25], type:'total-lunar', mag:1.192, contacts:{p1:'12:25',u1:'13:37',u2:'14:44',max:'15:14',u3:'15:43',u4:'16:51',p4:'18:03'}, saros:122, duration:'59m', visAr:'شرق آسيا، أستراليا', visEn:'E. Asia, Australia' },
+        { date:[2032,10,18], type:'total-lunar', mag:1.104, contacts:{p1:'16:02',u1:'17:10',u2:'18:22',max:'18:44',u3:'19:07',u4:'20:19',p4:'21:26'}, saros:127, duration:'45m', visAr:'الأمريكتان، أوروبا، أفريقيا', visEn:'Americas, Europe, Africa' },
+        { date:[2033,3,30], type:'total-solar', mag:1.046, contacts:{c1:'14:02',max:'18:01',c4:'22:00'}, saros:138, duration:'2m37s', visAr:'شمال أمريكا', visEn:'North America' },
+        { date:[2033,4,14], type:'penumbral-lunar', mag:0.998, contacts:{p1:'17:12',max:'19:13',p4:'21:14'}, saros:132, duration:null, visAr:'آسيا، أستراليا', visEn:'Asia, Australia' },
+        { date:[2033,10,8], type:'total-lunar', mag:1.220, contacts:{p1:'00:05',u1:'01:12',u2:'02:25',max:'02:55',u3:'03:25',u4:'04:38',p4:'05:45'}, saros:137, duration:'1h00m', visAr:'الأمريكتان', visEn:'Americas' },
+        { date:[2034,3,20], type:'total-solar', mag:1.046, contacts:{c1:'08:42',max:'10:18',c4:'11:55'}, saros:148, duration:'4m09s', visAr:'غرب أفريقيا، الشرق الأوسط', visEn:'W. Africa, Middle East' },
+        { date:[2034,9,28], type:'total-lunar', mag:1.014, contacts:{p1:'09:25',u1:'10:29',u2:'11:47',max:'11:46',u3:'11:45',u4:'13:03',p4:'14:07'}, saros:147, duration:null, visAr:'آسيا، أستراليا', visEn:'Asia, Australia' },
+        { date:[2035,3,9], type:'annular-solar', mag:0.992, contacts:{c1:'19:28',max:'23:05',c4:'02:42'}, saros:158, duration:'0m36s', visAr:'شرق آسيا', visEn:'E. Asia' },
+        { date:[2035,9,2], type:'total-solar', mag:1.045, contacts:{c1:'05:22',max:'07:57',c4:'10:32'}, saros:163, duration:'2m54s', visAr:'شرق آسيا، جنوب شرق آسيا', visEn:'E. & SE Asia' },
+    ];
+
+    function getEclipseInfo(gYear, gMonth, gDay) {
+        for (let i = 0; i < ECLIPSE_DATA.length; i++) {
+            const e = ECLIPSE_DATA[i];
+            if (e.date[0] === gYear && e.date[1] === gMonth && e.date[2] === gDay) {
+                const isLunar = e.type.includes('lunar');
+                const typeNames = {
+                    'total-lunar':     { ar:'خسوف كلي للقمر',   en:'Total Lunar Eclipse' },
+                    'partial-lunar':   { ar:'خسوف جزئي للقمر',  en:'Partial Lunar Eclipse' },
+                    'penumbral-lunar': { ar:'خسوف شبه ظلي',     en:'Penumbral Lunar Eclipse' },
+                    'total-solar':     { ar:'كسوف كلي للشمس',   en:'Total Solar Eclipse' },
+                    'annular-solar':   { ar:'كسوف حلقي للشمس',  en:'Annular Solar Eclipse' },
+                    'partial-solar':   { ar:'كسوف جزئي للشمس',  en:'Partial Solar Eclipse' },
+                    'hybrid-solar':    { ar:'كسوف هجين للشمس',  en:'Hybrid Solar Eclipse' },
+                };
+                const tn = typeNames[e.type] || { ar: e.type, en: e.type };
+                return {
+                    ...e,
+                    isLunar,
+                    isSolar: !isLunar,
+                    typeName: currentLang === 'en' ? tn.en : tn.ar,
+                    visibility: currentLang === 'en' ? e.visEn : e.visAr,
+                };
+            }
+        }
+        return null;
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -1084,22 +1235,67 @@ const HijriCalendar = (() => {
         }
     };
 
-    /** حساب يوم سهيل من التاريخ الميلادي (15 أغسطس = يوم 1) */
-    function _suhailDay(gMonth, gDay, gYear) {
-        // 15 أغسطس = بداية الحساب
-        const start = new Date(gYear, 7, 15); // Aug 15
+    /**
+     * جدول المناطق مع تاريخ طلوع سهيل (Canopus)
+     * المصادر: حسابات فلكية (الباحة 20°ش والشارقة 25.3°ش مؤكدة) + استيفاء
+     * سهيل لا يُرى شمال خط عرض 37° شمالاً
+     */
+    const SUHAIL_REGIONS = [
+        { lat: 12.8, lng: 45.0, ar: 'عدن',    en: 'Aden',      month: 8, day: 7  },
+        { lat: 15.4, lng: 44.2, ar: 'صنعاء',   en: "Sana'a",    month: 8, day: 11 },
+        { lat: 17.0, lng: 54.1, ar: 'صلالة',   en: 'Salalah',   month: 8, day: 14 },
+        { lat: 20.0, lng: 41.5, ar: 'الباحة',  en: 'Al-Bahah',  month: 8, day: 25 },
+        { lat: 21.4, lng: 39.8, ar: 'مكة',     en: 'Makkah',    month: 8, day: 27 },
+        { lat: 23.6, lng: 58.5, ar: 'مسقط',    en: 'Muscat',    month: 8, day: 29 },
+        { lat: 24.5, lng: 54.7, ar: 'أبوظبي',  en: 'Abu Dhabi', month: 8, day: 30 },
+        { lat: 24.7, lng: 46.7, ar: 'الرياض',  en: 'Riyadh',    month: 8, day: 31 },
+        { lat: 25.3, lng: 55.4, ar: 'الشارقة', en: 'Sharjah',   month: 9, day: 1  },
+        { lat: 25.3, lng: 51.5, ar: 'الدوحة',  en: 'Doha',      month: 9, day: 1  },
+        { lat: 26.2, lng: 50.6, ar: 'المنامة', en: 'Manama',    month: 9, day: 3  },
+        { lat: 29.4, lng: 48.0, ar: 'الكويت',  en: 'Kuwait',    month: 9, day: 8  },
+        { lat: 30.5, lng: 47.8, ar: 'البصرة',  en: 'Basra',     month: 9, day: 12 },
+        { lat: 31.8, lng: 35.2, ar: 'القدس',   en: 'Jerusalem', month: 9, day: 15 },
+        { lat: 33.3, lng: 44.4, ar: 'بغداد',   en: 'Baghdad',   month: 9, day: 19 },
+        { lat: 33.5, lng: 36.3, ar: 'دمشق',    en: 'Damascus',  month: 9, day: 20 },
+    ];
+
+    /** إيجاد أقرب منطقة لإحداثيات معينة */
+    function getSuhailRegion(lat, lng) {
+        if (!lat || lat > 37) return null; // سهيل لا يُرى شمال 37°ش
+        let best = null, bestDist = Infinity;
+        for (const r of SUHAIL_REGIONS) {
+            const dLat = r.lat - lat, dLng = r.lng - (lng || 0);
+            const dist = dLat * dLat + dLng * dLng;
+            if (dist < bestDist) { bestDist = dist; best = r; }
+        }
+        return best;
+    }
+
+    /** إزاحة تاريخ [شهر, يوم] بعدد أيام معيّن */
+    function shiftDate(monthDay, offsetDays, gYear) {
+        if (!offsetDays) return monthDay;
+        const d = new Date(gYear, monthDay[0] - 1, monthDay[1]);
+        d.setDate(d.getDate() + offsetDays);
+        return [d.getMonth() + 1, d.getDate()];
+    }
+
+    /** حساب يوم سهيل من التاريخ الميلادي
+     *  suhailStart = [month, day] اختياري — تاريخ بدء الحساب (الافتراضي: 15 أغسطس)
+     */
+    function _suhailDay(gMonth, gDay, gYear, suhailStart) {
+        const [sm, sd] = suhailStart || [8, 15];
+        const start = new Date(gYear, sm - 1, sd);
         let target = new Date(gYear, gMonth - 1, gDay);
-        // إذا كان التاريخ قبل 15 أغسطس، نحسب من السنة السابقة
         if (target < start) {
             start.setFullYear(gYear - 1);
         }
         const diff = Math.floor((target - start) / 86400000);
-        return diff + 1; // يوم 1 = 15 أغسطس
+        return diff + 1; // يوم 1 = تاريخ البدء
     }
 
     /** الحصول على الدر الحالي ورقم سهيل */
-    function getDurr(gMonth, gDay, gYear) {
-        const sDay = _suhailDay(gMonth, gDay, gYear);
+    function getDurr(gMonth, gDay, gYear, suhailStart) {
+        const sDay = _suhailDay(gMonth, gDay, gYear, suhailStart);
         // تحديد المائة والدر
         let mia, durrIdx;
         if (sDay <= 100) {
@@ -1190,9 +1386,9 @@ const HijriCalendar = (() => {
     }
 
     /** الحصول على تفاصيل الدر الحالي */
-    function getDurrDetails(gMonth, gDay, gYear) {
-        const d = getDurr(gMonth, gDay, gYear);
-        const sDay = _suhailDay(gMonth, gDay, gYear);
+    function getDurrDetails(gMonth, gDay, gYear, suhailStart) {
+        const d = getDurr(gMonth, gDay, gYear, suhailStart);
+        const sDay = _suhailDay(gMonth, gDay, gYear, suhailStart);
         let mia;
         if (sDay <= 100) mia = 0;
         else if (sDay <= 200) mia = 1;
@@ -1202,6 +1398,113 @@ const HijriCalendar = (() => {
         const key = mia + '-' + Math.min(Math.max(durrIdx, 0), (mia === 3 ? 6 : 9));
         const details = DURR_DETAILS[key];
         return details ? { ...d, desc_ar: details.ar, desc_en: details.en, dates: details.dates } : d;
+    }
+
+    // ─── دوال مؤشر الراديو التناظري ──────────────────────────
+    /** حساب عدد أيام النطاق (from/to بصيغة [month, day]) */
+    function _rangeDays(from, to) {
+        // نستخدم سنة غير كبيسة كمرجع (2025)
+        let s = new Date(2025, from[0] - 1, from[1]);
+        let e = new Date(2025, to[0] - 1, to[1]);
+        if (e < s) e.setFullYear(2026); // نطاق يعبر نهاية السنة
+        return Math.round((e - s) / 86400000) + 1;
+    }
+
+    /** حساب رقم اليوم داخل النطاق (1-based) */
+    function _dayInRange(gMonth, gDay, from, to) {
+        let s = new Date(2025, from[0] - 1, from[1]);
+        let d = new Date(2025, gMonth - 1, gDay);
+        if (d < s) d.setFullYear(2026);
+        return Math.round((d - s) / 86400000) + 1;
+    }
+
+    /** بيانات شريط الراديو لكل عنصر فلكي */
+    function getDialData(gMonth, gDay, gYear, suhailStart) {
+        const lang = currentLang;
+        const result = [];
+
+        // دالة مساعدة: البحث عن العنصر الحالي + السابق + التالي في مصفوفة دائرية
+        function _findInCycle(arr, nameKey) {
+            for (let i = 0; i < arr.length; i++) {
+                if (_matchRange(gMonth, gDay, arr[i].from, arr[i].to)) {
+                    const prev = arr[(i - 1 + arr.length) % arr.length];
+                    const next = arr[(i + 1) % arr.length];
+                    const cur = arr[i];
+                    return {
+                        prev: { name: lang === 'en' ? prev.en : prev.ar, days: _rangeDays(prev.from, prev.to) },
+                        current: { name: lang === 'en' ? cur.en : cur.ar, days: _rangeDays(cur.from, cur.to), dayIn: _dayInRange(gMonth, gDay, cur.from, cur.to), from: cur.from, to: cur.to },
+                        next: { name: lang === 'en' ? next.en : next.ar, days: _rangeDays(next.from, next.to) }
+                    };
+                }
+            }
+            return null;
+        }
+
+        // 1. الفصل (SEASONS)
+        const seasonData = _findInCycle(SEASONS, 'ar');
+        if (seasonData) result.push({ type: 'season', icon: '🌍', label: lang === 'en' ? 'Season' : 'الفصل', ...seasonData });
+
+        // 2. البرج (ZODIAC)
+        const zodiacData = _findInCycle(ZODIAC, 'ar');
+        if (zodiacData) {
+            // إضافة الرمز الفلكي
+            for (const z of ZODIAC) {
+                if (_matchRange(gMonth, gDay, z.from, z.to)) { zodiacData.current.symbol = z.symbol; break; }
+            }
+            result.push({ type: 'zodiac', icon: '♈', label: lang === 'en' ? 'Zodiac' : 'البرج', ...zodiacData });
+        }
+
+        // 3. الأنواء — الطالع (TAWALIE)
+        const tale3Data = _findInCycle(TAWALIE, 'ar');
+        if (tale3Data) result.push({ type: 'star', icon: '⭐', label: lang === 'en' ? 'Star' : 'الأنواء', ...tale3Data });
+
+        // 4. الدرور (حساب خاص عبر سهيل)
+        const sDay = _suhailDay(gMonth, gDay, gYear, suhailStart);
+        const durrInfo = getDurr(gMonth, gDay, gYear, suhailStart);
+        if (durrInfo) {
+            const dayInDurr = ((sDay - 1) % 10) + 1;
+            const miaBase = durrInfo.miaIdx * 100;
+            const durrStart = miaBase + (Math.ceil((sDay - miaBase) / 10) - 1) * 10 + 1;
+            // الدر الحالي / السابق / التالي
+            const allLabels = DUROR_LABELS[lang];
+            const durrIdx = Math.ceil((sDay - miaBase) / 10) - 1;
+            const prevIdx = durrIdx > 0 ? durrIdx - 1 : (durrInfo.miaIdx > 0 ? 9 : allLabels.length - 1);
+            const nextIdx = durrIdx < 9 ? durrIdx + 1 : 0;
+            const prevMia = durrIdx > 0 ? durrInfo.miaIdx : Math.max(0, durrInfo.miaIdx - 1);
+            const nextMia = durrIdx < 9 ? durrInfo.miaIdx : Math.min(3, durrInfo.miaIdx + 1);
+            result.push({
+                type: 'durr', icon: '📜', label: lang === 'en' ? 'Durr' : 'الدرور',
+                prev: { name: allLabels[prevIdx], days: 10 },
+                current: { name: durrInfo.durr, days: 10, dayIn: dayInDurr },
+                next: { name: allLabels[nextIdx], days: 10 }
+            });
+        }
+
+        // 5. الرياح (متعددة/متداخلة — كل ريح نشطة تحصل على شريط)
+        const winds = ANWA_ENRICHMENT.seasonalWinds.filter(w => _matchRange(gMonth, gDay, w.from, w.to));
+        winds.forEach(w => {
+            const totalDays = _rangeDays(w.from, w.to);
+            const dayIn = _dayInRange(gMonth, gDay, w.from, w.to);
+            result.push({
+                type: 'wind', icon: '💨', label: lang === 'en' ? w.en : w.ar,
+                prev: null, next: null,
+                current: { name: lang === 'en' ? w.en : w.ar, days: totalDays, dayIn: dayIn }
+            });
+        });
+
+        // 6. المواسم الخاصة (متعددة/متداخلة)
+        const activeSeasons = SPECIAL_SEASONS.filter(s => _matchRange(gMonth, gDay, s.from, s.to));
+        activeSeasons.forEach(s => {
+            const totalDays = _rangeDays(s.from, s.to);
+            const dayIn = _dayInRange(gMonth, gDay, s.from, s.to);
+            result.push({
+                type: 'mawsem', icon: s.icon || '🗓️', label: lang === 'en' ? s.en : s.ar,
+                prev: null, next: null,
+                current: { name: lang === 'en' ? s.en : s.ar, days: totalDays, dayIn: dayIn }
+            });
+        });
+
+        return result;
     }
 
     /** الحصول على المواسم الخاصة النشطة حالياً */
@@ -2629,8 +2932,9 @@ const HijriCalendar = (() => {
         dayOfWeek, todayHijri, todayJDN,
         getMonthData,
 
-        // المناسبات
+        // المناسبات والكسوف والخسوف
         ISLAMIC_EVENTS, getEvent,
+        ECLIPSE_DATA, getEclipseInfo,
 
         // الأنواء والمواسم والأبراج والدرور وأطوار القمر والهلال
         getTale3, getZodiac, getSeason, getDurr, getMoonPhase, getMoonTiltAngle, getMoonriseMoonset, getHilalInfo,
@@ -2638,7 +2942,7 @@ const HijriCalendar = (() => {
         // بيانات إثرائية + مصفوفات مكشوفة
         TAWALIE, SEASONS, DUROR_LABELS, DUROR_MIA, DUROR_ALIASES, ANWA_ENRICHMENT, ZODIAC,
         getSeasonalWinds, getSeasonalFish, getSeasonalCrops, getSeasonalWildlife,
-        _matchRange, _suhailDay,
+        _matchRange, _suhailDay, _rangeDays, _dayInRange, getDialData, shiftDate, SUHAIL_REGIONS, getSuhailRegion,
 
         // بيانات كتاب الدرور والطوالع
         DURR_DETAILS, SPECIAL_SEASONS, ASTRO_EVENTS, FOLK_PROVERBS,
