@@ -3475,9 +3475,9 @@ tr:nth-child(even) { background: #fafafa; }
                 const pD = item.prev.days, cD = cur.days, nD = item.next.days;
                 const tot = pD + cD + nD;
                 const pP = (pD / tot) * 100, cP = (cD / tot) * 100, nP = 100 - pP - cP;
-                anwaHtml += `<div class="anwa-bs prev" style="width:${pP.toFixed(1)}%;background:${clr}"></div>`;
-                anwaHtml += `<div class="anwa-bs act" style="width:${cP.toFixed(1)}%;background:${clr}"></div>`;
-                anwaHtml += `<div class="anwa-bs next" style="width:${nP.toFixed(1)}%;background:${clr}"></div>`;
+                anwaHtml += `<div class="anwa-bs prev" style="width:${pP.toFixed(1)}%;background:${clr}"><span class="anwa-sn">${item.prev.name}</span></div>`;
+                anwaHtml += `<div class="anwa-bs act" style="width:${cP.toFixed(1)}%;background:${clr}"><span class="anwa-sn cur">${cur.name}</span></div>`;
+                anwaHtml += `<div class="anwa-bs next" style="width:${nP.toFixed(1)}%;background:${clr}"><span class="anwa-sn">${item.next.name}</span></div>`;
                 for (let t = 0; t < cD; t++) {
                     const tp = pP + (t / (cD - 1 || 1)) * cP;
                     anwaHtml += `<i class="anwa-tk" style="left:${tp.toFixed(1)}%"></i>`;
