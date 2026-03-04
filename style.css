@@ -3565,6 +3565,15 @@ html[dir="ltr"] .anwa-card {
 }
 
 /* ─── Radio Dial Bars — أشرطة الراديو التناظري ─── */
+.anwa-dial-suhail {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--papyrus-text-secondary);
+    margin-bottom: 8px;
+    opacity: 0.7;
+}
+[data-theme="dark"] .anwa-dial-suhail { color: var(--text-secondary); }
+
 .anwa-dials {
     display: flex;
     flex-direction: column;

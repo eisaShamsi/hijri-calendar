@@ -3405,8 +3405,15 @@ tr:nth-child(even) { background: #fafafa; }
             anwaHtml += `<div class="info-help-popup" id="dv-anwa-help-popup"><h4>${H.t('anwaExplainTitle')}</h4><p>${H.t('anwaExplain').replace(/\n/g, '<br>')}</p></div>`;
         }
 
+        // غرة سهيل — الأساس الذي تُبنى عليه حسابات الدرور
+        const _sh = _getSuhailStart();
+        const _shDay = _sh[1], _shMonthName = H.gregMonthName(_sh[0] - 1);
+        const _shLabel = lang === 'en' ? 'Canopus rise' : 'غرة سهيل';
+        const _shDate = lang === 'en' ? `${_shMonthName} ${_shDay}` : `${_shDay} ${_shMonthName}`;
+        anwaHtml += `<div class="anwa-dial-suhail">⭐ ${_shLabel}: ${_shDate}</div>`;
+
         // بناء أشرطة الراديو
-        const dialItems = H.getDialData(gMonth, gDay, gYear, _getSuhailStart());
+        const dialItems = H.getDialData(gMonth, gDay, gYear, _sh);
         anwaHtml += `<div class="anwa-dials">`;
         dialItems.forEach(item => {
             const hasPrevNext = item.prev && item.next;
