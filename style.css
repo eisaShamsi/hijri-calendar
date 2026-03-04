@@ -3564,182 +3564,159 @@ html[dir="ltr"] .anwa-card {
     border-top-color: rgba(255,255,255,0.06);
 }
 
-/* ─── Radio Dial Bars — أشرطة الراديو التناظري ─── */
+/* ─── Fixed-Needle Bars — أشرطة الإبرة الثابتة ─── */
 .anwa-dial-suhail {
     text-align: center;
     font-size: 0.72rem;
     color: var(--papyrus-text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     opacity: 0.7;
 }
 [data-theme="dark"] .anwa-dial-suhail { color: var(--text-secondary); }
 
-.anwa-dials {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+/* الحاوية الرئيسية */
+.anwa-fc {
+    position: relative;
+    padding-top: 22px;
     margin-bottom: 12px;
 }
-.anwa-dial {
-    position: relative;
-}
-.anwa-dial-header {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 2px;
-}
-.anwa-dial-icon {
-    font-size: 0.75rem;
-    opacity: 0.7;
-}
-.anwa-dial-title {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--papyrus-text-secondary);
-}
-[data-theme="dark"] .anwa-dial-title { color: var(--text-secondary); }
 
-.anwa-dial-names {
+/* رأس الإبرة */
+.anwa-nh {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    filter: drop-shadow(0 1px 3px rgba(192,57,43,0.35));
+    line-height: 0;
+}
+
+/* خط الإبرة العمودي */
+.anwa-nl {
+    position: absolute;
+    top: 20px;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: #c0392b;
+    z-index: 6;
+    pointer-events: none;
+    box-shadow: 0 0 5px rgba(192,57,43,0.3);
+}
+[data-theme="dark"] .anwa-nl {
+    background: #e74c3c;
+    box-shadow: 0 0 8px rgba(231,76,60,0.4);
+}
+
+/* صف الشريط */
+.anwa-br {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 8px;
+}
+.anwa-br.single {
+    margin-bottom: 6px;
+}
+
+/* حاوية القص */
+.anwa-bw {
+    overflow: hidden;
+    position: relative;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(200,180,150,0.06);
+    border: 1px solid rgba(160,140,110,0.12);
+}
+.anwa-br.single .anwa-bw {
+    height: 14px;
+    border-radius: 3px;
+}
+[data-theme="dark"] .anwa-bw {
+    background: rgba(50,40,28,0.3);
+    border-color: rgba(139,90,43,0.15);
+}
+
+/* المسار الداخلي (يتحرك) */
+.anwa-bt {
     display: flex;
     direction: ltr;
-    margin-bottom: 1px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-.anwa-dial-name {
-    font-size: 0.68rem;
-    text-align: center;
-    color: var(--papyrus-text-secondary);
-    opacity: 0.5;
+
+/* القطاعات */
+.anwa-bs {
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+.anwa-bs.prev {
+    opacity: 0.25;
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
+.anwa-bs.act {
+    opacity: 0.8;
+}
+.anwa-bs.next {
+    opacity: 0.25;
+    border-left: 1px solid rgba(0,0,0,0.1);
+}
+.anwa-bs.sg {
+    opacity: 0.7;
+    border-radius: 3px;
+}
+[data-theme="dark"] .anwa-bs.prev { opacity: 0.35; border-right-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .anwa-bs.act { opacity: 0.9; }
+[data-theme="dark"] .anwa-bs.next { opacity: 0.35; border-left-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .anwa-bs.sg { opacity: 0.8; }
+
+/* علامات الأيام */
+.anwa-tk {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    width: 1px;
+    background: rgba(0,0,0,0.12);
+    z-index: 1;
+    pointer-events: none;
+    font-style: normal;
+}
+.anwa-br.single .anwa-tk {
+    top: 2px;
+    bottom: 2px;
+}
+[data-theme="dark"] .anwa-tk { background: rgba(255,255,255,0.1); }
+
+/* معلومات الشريط */
+.anwa-bi {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+    padding: 0 2px;
+}
+.anwa-bi-l {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--papyrus-text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 0 2px;
 }
-.anwa-dial-name.current {
-    font-weight: 700;
-    color: var(--papyrus-text);
-    opacity: 1;
-    font-size: 0.75rem;
-}
-[data-theme="dark"] .anwa-dial-name { color: var(--text-secondary); }
-[data-theme="dark"] .anwa-dial-name.current { color: var(--text-primary); }
-
-.anwa-dial-track {
-    position: relative;
-    display: flex;
-    direction: ltr;
-    height: 18px;
-    border-radius: 9px;
-    overflow: visible;
-    background: rgba(200,180,150,0.15);
-    border: 1px solid rgba(160,140,110,0.25);
-}
-[data-theme="dark"] .anwa-dial-track {
-    background: rgba(60,50,35,0.4);
-    border-color: rgba(139,90,43,0.25);
-}
-
-.anwa-dial-seg {
-    height: 100%;
-    position: relative;
-}
-.anwa-dial-seg.prev {
-    background: rgba(200,180,150,0.12);
-    border-radius: 9px 0 0 9px;
-    border-right: 1px solid rgba(160,140,110,0.3);
-}
-.anwa-dial-seg.active {
-    background: linear-gradient(180deg, rgba(180,140,80,0.3) 0%, rgba(160,120,60,0.15) 100%);
-}
-.anwa-dial-seg.next {
-    background: rgba(200,180,150,0.12);
-    border-radius: 0 9px 9px 0;
-    border-left: 1px solid rgba(160,140,110,0.3);
-}
-[data-theme="dark"] .anwa-dial-seg.prev,
-[data-theme="dark"] .anwa-dial-seg.next {
-    background: rgba(40,32,20,0.3);
-}
-[data-theme="dark"] .anwa-dial-seg.active {
-    background: linear-gradient(180deg, rgba(139,90,43,0.35) 0%, rgba(100,70,30,0.15) 100%);
-}
-[data-theme="dark"] .anwa-dial-seg.prev { border-right-color: rgba(139,90,43,0.2); }
-[data-theme="dark"] .anwa-dial-seg.next { border-left-color: rgba(139,90,43,0.2); }
-
-/* علامات الأيام (ticks) */
-.anwa-dial-tick {
-    position: absolute;
-    top: 2px;
-    bottom: 2px;
-    width: 1px;
-    background: rgba(140,120,90,0.25);
-    z-index: 1;
-    pointer-events: none;
-}
-.anwa-dial-tick.active {
-    background: rgba(180,60,30,0.5);
-    width: 2px;
-}
-[data-theme="dark"] .anwa-dial-tick { background: rgba(180,150,100,0.15); }
-[data-theme="dark"] .anwa-dial-tick.active { background: rgba(220,80,40,0.5); }
-
-/* الإبرة */
-.anwa-dial-needle {
-    position: absolute;
-    top: -3px;
-    bottom: -14px;
-    z-index: 3;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-}
-.anwa-dial-needle-line {
-    width: 2px;
-    height: 24px;
-    background: #c0392b;
-    border-radius: 1px;
-    box-shadow: 0 0 4px rgba(192,57,43,0.4);
-}
-.anwa-dial-needle-tri {
-    font-size: 8px;
-    line-height: 1;
-    color: #c0392b;
-    margin-top: -2px;
-    filter: drop-shadow(0 1px 2px rgba(192,57,43,0.4));
-}
-[data-theme="dark"] .anwa-dial-needle-line {
-    background: #e74c3c;
-    box-shadow: 0 0 6px rgba(231,76,60,0.5);
-}
-[data-theme="dark"] .anwa-dial-needle-tri { color: #e74c3c; }
-
-/* رقم اليوم */
-.anwa-dial-pos {
-    text-align: center;
+.anwa-bi-r {
     font-size: 0.62rem;
     color: var(--papyrus-text-secondary);
-    margin-top: 10px;
     opacity: 0.7;
     direction: ltr;
+    flex-shrink: 0;
+    margin-inline-start: 8px;
 }
-[data-theme="dark"] .anwa-dial-pos { color: var(--text-secondary); }
-
-/* شريط مفرد (الرياح/المواسم بدون سابق/تالي) */
-.anwa-dial.single .anwa-dial-track {
-    height: 12px;
-    border-radius: 6px;
-}
-.anwa-dial.single .anwa-dial-needle-line {
-    height: 18px;
-}
-.anwa-dial.single .anwa-dial-pos {
-    margin-top: 6px;
-}
-.anwa-dial.single .anwa-dial-track.single .anwa-dial-seg.active {
-    border-radius: 6px;
-}
+[data-theme="dark"] .anwa-bi-l { color: var(--text-primary); }
+[data-theme="dark"] .anwa-bi-r { color: var(--text-secondary); }
 
 /* ─── AI Section ─── */
 .dv-ai-section {

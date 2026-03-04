@@ -3390,7 +3390,7 @@ tr:nth-child(even) { background: #fafafa; }
         weatherEl.innerHTML = weatherHtml;
         fetchLiveWeather(gYear, gMonth, gDay, isToday);
 
-        // Anwa summary — أشرطة الراديو التناظري
+        // Anwa summary — بطاقة الأنواء (تصميم الإبرة الثابتة)
         const anwaEl = document.getElementById('dv-anwa-section');
         const season = H.getSeason(gMonth, gDay);
         const durr = H.getDurr(gMonth, gDay, gYear, _getSuhailStart());
@@ -3412,72 +3412,96 @@ tr:nth-child(even) { background: #fafafa; }
         const _shDate = lang === 'en' ? `${_shMonthName} ${_shDay}` : `${_shDay} ${_shMonthName}`;
         anwaHtml += `<div class="anwa-dial-suhail">⭐ ${_shLabel}: ${_shDate}</div>`;
 
-        // بناء أشرطة الراديو
+        // بناء أشرطة الإبرة الثابتة — ألوان ديرة الدرور
         const dialItems = H.getDialData(gMonth, gDay, gYear, _sh);
-        anwaHtml += `<div class="anwa-dials">`;
+        const _durrRef = dialItems.find(d => d.type === 'durr');
+        const _mia = _durrRef ? (_durrRef.miaIdx || 0) : 0;
+        const _dk = document.documentElement.dataset.theme === 'dark';
+        const _RC = {
+            season: { l: ['#c4956a','#6b9dba','#7ab87a','#c75050'], d: ['#8a6540','#4a7090','#508050','#904040'] },
+            zodiac: { l: '#e8c170', d: '#6a5530' },
+            star:   { l: '#f0d890', d: '#4a3d20' },
+            durr:   { l: ['#d4a878','#82b0cc','#8cc898','#d06868'], d: ['#6a5030','#3a6080','#3a6840','#703838'] },
+            wind:   { l: ['#d4b896','#a0c4dc','#a8d4a8','#e8b4a0'], d: ['#6a5030','#3a5a7a','#3a6840','#7a4a38'] },
+            strike: { l: '#e0a0a0', d: '#6a2020' },
+            mawsem: { l: ['#d4b896','#a8c8dc','#a8d4a8','#e8c4a0'], d: ['#5a4428','#3a5a7a','#3a6840','#6a5030'] }
+        };
+        function _ringClr(type) {
+            const c = _RC[type] || _RC.star;
+            const v = _dk ? c.d : c.l;
+            return Array.isArray(v) ? v[_mia % v.length] : v;
+        }
+
+        // --- الحاوية الرئيسية بالإبرة الثابتة ---
+        anwaHtml += `<div class="anwa-fc">`;
+
+        // رأس الإبرة (مستوحى من ديرة الدرور)
+        anwaHtml += `<div class="anwa-nh"><svg width="22" height="18" viewBox="0 0 22 18">`;
+        anwaHtml += `<defs><linearGradient id="ndlG" x1="0" y1="0" x2="0" y2="1">`;
+        anwaHtml += `<stop offset="0%" stop-color="${_dk ? '#e74c3c' : '#b03025'}"/>`;
+        anwaHtml += `<stop offset="100%" stop-color="${_dk ? '#f55' : '#e74c3c'}"/>`;
+        anwaHtml += `</linearGradient></defs>`;
+        anwaHtml += `<polygon points="11,18 4,3 7,0 11,6 15,0 18,3" fill="url(#ndlG)"/>`;
+        anwaHtml += `<circle cx="11" cy="5" r="2.5" fill="${_dk ? '#e74c3c' : '#c0392b'}" stroke="#fff" stroke-width="0.5" opacity="0.9"/>`;
+        anwaHtml += `</svg></div>`;
+
+        // خط الإبرة العمودي المستمر
+        anwaHtml += `<div class="anwa-nl"></div>`;
+
+        // --- الأشرطة ---
         dialItems.forEach(item => {
-            const hasPrevNext = item.prev && item.next;
             const cur = item.current;
+            const hasPn = item.prev && item.next;
+            const clr = _ringClr(item.type);
 
-            if (hasPrevNext) {
-                // شريط ثلاثي: سابق | حالي | تالي
-                const prevDays = item.prev.days;
-                const curDays = cur.days;
-                const nextDays = item.next.days;
-                const total = prevDays + curDays + nextDays;
-                const prevPct = (prevDays / total) * 100;
-                const curPct = (curDays / total) * 100;
-                // موقع الإبرة: بداية القسم الحالي + التقدم داخله
-                const needlePct = prevPct + ((cur.dayIn - 1) / (curDays - 1 || 1)) * curPct;
-
-                // علامات الأيام (ticks) للقسم الحالي فقط
-                let ticksHtml = '';
-                for (let t = 0; t < curDays; t++) {
-                    const tickPos = prevPct + (t / (curDays - 1 || 1)) * curPct;
-                    const isCurrent = (t + 1) === cur.dayIn;
-                    ticksHtml += `<span class="anwa-dial-tick${isCurrent ? ' active' : ''}" style="left:${tickPos}%"></span>`;
-                }
-
-                anwaHtml += `<div class="anwa-dial">`;
-                anwaHtml += `<div class="anwa-dial-header"><span class="anwa-dial-icon">${item.icon}</span> <span class="anwa-dial-title">${item.label}</span></div>`;
-                anwaHtml += `<div class="anwa-dial-names">`;
-                anwaHtml += `<span class="anwa-dial-name side" style="width:${prevPct}%">${item.prev.name}</span>`;
-                anwaHtml += `<span class="anwa-dial-name current" style="width:${curPct}%">${cur.name}</span>`;
-                anwaHtml += `<span class="anwa-dial-name side" style="width:${100 - prevPct - curPct}%">${item.next.name}</span>`;
-                anwaHtml += `</div>`;
-                anwaHtml += `<div class="anwa-dial-track">`;
-                anwaHtml += `<div class="anwa-dial-seg prev" style="width:${prevPct}%"></div>`;
-                anwaHtml += `<div class="anwa-dial-seg active" style="width:${curPct}%"></div>`;
-                anwaHtml += `<div class="anwa-dial-seg next" style="width:${100 - prevPct - curPct}%"></div>`;
-                anwaHtml += ticksHtml;
-                anwaHtml += `<div class="anwa-dial-needle" style="left:${needlePct}%"><div class="anwa-dial-needle-line"></div><div class="anwa-dial-needle-tri">▲</div></div>`;
-                anwaHtml += `</div>`;
-                anwaHtml += `<div class="anwa-dial-pos">${cur.dayIn} / ${curDays}</div>`;
-                anwaHtml += `</div>`;
+            let needlePct;
+            if (hasPn) {
+                const pD = item.prev.days, cD = cur.days, nD = item.next.days;
+                const tot = pD + cD + nD;
+                const pP = (pD / tot) * 100, cP = (cD / tot) * 100;
+                needlePct = pP + ((cur.dayIn - 1) / (cD - 1 || 1)) * cP;
             } else {
-                // شريط مفرد: للرياح والمواسم (بدون prev/next)
-                const curDays = cur.days;
-                const needlePct = ((cur.dayIn - 1) / (curDays - 1 || 1)) * 100;
-
-                let ticksHtml = '';
-                const tickStep = curDays > 30 ? 5 : 1;
-                for (let t = 0; t < curDays; t += tickStep) {
-                    const tickPos = (t / (curDays - 1 || 1)) * 100;
-                    ticksHtml += `<span class="anwa-dial-tick" style="left:${tickPos}%"></span>`;
-                }
-
-                anwaHtml += `<div class="anwa-dial single">`;
-                anwaHtml += `<div class="anwa-dial-header"><span class="anwa-dial-icon">${item.icon}</span> <span class="anwa-dial-title">${item.label}</span></div>`;
-                anwaHtml += `<div class="anwa-dial-track single">`;
-                anwaHtml += `<div class="anwa-dial-seg active" style="width:100%"></div>`;
-                anwaHtml += ticksHtml;
-                anwaHtml += `<div class="anwa-dial-needle" style="left:${needlePct}%"><div class="anwa-dial-needle-line"></div><div class="anwa-dial-needle-tri">▲</div></div>`;
-                anwaHtml += `</div>`;
-                anwaHtml += `<div class="anwa-dial-pos">${cur.dayIn} / ${curDays}</div>`;
-                anwaHtml += `</div>`;
+                needlePct = ((cur.dayIn - 1) / (cur.days - 1 || 1)) * 100;
             }
+            const shift = (50 - needlePct).toFixed(1);
+
+            anwaHtml += `<div class="anwa-br${hasPn ? '' : ' single'}">`;
+
+            // حاوية الشريط مع القص
+            anwaHtml += `<div class="anwa-bw">`;
+            anwaHtml += `<div class="anwa-bt" style="transform:translateX(${shift}%)">`;
+
+            if (hasPn) {
+                const pD = item.prev.days, cD = cur.days, nD = item.next.days;
+                const tot = pD + cD + nD;
+                const pP = (pD / tot) * 100, cP = (cD / tot) * 100, nP = 100 - pP - cP;
+                anwaHtml += `<div class="anwa-bs prev" style="width:${pP.toFixed(1)}%;background:${clr}"></div>`;
+                anwaHtml += `<div class="anwa-bs act" style="width:${cP.toFixed(1)}%;background:${clr}"></div>`;
+                anwaHtml += `<div class="anwa-bs next" style="width:${nP.toFixed(1)}%;background:${clr}"></div>`;
+                for (let t = 0; t < cD; t++) {
+                    const tp = pP + (t / (cD - 1 || 1)) * cP;
+                    anwaHtml += `<i class="anwa-tk" style="left:${tp.toFixed(1)}%"></i>`;
+                }
+            } else {
+                anwaHtml += `<div class="anwa-bs act sg" style="width:100%;background:${clr}"></div>`;
+                const ts = cur.days > 30 ? 5 : 1;
+                for (let t = 0; t < cur.days; t += ts) {
+                    const tp = (t / (cur.days - 1 || 1)) * 100;
+                    anwaHtml += `<i class="anwa-tk" style="left:${tp.toFixed(1)}%"></i>`;
+                }
+            }
+            anwaHtml += `</div></div>`; // bt + bw
+
+            // معلومات الشريط
+            anwaHtml += `<div class="anwa-bi">`;
+            anwaHtml += `<span class="anwa-bi-l">${item.icon} ${hasPn ? item.label + ': ' : ''}${cur.name}</span>`;
+            anwaHtml += `<span class="anwa-bi-r">${cur.dayIn}/${cur.days}</span>`;
+            anwaHtml += `</div>`;
+
+            anwaHtml += `</div>`; // br
         });
-        anwaHtml += `</div>`;
+
+        anwaHtml += `</div>`; // fc
 
         // زر ديرة الدرور
         anwaHtml += `<button class="durur-more-btn dv-anwa-clickable" data-anwa-type="durur-circle">${H.t('dururCircleMore')}</button>`;

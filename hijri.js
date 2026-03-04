@@ -1474,6 +1474,7 @@ const HijriCalendar = (() => {
             const nextMia = durrIdx < 9 ? durrInfo.miaIdx : Math.min(3, durrInfo.miaIdx + 1);
             result.push({
                 type: 'durr', icon: '📜', label: lang === 'en' ? 'Durr' : 'الدرور',
+                miaIdx: durrInfo.miaIdx,
                 prev: { name: allLabels[prevIdx], days: 10 },
                 current: { name: durrInfo.durr, days: 10, dayIn: dayInDurr },
                 next: { name: allLabels[nextIdx], days: 10 }
@@ -1492,7 +1493,19 @@ const HijriCalendar = (() => {
             });
         });
 
-        // 6. المواسم الخاصة (متعددة/متداخلة)
+        // 6. الضربات البحرية (متعددة/متداخلة)
+        const activeStrikes = ANWA_ENRICHMENT.seaStrikes.filter(s => _matchRange(gMonth, gDay, s.from, s.to));
+        activeStrikes.forEach(s => {
+            const totalDays = _rangeDays(s.from, s.to);
+            const dayIn = _dayInRange(gMonth, gDay, s.from, s.to);
+            result.push({
+                type: 'strike', icon: '⚓', label: lang === 'en' ? s.en : s.ar,
+                prev: null, next: null,
+                current: { name: lang === 'en' ? s.en : s.ar, days: totalDays, dayIn: dayIn }
+            });
+        });
+
+        // 7. المواسم الخاصة (متعددة/متداخلة)
         const activeSeasons = SPECIAL_SEASONS.filter(s => _matchRange(gMonth, gDay, s.from, s.to));
         activeSeasons.forEach(s => {
             const totalDays = _rangeDays(s.from, s.to);
