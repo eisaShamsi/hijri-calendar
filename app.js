@@ -3854,6 +3854,11 @@ tr:nth-child(even) { background: #fafafa; }
             document.getElementById('calendar-view').style.display = '';
         } else {
             document.getElementById('day-view').style.display = '';
+            // إعادة رسم عرض اليوم إذا تغيّر تاريخ سهيل
+            if (_suhailChanged) {
+                _suhailChanged = false;
+                renderDayView(_selectedDate);
+            }
         }
     }
 
@@ -4078,6 +4083,7 @@ tr:nth-child(even) { background: #fafafa; }
     // ═══ حالة طلوع سهيل ═══
     let _suhailStartDate = null;   // [month, day] أو null → افتراضي [8,15]
     let _suhailRegionInfo = null;  // { ar, en, month, day, lat } — المنطقة المطابقة
+    let _suhailChanged = false;    // علامة لإعادة رسم عرض اليوم عند العودة من ديرة الدرور
 
     function _loadSuhailStart() {
         // 1. أولوية: تعيين يدوي من localStorage
@@ -6012,6 +6018,7 @@ tr:nth-child(even) { background: #fafafa; }
                     const d = parseInt(suhailPanel.querySelector('#suhail-day-sel').value);
                     localStorage.setItem('suhail-start-override', JSON.stringify([m, d]));
                     _suhailStartDate = [m, d];
+                    _suhailChanged = true;
                     _reRenderDururCircle(container);
                 });
             }
@@ -6019,6 +6026,7 @@ tr:nth-child(even) { background: #fafafa; }
                 resetBtn.addEventListener('click', () => {
                     localStorage.removeItem('suhail-start-override');
                     _loadSuhailStart();
+                    _suhailChanged = true;
                     _reRenderDururCircle(container);
                 });
             }
