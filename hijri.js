@@ -1458,26 +1458,32 @@ const HijriCalendar = (() => {
         const tale3Data = _findInCycle(TAWALIE, 'ar');
         if (tale3Data) result.push({ type: 'star', icon: '⭐', label: lang === 'en' ? 'Star' : 'الأنواء', ...tale3Data });
 
-        // 4. الدرور (حساب خاص عبر سهيل)
+        // 4. الدرور (حساب خاص عبر سهيل) — ترقيم ديرة الدرور
         const sDay = _suhailDay(gMonth, gDay, gYear, suhailStart);
         const durrInfo = getDurr(gMonth, gDay, gYear, suhailStart);
         if (durrInfo) {
             const dayInDurr = ((sDay - 1) % 10) + 1;
             const miaBase = durrInfo.miaIdx * 100;
             const durrStart = miaBase + (Math.ceil((sDay - miaBase) / 10) - 1) * 10 + 1;
-            // الدر الحالي / السابق / التالي
             const allLabels = DUROR_LABELS[lang];
             const durrIdx = Math.ceil((sDay - miaBase) / 10) - 1;
             const prevIdx = durrIdx > 0 ? durrIdx - 1 : (durrInfo.miaIdx > 0 ? 9 : allLabels.length - 1);
             const nextIdx = durrIdx < 9 ? durrIdx + 1 : 0;
             const prevMia = durrIdx > 0 ? durrInfo.miaIdx : Math.max(0, durrInfo.miaIdx - 1);
             const nextMia = durrIdx < 9 ? durrInfo.miaIdx : Math.min(3, durrInfo.miaIdx + 1);
+            // نظام الترقيم: حرف علوي للمئة + رقم الدر (مثل ²60)
+            const _SUP = ['\u00B9','\u00B2','\u00B3','\u2074'];
+            function _dLabel(idx, mia) {
+                const ak = `${mia}-${idx}`;
+                if (DUROR_ALIASES[lang] && DUROR_ALIASES[lang][ak]) return DUROR_ALIASES[lang][ak];
+                return _SUP[mia] + ((idx + 1) * 10);
+            }
             result.push({
                 type: 'durr', icon: '📜', label: lang === 'en' ? 'Durr' : 'الدرور',
                 miaIdx: durrInfo.miaIdx,
-                prev: { name: allLabels[prevIdx], days: 10 },
-                current: { name: durrInfo.durr, days: 10, dayIn: dayInDurr },
-                next: { name: allLabels[nextIdx], days: 10 }
+                prev: { name: _dLabel(prevIdx, prevMia), days: 10 },
+                current: { name: _dLabel(durrIdx, durrInfo.miaIdx), days: 10, dayIn: dayInDurr },
+                next: { name: _dLabel(nextIdx, nextMia), days: 10 }
             });
         }
 
