@@ -66,7 +66,7 @@ const HijriCalendar = (() => {
             langLabel: 'Language', langAr: 'العربية', langEn: 'English',
             corrLabel: 'تصحيح الشهر الحالي', corrReset: 'إعادة', corrClearAll: 'مسح الكل',
             corrections: 'التصحيحات:', noCorrections: 'لا توجد تصحيحات',
-            todayBtn: 'اليوم', leapYear: 'سنة كبيسة', weekCol: 'أسبوع',
+            todayBtn: 'اليوم', leapYear: 'سنة كبيسة', weekCol: 'الأسبوع',
             clickDay: 'انقر على يوم لعرض تفاصيله',
             goToDate: 'الانتقال إلى تاريخ', hijri: 'هجري', gregorian: 'ميلادي',
             day: 'اليوم', month: 'الشهر', year: 'السنة', go: 'انتقل',
@@ -80,9 +80,12 @@ const HijriCalendar = (() => {
             aboutP2: 'السنوات الكبيسة في الدورة: <strong>2، 5، 7، 10، 13، 15، 18، 21، 24، 26، 29</strong>',
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
+            developedBy: 'طور بواسطة',
             footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
             version: 'الإصدار 4.0',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            installBtn: 'تثبيت التطبيق',
+            installIOS: 'اضغط على زر المشاركة ⬆ ثم اختر "إضافة للشاشة الرئيسية"',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
             zodiacLabel: 'البرج',
@@ -296,6 +299,10 @@ const HijriCalendar = (() => {
             weatherMatch: 'تطابق مع التوقعات التقليدية',
             weatherMismatch: 'خارج النطاق التقليدي',
             traditionalRange: 'النطاق التقليدي',
+            // بطاقة المشاركة المُعززة
+            shareProverb: 'حكمة اليوم',
+            shareFact: 'معلومة اليوم',
+            shareSeaLabel: 'البحر',
         },
         en: {
             title: 'Hijri Calendar',
@@ -318,9 +325,12 @@ const HijriCalendar = (() => {
             aboutP2: 'Leap years in the cycle: <strong>2, 5, 7, 10, 13, 15, 18, 21, 24, 26, 29</strong>',
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
+            developedBy: 'Developed by',
             footer: 'Eisa Rashid ALSHAMSI - UAE',
             version: 'Version 4.0',
             credit: 'Designed with Claude Code (Opus 4.6)',
+            installBtn: 'Install App',
+            installIOS: 'Tap the Share button ⬆ then choose "Add to Home Screen"',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
             zodiacLabel: 'Zodiac',
@@ -538,6 +548,10 @@ const HijriCalendar = (() => {
             weatherMatch: 'Matches traditional expectations',
             weatherMismatch: 'Outside traditional range',
             traditionalRange: 'Traditional Range',
+            // Enhanced Share Card
+            shareProverb: 'Wisdom of the Day',
+            shareFact: 'Fact of the Day',
+            shareSeaLabel: 'Sea',
         }
     };
 
@@ -670,8 +684,7 @@ const HijriCalendar = (() => {
     }
 
     // ══════════════════════════════════════════════════════════════
-    // ⚠️  بيانات ديرة الدرور — مُقفلة (LOCKED v4.58)
-    //     لا يجوز تعديل الأسماء أو التواريخ أو الترتيب
+    //     بيانات ديرة الدرور
     //     المرجع: DIRAT_DUROR_SPEC.md
     //     المصدر: كتاب الدرور والطوالع — مركز جامع الشيخ زايد الكبير
     // ══════════════════════════════════════════════════════════════
@@ -766,7 +779,7 @@ const HijriCalendar = (() => {
           weatherEn: 'Scorching heat with moist Kaus winds creates exhausting humidity. Summer cumulus clouds (Rawayih) form over mountains, sometimes bringing thunderstorms.' },
     ];
 
-    // ─── الأبراج الشمسية — 12 برجاً ⚠️ مُقفل ──────────────
+    // ─── الأبراج الشمسية — 12 برجاً ──────────────────────────
     const ZODIAC = [
         { ar: 'الأسد', en: 'Leo', symbol: '♌', from: [7,23], to: [8,22] },
         { ar: 'السنبلة', en: 'Virgo', symbol: '♍', from: [8,23], to: [9,22] },
@@ -782,7 +795,7 @@ const HijriCalendar = (() => {
         { ar: 'السرطان', en: 'Cancer', symbol: '♋', from: [6,21], to: [7,22] },
     ];
 
-    // ─── المواسم العربية ⚠️ مُقفل ─────────────────────────────
+    // ─── المواسم العربية ──────────────────────────────────────
     const SEASONS = [
         { ar: 'الكليبين', en: 'Late Summer Heat', from: [8,11], to: [8,23] },
         { ar: 'الصفري', en: 'Early Autumn', from: [8,24], to: [10,15] },
@@ -800,7 +813,7 @@ const HijriCalendar = (() => {
         { ar: 'المرزم', en: 'Peak Summer', from: [7,29], to: [8,10] },
     ];
 
-    // ─── الدرور — 37 درّاً ⚠️ مُقفل ──────────────────────────
+    // ─── الدرور — 37 درّاً ────────────────────────────────────
     // يبدأ الحساب من 15 أغسطس (طلوع سهيل)
     // 4 مئات: الصفري (100 يوم)، الشتاء (100 يوم)، الصيف (100 يوم)، القيظ (65 يوم)
     const DUROR_LABELS = {
@@ -851,7 +864,7 @@ const HijriCalendar = (() => {
         { ar: 'الصباح', en: 'Morning Light', descAr: 'إشراق النور التام قبيل شروق الشمس', descEn: 'Full brightness just before the sun rises' }
     ];
 
-    // ─── بيانات إثرائية من كتاب الدرور والطوالع ⚠️ مُقفل ────
+    // ─── بيانات إثرائية من كتاب الدرور والطوالع ──────────────
     // (مركز جامع الشيخ زايد الكبير)
     const ANWA_ENRICHMENT = {
         // بوصلة الرياح — 16 اتجاه
@@ -2058,6 +2071,15 @@ const HijriCalendar = (() => {
         return ASTRO_EVENTS.filter(e => {
             const diff = (e.date[0] - gMonth) * 30 + (e.date[1] - gDay);
             return diff >= -1 && diff <= 15;
+        });
+    }
+
+    /** الحصول على الأحداث الفلكية ضمن مدى ±range يوم */
+    function getNearbyAstroEvents(gMonth, gDay, range) {
+        range = range || 15;
+        return ASTRO_EVENTS.filter(e => {
+            const diff = (e.date[0] - gMonth) * 30 + (e.date[1] - gDay);
+            return Math.abs(diff) <= range || Math.abs(diff + 365) <= range || Math.abs(diff - 365) <= range;
         });
     }
 
@@ -3493,7 +3515,7 @@ const HijriCalendar = (() => {
         // بيانات كتاب الدرور والطوالع
         DURR_DETAILS, SPECIAL_SEASONS, ASTRO_EVENTS, FOLK_PROVERBS,
         THURAYA_CONJUNCTIONS, CLIMATE_DATA, BIRD_MIGRATION, HERITAGE_GLOSSARY,
-        getDurrDetails, getActiveSeasons, getUpcomingAstroEvents, getSeasonalProverbs,
+        getDurrDetails, getActiveSeasons, getUpcomingAstroEvents, getNearbyAstroEvents, getSeasonalProverbs,
         getNextThurayaConjunction, getClimateData, getActiveBirdMigration, getGlossaryTerm,
 
         // الأزمنة العربية

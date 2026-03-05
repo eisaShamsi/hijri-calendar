@@ -174,11 +174,11 @@
 }
 
 [data-theme="dark"] .calendar-cell.today {
-    background: linear-gradient(135deg, #059669, #10b981);
+    background: linear-gradient(135deg, #a67c00, #c49440);
 }
 
 [data-theme="dark"] .calendar-cell.today:hover {
-    background: linear-gradient(135deg, #047857, #059669);
+    background: linear-gradient(135deg, #8b6914, #a67c00);
 }
 
 [data-theme="dark"] .calendar-cell .greg-day {
@@ -280,19 +280,9 @@ body {
     color: var(--gray-800);
 }
 
-/* ─── زخرفة الخلفية ──────────────────────────────────────── */
+/* ─── زخرفة الخلفية (مُلغاة — خلفية كريمية موحدة) ─────── */
 body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 320px;
-    background: linear-gradient(135deg, var(--header-from) 0%, var(--header-to) 100%);
-    z-index: -1;
-}
-[data-theme="dark"] body::before {
-    background: linear-gradient(135deg, #2a1a08 0%, #3d2517 100%);
+    display: none;
 }
 
 /* ─── الحاوية الرئيسية ───────────────────────────────────── */
@@ -306,7 +296,10 @@ body::before {
 .header {
     text-align: center;
     padding: calc(32px + env(safe-area-inset-top, 0px)) 16px 40px;
-    color: var(--white);
+    color: var(--header-from);
+}
+[data-theme="dark"] .header {
+    color: var(--papyrus-text);
 }
 
 .header-icon {
@@ -320,7 +313,7 @@ body::before {
     font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-shadow: none;
 }
 
 /* ─── بطاقة اليوم ────────────────────────────────────────── */
@@ -913,7 +906,7 @@ html[dir="ltr"] .nav-bar .nav-prev::after {
 
 /* اليوم الحالي */
 .calendar-cell.today {
-    background: linear-gradient(135deg, var(--green-600), var(--green-500));
+    background: linear-gradient(135deg, var(--gold-600), var(--gold-500));
     border-radius: var(--radius-sm);
 }
 
@@ -923,11 +916,11 @@ html[dir="ltr"] .nav-bar .nav-prev::after {
 }
 
 .calendar-cell.today .greg-day {
-    color: rgba(200,240,255,0.8);
+    color: rgba(255,245,220,0.85);
 }
 
 .calendar-cell.today:hover {
-    background: linear-gradient(135deg, var(--green-700), var(--green-600));
+    background: linear-gradient(135deg, #9a6f08, var(--gold-600));
 }
 
 /* يوم محدد */
@@ -2782,7 +2775,58 @@ html[dir="ltr"] .anwa-card {
     background-attachment: local;
 }
 .calendar-view {
-    /* inherits normal layout */
+    /* خلفية كريمية كالصفحة الرئيسة */
+}
+.calendar-view .today-card {
+    background: var(--papyrus-card);
+    border: 2px solid var(--papyrus-border);
+    box-shadow: 0 2px 12px rgba(100, 60, 20, 0.1);
+}
+[data-theme="dark"] .calendar-view .today-card {
+    background: rgba(30,24,14,0.7);
+    border-color: rgba(139,90,43,0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.calendar-view .calendar-grid {
+    background: var(--papyrus-border);
+}
+.calendar-view .calendar-cell {
+    background: var(--papyrus-card);
+}
+.calendar-view .calendar-cell:hover {
+    background: var(--papyrus-section);
+}
+[data-theme="dark"] .calendar-view .calendar-cell {
+    background: rgba(30,24,14,0.7);
+}
+[data-theme="dark"] .calendar-view .calendar-cell:hover {
+    background: rgba(50,40,25,0.8);
+}
+.calendar-view .calendar-cell.today {
+    background: linear-gradient(135deg, var(--gold-600), var(--gold-500));
+}
+.calendar-view .calendar-cell.today:hover {
+    background: linear-gradient(135deg, #9a6f08, var(--gold-600));
+}
+[data-theme="dark"] .calendar-view .calendar-cell.today {
+    background: linear-gradient(135deg, #a67c00, #c49440);
+}
+[data-theme="dark"] .calendar-view .calendar-cell.today:hover {
+    background: linear-gradient(135deg, #8b6914, #a67c00);
+}
+.calendar-view .week-number {
+    background: var(--papyrus-section);
+}
+[data-theme="dark"] .calendar-view .week-number {
+    background: rgba(30,24,14,0.5);
+}
+.calendar-view .site-footer {
+    color: var(--papyrus-text-secondary);
+}
+.calendar-view .footer-label {
+    font-size: 0.7rem;
+    opacity: 0.65;
+    margin-bottom: 2px;
 }
 
 /* ─── Card wrapper ─── */
@@ -3572,6 +3616,10 @@ html[dir="ltr"] .anwa-card {
     margin-bottom: 4px;
     opacity: 0.7;
 }
+.anwa-dial-suhail-region {
+    opacity: 0.7;
+    font-size: 0.68rem;
+}
 [data-theme="dark"] .anwa-dial-suhail { color: var(--text-secondary); }
 
 /* الحاوية الرئيسية */
@@ -3988,9 +4036,60 @@ html[dir="ltr"] .anwa-card {
 [data-theme="dark"] .dv-credits {
     color: var(--text-secondary, #94a3b8);
 }
+.dv-credits-label {
+    font-size: 0.7rem;
+    opacity: 0.65;
+    margin-bottom: 2px;
+}
+.dv-install-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 80%;
+    max-width: 320px;
+    margin: 16px auto;
+    padding: 12px 24px;
+    border: 2px solid var(--gold, #c49440);
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--btn-grad-from), var(--btn-grad-to));
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.dv-install-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+}
+.dv-install-btn .dv-install-icon {
+    font-size: 1.2em;
+}
 .dv-credits-name {
     font-weight: 600;
     font-size: 0.8rem;
+}
+.dv-credits-email,
+.footer-email {
+    font-size: 0.72rem;
+    margin-top: 2px;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+.dv-credits-email a,
+.footer-email a {
+    color: var(--papyrus-text, #3d2517);
+    text-decoration: none;
+}
+[data-theme="dark"] .dv-credits-email a,
+[data-theme="dark"] .footer-email a {
+    color: var(--btn-text, #f5edd8);
+}
+.dv-credits-email a:hover,
+.footer-email a:hover {
+    text-decoration: underline;
 }
 
 /* ─── Share Screen ─── */
@@ -5203,7 +5302,13 @@ html[dir="ltr"] .anwa-card {
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--gold, #c49440);
-    margin-bottom: 6px;
+    margin-bottom: 2px;
+}
+.zayed-eq-author {
+    font-size: 0.7rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    margin-bottom: 8px;
+    opacity: 0.8;
 }
 .zayed-eq-formula {
     font-family: 'Courier New', monospace;
@@ -5264,6 +5369,83 @@ html[dir="ltr"] .anwa-card {
 [data-theme="dark"] .emirates-elderly-badge.outside {
     background: rgba(244,67,54,0.15);
     color: #ef9a9a;
+}
+
+/* ── بطاقة (i) الموحدة لمعلومات سهيل ── */
+.suhail-unified-info {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.suhail-info-location {
+    margin-top: 6px;
+    opacity: 0.8;
+    font-size: 0.78rem;
+}
+.suhail-info-divider {
+    height: 1px;
+    background: var(--papyrus-border, rgba(139,90,43,0.2));
+    margin: 14px 0;
+}
+.suhail-unified-info .zayed-eq-panel {
+    margin-top: 0;
+}
+.zayed-eq-legend {
+    font-size: 0.75rem;
+    line-height: 1.8;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: rgba(139,90,43,0.04);
+    border-radius: 8px;
+    direction: ltr;
+    text-align: left;
+}
+.zayed-eq-legend div {
+    margin-bottom: 2px;
+}
+.zayed-eq-result {
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 8px 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(196,148,64,0.1);
+    color: var(--papyrus-text, #3a2f20);
+}
+.suhail-share-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--gold, #c49440);
+    background: transparent;
+    color: var(--gold, #c49440);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.suhail-share-btn:hover {
+    background: var(--gold, #c49440);
+    color: #fff;
+}
+[data-theme="dark"] .zayed-eq-legend {
+    background: rgba(255,255,255,0.04);
+    color: rgba(200,180,140,0.7);
+}
+[data-theme="dark"] .zayed-eq-result {
+    background: rgba(196,148,64,0.12);
+    color: var(--text-primary, #f5edd8);
+}
+[data-theme="dark"] .suhail-share-btn {
+    border-color: rgba(196,148,64,0.5);
+    color: rgba(196,148,64,0.8);
+}
+[data-theme="dark"] .suhail-share-btn:hover {
+    background: rgba(196,148,64,0.3);
+    color: #f5edd8;
 }
 
 /* ── F6: مؤشر خطورة البحر ── */
@@ -5912,19 +6094,6 @@ html[dir="ltr"] .anwa-card {
     border-color: rgba(196,148,64,0.5);
 }
 
-.durur-source {
-    margin-top: 20px;
-    padding: 10px;
-    font-size: 0.72rem;
-    color: var(--papyrus-text-secondary, #8a7e6a);
-    text-align: center;
-    border-top: 1px solid var(--papyrus-border, #d4c8a0);
-}
-[data-theme="dark"] .durur-source {
-    color: var(--text-secondary, #b0a890);
-    border-top-color: rgba(255,255,255,0.06);
-}
-
 /* ─── بطاقات الإثراء (كتاب الدرور والطوالع) ─── */
 .durur-enrich-section {
     display: flex;
@@ -6102,3 +6271,18 @@ html[dir="ltr"] .anwa-card {
 [data-theme="dark"] .dv-enrich-astro .dv-enrich-icon { background: rgba(63,81,181,0.2); }
 [data-theme="dark"] .dv-enrich-birds .dv-enrich-icon { background: rgba(0,150,136,0.2); }
 [data-theme="dark"] .dv-enrich-thuraya .dv-enrich-icon { background: rgba(156,39,176,0.2); }
+
+/* أزرار الإجراءات */
+.anwa-action-btns {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+.anwa-action-btns .durur-more-btn {
+    flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* F12: تحسينات عامة للمشاركة                             */
+/* ═══════════════════════════════════════════════════════ */
+/* (F12 uses Canvas, so no CSS needed for the share card itself) */

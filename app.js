@@ -221,18 +221,13 @@ const App = (() => {
         document.getElementById('next-month').title = H.t('nextMonth');
         document.getElementById('prev-month').title = H.t('prevMonth');
 
-        // عن المنهج
-        document.getElementById('about-title').textContent = H.t('aboutTitle');
-        document.getElementById('about-p1').innerHTML = H.t('aboutP1');
-        document.getElementById('about-p2').innerHTML = H.t('aboutP2');
-        document.getElementById('about-p3').innerHTML = H.t('aboutP3');
-        document.getElementById('about-p4').innerHTML = H.t('aboutP4');
-
         // زر العودة للواجهة الرئيسة
         const cvBackBtn = document.getElementById('cv-back-btn');
         if (cvBackBtn) cvBackBtn.textContent = H.t('backToDayView');
 
         // التذييل
+        const footerLabel = document.getElementById('footer-label');
+        if (footerLabel) footerLabel.textContent = H.t('developedBy');
         document.getElementById('footer-credit').textContent = H.t('footer');
         document.getElementById('footer-version').textContent = H.t('version');
         document.getElementById('footer-tool').textContent = H.t('credit');
@@ -1937,6 +1932,26 @@ const App = (() => {
             const s = PT.getSettings();
             if (s.lat || s.lng) prayers = _selectedDate ? PT.getForDate(_selectedDate, isRamadan) : PT.getForToday(isRamadan);
         }
+        // F12: بيانات إضافية للبطاقة المُعززة
+        const seaState = H.getSeaState(gMonth, gDay);
+        const proverbs = H.getSeasonalProverbsEnhanced(gMonth, gDay);
+        const palmStage = H.getPalmStage(gMonth, gDay);
+        const starStatus = H.getStarStatus(gMonth, gDay);
+        const activeBirds = H.getActiveBirdMigration(gMonth, gDay).filter(b => b.inSeason);
+        const durrDetails = H.getDurrDetails(gMonth, gDay, gYear, _getSuhailStart());
+
+        // اختيار معلومة اليوم (طائر أو نجم أو محصول)
+        let factOfDay = null;
+        if (activeBirds.length > 0) {
+            factOfDay = { icon: '🦅', text: activeBirds[0].name };
+        } else if (starStatus) {
+            const vis = starStatus.find(s => s.visible);
+            if (vis) factOfDay = { icon: vis.icon, text: vis.name + ' — ' + vis.status };
+        }
+        if (!factOfDay && palmStage) {
+            factOfDay = { icon: palmStage.icon, text: palmStage.name };
+        }
+
         return {
             dayName: H.dayName(dow),
             hijriDay: hijri.day, hijriMonth: H.monthName(hijri.month - 1), hijriYear: hijri.year, hijriSuffix: H.t('hSuffix'),
@@ -1945,7 +1960,12 @@ const App = (() => {
             isRamadan, prayers,
             tale3: (H.getTale3(gMonth, gDay) || {}).name || null,
             season: (H.getSeason(gMonth, gDay) || {}).name || null,
-            durr: (H.getDurr(gMonth, gDay, gYear, _getSuhailStart()) || {}).durr || null
+            durr: (H.getDurr(gMonth, gDay, gYear, _getSuhailStart()) || {}).durr || null,
+            // بيانات مُعززة
+            seaState: seaState,
+            proverb: proverbs.length > 0 ? proverbs[0].text : null,
+            factOfDay: factOfDay,
+            durrDesc: durrDetails ? (H.getLang() !== 'en' ? durrDetails.desc_ar : durrDetails.desc_en) : null
         };
     }
 
@@ -2025,6 +2045,16 @@ const App = (() => {
         if (data.season) anwaItems.push({ label: H.t('seasonLabel'), value: data.season });
         if (data.durr) anwaItems.push({ label: H.t('durrLabel'), value: data.durr });
         if (anwaItems.length) h += 16 + 1 + 16 + 20 + 52;
+
+        // F12: Enhanced sections
+        const hasProverb = !!data.proverb;
+        const hasSeaState = data.seaState && data.seaState.level !== 'safe';
+        const hasFact = !!data.factOfDay;
+        const enhancedCount = (hasProverb ? 1 : 0) + (hasSeaState ? 1 : 0) + (hasFact ? 1 : 0);
+        if (enhancedCount > 0) h += 16 + 1 + 10; // separator
+        if (hasProverb) h += 36;
+        if (hasSeaState) h += 22;
+        if (hasFact) h += 22;
 
         h += 14 + 14 + 14 + 14 + PAD + MARGIN; // footer (title + name + version + tech) + padding
         const totalH = h;
@@ -2113,6 +2143,39 @@ const App = (() => {
                 ctx.fillText(item.value, ax + acW/2, y + 24);
             });
             y += acH + 8;
+        }
+
+        // ── F12: Enhanced sections ──
+        if (enhancedCount > 0) {
+            y += 16;
+            ctx.strokeStyle = theme.separator; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(IL + 20, y); ctx.lineTo(IR - 20, y); ctx.stroke();
+            y += 10;
+
+            if (hasProverb) {
+                ctx.font = `italic 400 11px ${FONT}`; ctx.fillStyle = theme.accent;
+                ctx.textAlign = 'center'; ctx.direction = 'rtl'; ctx.globalAlpha = 0.85;
+                // Truncate proverb if too long
+                let proverbText = '« ' + data.proverb + ' »';
+                if (proverbText.length > 55) proverbText = proverbText.substring(0, 52) + '… »';
+                ctx.fillText(proverbText, CX, y); y += 16;
+                ctx.font = `400 8px ${FONT}`; ctx.fillStyle = theme.textSecondary; ctx.globalAlpha = 0.5;
+                ctx.fillText(H.t('shareProverb'), CX, y); y += 20;
+                ctx.globalAlpha = 1;
+            }
+            if (hasSeaState) {
+                const seaColor = data.seaState.level === 'danger' ? '#ef5350' : '#ffa726';
+                ctx.font = `600 11px ${FONT}`; ctx.fillStyle = seaColor;
+                ctx.textAlign = 'center'; ctx.direction = 'rtl'; ctx.globalAlpha = 0.9;
+                ctx.fillText(`${data.seaState.emoji} ${data.seaState.label}`, CX, y); y += 22;
+                ctx.globalAlpha = 1;
+            }
+            if (hasFact) {
+                ctx.font = `500 11px ${FONT}`; ctx.fillStyle = theme.textPrimary;
+                ctx.textAlign = 'center'; ctx.direction = 'rtl'; ctx.globalAlpha = 0.7;
+                ctx.fillText(`${data.factOfDay.icon} ${data.factOfDay.text}`, CX, y); y += 22;
+                ctx.globalAlpha = 1;
+            }
         }
 
         // ── Footer ──
@@ -2439,20 +2502,49 @@ tr:nth-child(even) { background: #fafafa; }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js').catch(() => {});
         }
+
+        const installBtn = document.getElementById('install-btn');
+        if (!installBtn) return;
+
+        // هل التطبيق مثبّت بالفعل؟
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || navigator.standalone === true;
+        if (isStandalone) return; // مثبّت — لا تعرض الزر
+
+        // iOS Safari — لا يدعم beforeinstallprompt
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            installBtn.style.display = 'flex';
+            const btnText = document.getElementById('install-btn-text');
+            if (btnText) btnText.textContent = H.t('installBtn') || 'أضف للشاشة الرئيسية';
+            installBtn.addEventListener('click', () => {
+                alert(H.t('installIOS') || 'اضغط على زر المشاركة ⬆ ثم اختر "إضافة للشاشة الرئيسية"');
+            });
+            return;
+        }
+
+        // Android / Desktop — beforeinstallprompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             _deferredInstallPrompt = e;
-            const installBtn = document.getElementById('install-btn');
-            if (installBtn) {
-                installBtn.style.display = 'inline-block';
-                installBtn.addEventListener('click', () => {
-                    if (_deferredInstallPrompt) {
-                        _deferredInstallPrompt.prompt();
+            installBtn.style.display = 'flex';
+            installBtn.addEventListener('click', () => {
+                if (_deferredInstallPrompt) {
+                    _deferredInstallPrompt.prompt();
+                    _deferredInstallPrompt.userChoice.then(choice => {
+                        if (choice.outcome === 'accepted') {
+                            installBtn.style.display = 'none';
+                        }
                         _deferredInstallPrompt = null;
-                        installBtn.style.display = 'none';
-                    }
-                });
-            }
+                    });
+                }
+            }, { once: true });
+        });
+
+        // إخفاء الزر بعد التثبيت
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            _deferredInstallPrompt = null;
         });
     }
 
@@ -3428,7 +3520,9 @@ tr:nth-child(even) { background: #fafafa; }
         const _shDay = _sh[1], _shMonthName = H.gregMonthName(_sh[0] - 1);
         const _shLabel = lang === 'en' ? 'Canopus rise' : 'غرة سهيل';
         const _shDate = lang === 'en' ? `${_shMonthName} ${_shDay}` : `${_shDay} ${_shMonthName}`;
-        anwaHtml += `<div class="anwa-dial-suhail">⭐ ${_shLabel}: ${_shDate}</div>`;
+        const _shRegion = _suhailRegionInfo ? (lang === 'en' ? _suhailRegionInfo.en : _suhailRegionInfo.ar) : '';
+        const _shRegionTag = _shRegion ? ` <span class="anwa-dial-suhail-region">(${_shRegion})</span>` : '';
+        anwaHtml += `<div class="anwa-dial-suhail">⭐ ${_shLabel}: ${_shDate}${_shRegionTag}</div>`;
 
         // بناء أشرطة الإبرة الثابتة — ألوان ديرة الدرور
         const dialItems = H.getDialData(gMonth, gDay, gYear, _sh);
@@ -3564,8 +3658,10 @@ tr:nth-child(even) { background: #fafafa; }
             anwaHtml += `<div class="anwa-proverb dv-anwa-clickable" data-anwa-type="conditions">« ${_proverbs[0].text} »</div>`;
         }
 
-        // زر ديرة الدرور
+        // زر ديرة الدرور + روزنامة الأجداد
+        anwaHtml += `<div class="anwa-action-btns">`;
         anwaHtml += `<button class="durur-more-btn dv-anwa-clickable" data-anwa-type="durur-circle">${H.t('dururCircleMore')}</button>`;
+        anwaHtml += `</div>`;
         if (tale3 && tale3.weather) {
             anwaHtml += `<div class="dv-anwa-weather">${tale3.weather}</div>`;
         }
@@ -3626,6 +3722,8 @@ tr:nth-child(even) { background: #fafafa; }
         if (paletteBtn) paletteBtn.textContent = H.t('palette');
 
         // Credits
+        const creditsLabel = document.querySelector('.dv-credits-label');
+        if (creditsLabel) creditsLabel.textContent = H.t('developedBy');
         const creditsName = document.querySelector('.dv-credits-name');
         if (creditsName) creditsName.textContent = H.t('creditsName');
         const creditsVer = document.querySelector('.dv-credits-version');
@@ -3901,10 +3999,14 @@ tr:nth-child(even) { background: #fafafa; }
             // عنوان الديرة مع السنة الميلادية والهجرية
             const _hStart = H.gregorianToHijri(gYear, 1, 1);
             const _hEnd = H.gregorianToHijri(gYear, 12, 31);
-            const _hijriYearsArr = _hStart.year === _hEnd.year ? [_hStart.year] : [_hStart.year, _hEnd.year];
+            const _hijriYearsStr = _hStart.year === _hEnd.year
+                ? (lang === 'en' ? String(_hStart.year) : H.toArabicNumerals(String(_hStart.year)))
+                : lang === 'en'
+                    ? `${_hStart.year}/${_hEnd.year}`
+                    : `${H.toArabicNumerals(String(_hEnd.year))}/${H.toArabicNumerals(String(_hStart.year))}`;
             const _yearLabel = lang === 'en'
-                ? `${gYear} — ${_hijriYearsArr.join('/')}`
-                : `${H.toArabicNumerals(String(gYear))} — ${_hijriYearsArr.map(y => H.toArabicNumerals(String(y))).join('/')}`;
+                ? `${gYear} — ${_hijriYearsStr}`
+                : `${H.toArabicNumerals(String(gYear))} — ${_hijriYearsStr}`;
             titleEl.textContent = H.t('dururCircleTitle') + '  ' + _yearLabel;
             if (lang === 'en') {
                 titleEl.innerHTML = H.t('dururCircleTitle') + '  ' + _yearLabel + ' <button class="info-help-btn" id="dirat-help-btn" aria-label="What is this?">?</button>';
@@ -4456,8 +4558,7 @@ tr:nth-child(even) { background: #fafafa; }
     }
 
     // ══════════════════════════════════════════════════════════════
-    // ⚠️  أنصاف الأقطار وتخطيط الحلقات — مُقفل (LOCKED v4.58)
-    //     لا يجوز تعديل الترتيب أو الأنصاف أو عدد الحلقات
+    //     أنصاف الأقطار وتخطيط الحلقات
     //     المرجع: DIRAT_DUROR_SPEC.md
     // ══════════════════════════════════════════════════════════════
 
@@ -4508,7 +4609,7 @@ tr:nth-child(even) { background: #fafafa; }
         const events = H.ISLAMIC_EVENTS;
         if (events && events[eventKey]) {
             const ev = events[eventKey];
-            const evName = lang === 'en' ? ev.en : ev.ar;
+            const evName = lang === 'en' ? (ev.nameEn || ev.en) : (ev.nameAr || ev.ar);
             detail += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--papyrus-border,#ccc);text-align:center">`;
             detail += `<span style="font-size:1.2em">🌙</span> <strong>${evName}</strong>`;
             detail += `</div>`;
@@ -4590,6 +4691,33 @@ tr:nth-child(even) { background: #fafafa; }
         if (excludeRing !== 'wind') html += section('💨', lang === 'en' ? 'Winds' : 'الرياح', [...winds.keys()]);
         if (strikes.size > 0 && excludeRing !== 'sea-strike' && excludeRing !== 'sea-strike-wind') html += section('⚓', lang === 'en' ? 'Sea Strikes' : 'الضربات البحرية', [...strikes.keys()]);
         if (bigSeasons.size > 0) html += section('🗓️', lang === 'en' ? 'Major Seasons' : 'المواسم', [...bigSeasons.keys()]);
+
+        // مترابطات النخلة والطيور والفلك
+        if (excludeRing !== 'palm') {
+            const palms = new Map();
+            pts.forEach(([m, d]) => {
+                const ps = H.getPalmStage(m, d);
+                if (ps) palms.set(ps.nameAr, ps);
+            });
+            html += section('🌴', lang === 'en' ? 'Palm' : 'النخلة', [...palms.values()].map(p => `${p.icon} ${lang === 'en' ? p.nameEn : p.nameAr}`));
+        }
+        if (excludeRing !== 'bird') {
+            const birds = new Map();
+            pts.forEach(([m, d]) => {
+                H.getActiveBirdMigration(m, d).forEach(b => {
+                    const bk = lang === 'en' ? b.en : b.ar;
+                    birds.set(bk, b);
+                });
+            });
+            const dirArrow = { south: '↓', north: '↑', resident: '○' };
+            if (birds.size > 0) html += section('🦅', lang === 'en' ? 'Birds' : 'الطيور', [...birds.values()].map(b => `${lang === 'en' ? b.en : b.ar} ${dirArrow[b.direction] || ''}`));
+        }
+        if (excludeRing !== 'astro') {
+            const midDoy = Math.floor((d1 + d2) / 2);
+            const [midM, midD] = fromDOY(midDoy > 365 ? midDoy - 365 : midDoy);
+            const nearAstro = H.getNearbyAstroEvents(midM, midD, Math.max(Math.floor((d2 - d1) / 2) + 5, 15));
+            if (nearAstro.length > 0) html += section('✨', lang === 'en' ? 'Astronomy' : 'أحداث فلكية', nearAstro.map(ev => `${ev.icon} ${lang === 'en' ? ev.en : ev.ar}`));
+        }
 
         return html;
     }
@@ -4674,8 +4802,6 @@ tr:nth-child(even) { background: #fafafa; }
             wildlifeActive.forEach(w => { html += `<span class="durur-list-tag in-season">${w.name}</span>`; });
             html += `</div></div>`;
         }
-
-        html += `<div class="durur-source">${H.t('anwaSource')}</div>`;
 
         // بطاقات الإثراء
         html += `<div class="durur-enrich-section">`;
@@ -4801,8 +4927,6 @@ tr:nth-child(even) { background: #fafafa; }
             wildlifeActive.forEach(w => { html += `<span class="durur-list-tag in-season">${w.name}</span>`; });
             html += `</div></div>`;
         }
-
-        html += `<div class="durur-source">${H.t('anwaSource')}</div>`;
 
         // ─── بطاقات الإثراء ───
         html += `<div class="durur-enrich-section">`;
@@ -5318,30 +5442,53 @@ tr:nth-child(even) { background: #fafafa; }
         if (region) {
             const regionName = isAr ? region.ar : region.en;
             const latStr = isAr ? H.toArabicNumerals(region.lat.toFixed(1)) : region.lat.toFixed(1);
+            // سطر المنطقة مع زر (i) الذي يفتح التفاصيل الكاملة
             if (isManual) {
                 html += `<div class="suhail-calc-date-sub">${H.t('suhailManualAdj')} — <span>📍 ${H.t('suhailRegion')}: ${regionName}</span><button class="info-help-btn suhail-region-info-btn" title="${H.t('suhailRegionInfoTitle')}">i</button></div>`;
             } else {
                 html += `<div class="suhail-calc-date-sub"><span>📍 ${H.t('suhailRegion')}: ${regionName}</span><button class="info-help-btn suhail-region-info-btn" title="${H.t('suhailRegionInfoTitle')}">i</button></div>`;
             }
-            html += `<div class="info-help-popup" id="suhail-region-info-popup">`;
+            // ─── بطاقة (i) الموحدة: الشرح + المعادلة + شواب + مشاركة ───
+            html += `<div class="info-help-popup suhail-unified-info" id="suhail-region-info-popup">`;
+            // §1 كيف تُحدَّد غرة سهيل
             html += `<h4>${H.t('suhailRegionInfoTitle')}</h4>`;
             html += `<p>${H.t('suhailRegionInfoBody')}</p>`;
             html += `<p>${H.t('suhailRegionInfoMethod')}</p>`;
-            html += `<p style="margin-top:6px;opacity:0.8;font-size:12px">📍 ${regionName} — ${isAr ? 'خط عرض' : 'Lat'} ${latStr}°</p>`;
-            html += `</div>`;
-            // ─── قسم معادلة زايد ───
+            html += `<p class="suhail-info-location">📍 ${regionName} — ${isAr ? 'خط عرض' : 'Lat'} ${latStr}°</p>`;
+            // §2 معادلة زايد (إن وُجدت)
             if (region.source === 'zayed') {
                 const elderlyLabel = region.emiratesElderly === 'exact' ? H.t('emiratesElderlyExact')
                     : region.emiratesElderly === 'acceptable' ? H.t('emiratesElderlyAcceptable')
                     : H.t('emiratesElderlyOutside');
                 const elderlyCls = region.emiratesElderly === 'exact' ? 'exact' : region.emiratesElderly === 'acceptable' ? 'acceptable' : 'outside';
+                html += `<div class="suhail-info-divider"></div>`;
                 html += `<div class="zayed-eq-panel">`;
                 html += `<div class="zayed-eq-header">🧮 ${H.t('zayedEquation')}</div>`;
+                html += `<div class="zayed-eq-author">${isAr ? 'تطوير: عيسى بن راشد الشامسي' : 'Developed by: Eisa bin Rashid Al Shamsi'}</div>`;
                 html += `<div class="zayed-eq-formula">${H.t('zayedFormula')}</div>`;
+                // شرح تفصيلي لرموز المعادلة
+                html += `<div class="zayed-eq-legend">`;
+                html += isAr
+                    ? `<div><strong>S(φ)</strong> = تاريخ طلوع سهيل عند خط عرض φ</div>
+                       <div><strong>S₀</strong> = التاريخ المرجعي (١٥ أغسطس عند ليوا ٢٣°ش)</div>
+                       <div><strong>k</strong> = معامل الإزاحة (≈ ٢ يوم/درجة)</div>
+                       <div><strong>φ₀</strong> = خط عرض ليوا المرجعي (٢٣°ش)</div>`
+                    : `<div><strong>S(φ)</strong> = Suhail rising date at latitude φ</div>
+                       <div><strong>S₀</strong> = Reference date (Aug 15 at Liwa 23°N)</div>
+                       <div><strong>k</strong> = Offset coefficient (≈ 2 days/degree)</div>
+                       <div><strong>φ₀</strong> = Liwa reference latitude (23°N)</div>`;
+                html += `</div>`;
                 html += `<div class="zayed-eq-ref">${H.t('zayedReference')}</div>`;
+                // النتيجة المحسوبة
+                html += `<div class="zayed-eq-result">${isAr ? 'النتيجة' : 'Result'}: <strong>${toN(sd)} ${monthNames[sm - 1]}</strong> ${isAr ? 'عند خط عرض' : 'at lat'} ${latStr}°</div>`;
                 html += `<div class="emirates-elderly-badge ${elderlyCls}">${H.t('emiratesElderlyVerify')}: ${elderlyLabel}</div>`;
                 html += `</div>`;
+                // §3 زر المشاركة
+                html += `<button class="suhail-share-btn" id="suhail-share-zayed-btn">`;
+                html += isAr ? '📤 مشاركة معادلة زايد' : '📤 Share Zayed Equation';
+                html += `</button>`;
             }
+            html += `</div>`;
         }
         html += `</div>`;
 
@@ -5398,7 +5545,7 @@ tr:nth-child(even) { background: #fafafa; }
         const RC = _RING_COLORS;
         const todayAngle = _dateToAngle(gMonth, gDay);
 
-        let svg = `<svg viewBox="-130 -130 1340 1340" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
+        let svg = `<svg viewBox="-260 -260 1600 1600" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
         // جعل كل العناصر غير التفاعلية شفافة للنقر، فقط .durur-segment تستقبل الأحداث
         svg += `<style>
             .durur-circle-svg circle, .durur-circle-svg line, .durur-circle-svg polygon, .durur-circle-svg text,
@@ -5496,7 +5643,7 @@ tr:nth-child(even) { background: #fafafa; }
             const isCurrent = (todayAngle >= arcStart && todayAngle < arcEnd) || (arcEnd > 360 && todayAngle < arcEnd - 360);
             svg += `<path d="${_arcPath(arcStart, arcEnd, 82, 140, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="zodiac" data-index="${i}" data-name="${lang === 'en' ? z.en : z.ar}"${isCurrent ? ' opacity="1"' : ' opacity="0.75"'}/>`;
             const name = lang === 'en' ? z.en : z.ar;
-            svg += _radialTextVertical(name, midDeg, 86, 136, cx, cy, 17, isCurrent);
+            svg += _radialTextVertical(name, midDeg, 86, 136, cx, cy, 14, isCurrent);
         });
         svg += `<circle cx="${cx}" cy="${cy}" r="141" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
 
@@ -5577,7 +5724,7 @@ tr:nth-child(even) { background: #fafafa; }
                     const numStr = lang === 'en' ? String(durrNum) : H.toArabicNumerals(String(durrNum));
                     durrDisplayLabel = _SUPERSCRIPTS[mia] + numStr;
                 }
-                svg += _radialTextVertical(durrDisplayLabel, midDeg, 226, 276, cx, cy, 12, isDurrCurrent);
+                svg += _radialTextVertical(durrDisplayLabel, midDeg, 226, 276, cx, cy, 14, isDurrCurrent);
                 durrDayStart = endDay;
             }
         }
@@ -5660,7 +5807,7 @@ tr:nth-child(even) { background: #fafafa; }
                 // الدوران المماسي
                 let rot = midDeg;
                 if (midDeg > 90 && midDeg < 270) rot += 180;
-                const fontSize = span >= 40 ? 13 : span >= 25 ? 11 : span >= 12 ? 9 : 8;
+                const fontSize = span >= 40 ? 14 : span >= 25 ? 12 : 10;
                 const shortName = name.length > 16 ? name.split(' ').slice(0, 2).join(' ') : name;
                 const foW = Math.max(arcLen * 0.85, 50);
                 const foH = laneH;
@@ -5705,7 +5852,7 @@ tr:nth-child(even) { background: #fafafa; }
                 if (asMidDeg > 90 && asMidDeg < 270) asRot += 180;
                 const asFoW = Math.max(asArcLen * 0.85, 50);
                 svg += `<foreignObject x="${asMx - asFoW / 2}" y="${asMy - asLaneH / 2}" width="${asFoW}" height="${asLaneH}" transform="rotate(${asRot},${asMx},${asMy})">` +
-                       `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:8px;color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:visible;line-height:1;pointer-events:none;">${lang === 'en' ? 'Ahimar Strike' : 'ضربة الأحيمر'}</div>` +
+                       `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:10px;color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:visible;line-height:1;pointer-events:none;">${lang === 'en' ? 'Ahimar Strike' : 'ضربة الأحيمر'}</div>` +
                        `</foreignObject>`;
             }
         }
@@ -5737,7 +5884,7 @@ tr:nth-child(even) { background: #fafafa; }
             if (span >= 5) {
                 const midDeg = (a1 + span / 2) % 360;
                 const midR = (strikeInner + strikeOuter) / 2;
-                svg += _radialText(lang === 'en' ? s.en : s.ar, midDeg, midR, cx, cy, 8, false);
+                svg += _radialText(lang === 'en' ? s.en : s.ar, midDeg, midR, cx, cy, 12, false);
             }
         });
         svg += `<circle cx="${cx}" cy="${cy}" r="${strikeOuter + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
@@ -5749,7 +5896,7 @@ tr:nth-child(even) { background: #fafafa; }
         // Lane 0 (كامل العرض): المواسم العادية
         // Lane 1 (خارجية): كنة الثريا (تتداخل مع الذراعين)
         // Lane 2 (داخلية): الذراعين (أسفل الكنة)
-        // ⚠️ مُقفل — لا يجوز تعديل ترتيب الحارات — DIRAT_DUROR_SPEC.md
+        // ترتيب الحارات — المرجع: DIRAT_DUROR_SPEC.md
         const SEASON_LANES = [0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0];
         const seasonLane0Inner = 376, seasonLane0Outer = 398;
         const seasonLane1Inner = 398, seasonLane1Outer = 420;
@@ -5827,11 +5974,194 @@ tr:nth-child(even) { background: #fafafa; }
             if (span >= 8) {
                 const midDeg = (arcStart + span / 2) % 360;
                 const midR = (innerR + outerR) / 2;
-                const fontSize = span >= 30 ? 13 : span >= 18 ? 11 : span >= 12 ? 9 : 8;
+                const fontSize = span >= 30 ? 14 : span >= 18 ? 12 : 10;
                 svg += _radialText(shortName, midDeg, midR, cx, cy, fontSize, isCurrent);
             }
         });
         svg += `<circle cx="${cx}" cy="${cy}" r="${seasonOutermost + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+
+        // ═══════════════════════════════════════════════════
+        // ─── حلقة دورة حياة النخلة 🌴 ───
+        // ═══════════════════════════════════════════════════
+        {
+            const palmIR = 423, palmOR = 447;
+            const palmNameR = (palmIR + palmOR) / 2;
+            const palmColors = [
+                ['#8bc34a', '#4a6a28'],  // طلع الفحّال
+                ['#e91e63', '#7a1838'],  // التنبيت
+                ['#8d6e63', '#4a3828'],  // الحبابوك
+                ['#fdd835', '#7a6a18'],  // الخلال
+                ['#a1887f', '#5a4438'],  // الرطب
+                ['#ff8f00', '#7a4400'],  // الخرائف
+                ['#5d4037', '#3a2418'],  // التمر
+            ];
+
+            H.PALM_LIFECYCLE.forEach((p, i) => {
+                const aFrom = _dateToAngle(p.from[0], p.from[1]);
+                const aTo = _dateToAngleEnd(p.to[0], p.to[1]);
+                let arcStart = aTo, arcEnd = aFrom;
+                if (arcEnd < arcStart) arcEnd += 360;
+                const fill = isDark ? palmColors[i][1] : palmColors[i][0];
+                const stroke = _darkenColor(fill);
+                const isCurrent = (todayAngle >= arcStart && todayAngle < arcEnd) || (arcEnd > 360 && todayAngle < arcEnd - 360);
+                const label = lang === 'en' ? p.en : p.ar;
+
+                svg += `<path d="${_arcPath(arcStart, arcEnd, palmIR, palmOR, cx, cy)}" fill="${fill}" fill-opacity="${isCurrent ? 0.85 : 0.5}" stroke="${stroke}" stroke-width="1" class="durur-segment" data-ring="palm" data-index="${i}" data-name="${label}"/>`;
+
+                const span = arcEnd - arcStart;
+                if (span >= 12) {
+                    const midDeg = (arcStart + span / 2) % 360;
+                    svg += _radialText(`${p.icon} ${label}`, midDeg, palmNameR, cx, cy, 12, isCurrent);
+                }
+            });
+
+            // فترة السكون (نوفمبر-ديسمبر)
+            {
+                const aFrom = _dateToAngle(11, 1);
+                const aTo = _dateToAngleEnd(12, 31);
+                let arcStart = aTo, arcEnd = aFrom;
+                if (arcEnd < arcStart) arcEnd += 360;
+                const isCurrent = (todayAngle >= arcStart && todayAngle < arcEnd) || (arcEnd > 360 && todayAngle < arcEnd - 360);
+                const dormLabel = lang === 'en' ? 'Dormancy' : 'سكون';
+
+                svg += `<path d="${_arcPath(arcStart, arcEnd, palmIR, palmOR, cx, cy)}" fill="none" stroke="${isDark ? '#5a4a28' : '#c8a860'}" stroke-width="1" stroke-dasharray="4 3" class="durur-segment" data-ring="palm" data-index="7" data-name="${dormLabel}"/>`;
+
+                const span = arcEnd - arcStart;
+                const midDeg = (arcStart + span / 2) % 360;
+                svg += _radialText(`🌴 ${dormLabel}`, midDeg, palmNameR, cx, cy, 12, isCurrent);
+            }
+
+            svg += `<circle cx="${cx}" cy="${cy}" r="${palmIR}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${palmOR}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // ─── حلقة هجرة الطيور 🦅 (مسارات متعددة) ───
+        // ═══════════════════════════════════════════════════
+        {
+            const birdIR = 450, birdOR = 486;
+            const NUM_BIRD_LANES = 3;
+            const birdLaneW = (birdOR - birdIR) / NUM_BIRD_LANES;
+            const dirColors = {
+                south: isDark ? '#3a4278' : '#5c6bc0',
+                north: isDark ? '#3a6a3c' : '#66bb6a',
+                resident: isDark ? '#6a2a74' : '#ab47bc',
+            };
+
+            // حساب المسارات بنفس خوارزمية الرياح
+            const birdItems = H.BIRD_MIGRATION.map((b, i) => {
+                const aFrom = _dateToAngle(b.from[0], b.from[1]);
+                const aTo = _dateToAngleEnd(b.to[0], b.to[1]);
+                let arcStart = aTo, arcEnd = aFrom;
+                if (arcEnd < arcStart) arcEnd += 360;
+                return { index: i, a1: arcStart, a2: arcEnd, span: arcEnd - arcStart };
+            });
+            const birdSorted = [...birdItems].sort((a, b) => b.span - a.span);
+            const birdLanes = Array.from({ length: NUM_BIRD_LANES }, () => []);
+            const birdLaneAssign = new Array(H.BIRD_MIGRATION.length).fill(0);
+            for (const item of birdSorted) {
+                let placed = false;
+                for (let ln = NUM_BIRD_LANES - 1; ln >= 0; ln--) {
+                    let conflict = false;
+                    for (const ex of birdLanes[ln]) {
+                        if (_anglesOverlap(item.a1, item.a2, ex.a1, ex.a2)) { conflict = true; break; }
+                    }
+                    if (!conflict) { birdLanes[ln].push(item); birdLaneAssign[item.index] = ln; placed = true; break; }
+                }
+                if (!placed) { birdLanes[0].push(item); birdLaneAssign[item.index] = 0; }
+            }
+
+            // خلفية الحلقة
+            svg += `<circle cx="${cx}" cy="${cy}" r="${(birdIR + birdOR) / 2}" fill="none" stroke="${isDark ? '#1e2530' : '#f0ebe0'}" stroke-width="${birdOR - birdIR}"/>`;
+
+            H.BIRD_MIGRATION.forEach((b, i) => {
+                const it = birdItems[i];
+                const ln = birdLaneAssign[i];
+                const lrInner = birdIR + ln * birdLaneW;
+                const lrOuter = lrInner + birdLaneW;
+                const fill = dirColors[b.direction] || dirColors.south;
+                const stroke = _darkenColor(fill);
+                const isCurrent = (todayAngle >= it.a1 && todayAngle < it.a2) || (it.a2 > 360 && todayAngle < it.a2 - 360);
+                const label = lang === 'en' ? b.en : b.ar;
+
+                svg += `<path d="${_arcPath(it.a1, it.a2, lrInner, lrOuter, cx, cy)}" fill="${fill}" fill-opacity="${isCurrent ? 0.8 : 0.5}" stroke="${stroke}" stroke-width="0.8" class="durur-segment" data-ring="bird" data-index="${i}" data-name="${label}"/>`;
+
+                const span = it.a2 - it.a1;
+                if (span >= 10) {
+                    const midDeg = (it.a1 + span / 2) % 360;
+                    const midR = (lrInner + lrOuter) / 2;
+                    svg += _radialText(label, midDeg, midR, cx, cy, 12, isCurrent);
+                }
+            });
+
+            svg += `<circle cx="${cx}" cy="${cy}" r="${birdIR}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${birdOR}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // ─── حلقة الأحداث الفلكية ✨ ───
+        // ═══════════════════════════════════════════════════
+        {
+            const astroIR = 489, astroOR = 503;
+            const astroMidR = (astroIR + astroOR) / 2;
+            // خلفية الحلقة — بيضاء/داكنة
+            svg += `<circle cx="${cx}" cy="${cy}" r="${astroMidR}" fill="none" stroke="${isDark ? '#1e1c18' : '#ffffff'}" stroke-width="${astroOR - astroIR}"/>`;
+            // إطارات الحلقة
+            svg += `<circle cx="${cx}" cy="${cy}" r="${astroIR}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="${astroOR}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+
+            // رمز + لون لكل نوع حدث فلكي
+            const _astroStyle = (icon) => {
+                // النجوم — ★ ذهبية
+                if (icon === '⭐' || icon === '🌅' || icon === '✨' || icon === '🌙')
+                    return { sym: '★', fill: isDark ? '#e8c860' : '#c49440', size: 13 };
+                // العقرب (الأحيمر) — ♏ أحمر
+                if (icon === '🔴')
+                    return { sym: '♏', fill: isDark ? '#e06060' : '#b03030', size: 13 };
+                // الاعتدال — ◑ أزرق
+                if (icon === '🌍' || icon === '🍂')
+                    return { sym: '◑', fill: isDark ? '#70a0c8' : '#3a7aaa', size: 14 };
+                // الانقلاب الصيفي — ☀ برتقالي
+                if (icon === '☀️')
+                    return { sym: '☀', fill: isDark ? '#f0a830' : '#d08020', size: 14 };
+                // الانقلاب الشتوي — ❄ أزرق فاتح
+                if (icon === '🌑')
+                    return { sym: '❄', fill: isDark ? '#90c8e8' : '#4a90b8', size: 13 };
+                // الشهب — ☄ برتقالي
+                if (icon === '☄️')
+                    return { sym: '☄', fill: isDark ? '#f0c040' : '#c08020', size: 13 };
+                return { sym: '●', fill: isDark ? '#c8a040' : '#d4b050', size: 10 };
+            };
+
+            // حساب الزوايا مسبقاً لكشف التداخل
+            const _astroItems = H.ASTRO_EVENTS.map((ev, i) => ({
+                ev, i, angle: _dateToAngle(ev.date[0], ev.date[1])
+            }));
+
+            _astroItems.forEach(it => {
+                const { ev, i, angle } = it;
+                const rad = (angle - 90) * Math.PI / 180;
+                const ex = cx + astroMidR * Math.cos(rad);
+                const ey = cy + astroMidR * Math.sin(rad);
+
+                const diff = (ev.date[0] - gMonth) * 30 + (ev.date[1] - gDay);
+                const isNear = Math.abs(diff) <= 15 || Math.abs(diff + 365) <= 15 || Math.abs(diff - 365) <= 15;
+                const label = lang === 'en' ? ev.en : ev.ar;
+                const st = _astroStyle(ev.icon);
+
+                svg += `<g class="durur-segment astro-icon" data-ring="astro" data-index="${i}" data-name="${label}" data-angle="${angle}" style="cursor:pointer">`;
+                // منطقة نقر شفافة كبيرة
+                svg += `<circle cx="${ex}" cy="${ey}" r="18" fill="transparent" style="pointer-events:all"/>`;
+                // هالة للأحداث القريبة
+                if (isNear) {
+                    svg += `<circle cx="${ex}" cy="${ey}" r="10" fill="${st.fill}" opacity="0.2" style="pointer-events:none"/>`;
+                }
+                // الرمز
+                svg += `<text x="${ex}" y="${ey}" text-anchor="middle" dominant-baseline="central" font-size="${st.size}" fill="${st.fill}" opacity="${isNear ? 1 : 0.7}" font-family="Segoe UI Symbol, sans-serif" style="pointer-events:none">${st.sym}</text>`;
+                svg += `<title>${label}</title>`;
+                svg += `</g>`;
+            });
+        }
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 6: علامات الأيام ───
@@ -5850,28 +6180,28 @@ tr:nth-child(even) { background: #fafafa; }
                 const isSuhailStart = (m === _suhailS[0] && d === _suhailS[1]);
                 if (isSuhailStart) {
                     // خط يوم بدء الدرور — أحمر وأغلظ يمتد عبر كل الحلقات
-                    svg += `<line x1="${cx + 422 * Math.cos(rad)}" y1="${cy + 422 * Math.sin(rad)}" x2="${cx + 447 * Math.cos(rad)}" y2="${cy + 447 * Math.sin(rad)}" stroke="${isDark ? '#e04040' : '#cc2020'}" stroke-width="3.5"/>`;
+                    svg += `<line x1="${cx + 511 * Math.cos(rad)}" y1="${cy + 511 * Math.sin(rad)}" x2="${cx + 536 * Math.cos(rad)}" y2="${cy + 536 * Math.sin(rad)}" stroke="${isDark ? '#e04040' : '#cc2020'}" stroke-width="3.5"/>`;
                 } else if (d === 1) {
-                    svg += `<line x1="${cx + 422 * Math.cos(rad)}" y1="${cy + 422 * Math.sin(rad)}" x2="${cx + 447 * Math.cos(rad)}" y2="${cy + 447 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="2"/>`;
+                    svg += `<line x1="${cx + 511 * Math.cos(rad)}" y1="${cy + 511 * Math.sin(rad)}" x2="${cx + 536 * Math.cos(rad)}" y2="${cy + 536 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="2"/>`;
                 } else if (isFive) {
-                    svg += `<line x1="${cx + 424 * Math.cos(rad)}" y1="${cy + 424 * Math.sin(rad)}" x2="${cx + 446 * Math.cos(rad)}" y2="${cy + 446 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="1.2"/>`;
+                    svg += `<line x1="${cx + 513 * Math.cos(rad)}" y1="${cy + 513 * Math.sin(rad)}" x2="${cx + 535 * Math.cos(rad)}" y2="${cy + 535 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="1.2"/>`;
                 } else {
-                    svg += `<line x1="${cx + 430 * Math.cos(rad)}" y1="${cy + 430 * Math.sin(rad)}" x2="${cx + 444 * Math.cos(rad)}" y2="${cy + 444 * Math.sin(rad)}" stroke="${tickColorLight}" stroke-width="0.6" opacity="0.7"/>`;
+                    svg += `<line x1="${cx + 519 * Math.cos(rad)}" y1="${cy + 519 * Math.sin(rad)}" x2="${cx + 533 * Math.cos(rad)}" y2="${cy + 533 * Math.sin(rad)}" stroke="${tickColorLight}" stroke-width="0.6" opacity="0.7"/>`;
                 }
             }
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="449" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="538" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
 
         // ─── Ring 6b: الأرقام الخمسية ───
         for (let m = 1; m <= 12; m++) {
             for (let d = 1; d <= monthDays[m - 1]; d++) {
                 if (d % 5 === 0) {
                     const angle = _dateToAngle(m, d);
-                    svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, 460, cx, cy, 11, false);
+                    svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, 549, cx, cy, 10, false);
                 }
             }
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="471" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="560" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 7: الأشهر الميلادية ───
@@ -5884,17 +6214,19 @@ tr:nth-child(even) { background: #fafafa; }
             let arcStart = aLast, arcEnd = aFirst;
             if (arcEnd < arcStart) arcEnd += 360;
             // قطاع شفاف قابل للنقر
-            svg += `<path d="${_arcPath(arcStart, arcEnd, 422, 519, cx, cy)}" fill="transparent" stroke="none" class="durur-segment" data-ring="month" data-index="${m}" data-name="${gMonthNames[m]}" style="cursor:pointer"/>`;
+            svg += `<path d="${_arcPath(arcStart, arcEnd, 511, 608, cx, cy)}" fill="transparent" stroke="none" class="durur-segment" data-ring="month" data-index="${m}" data-name="${gMonthNames[m]}" style="cursor:pointer"/>`;
             // خط شعاعي عند بداية كل شهر
             {
                 const rad1 = (aFirst - 90) * Math.PI / 180;
-                svg += `<line x1="${cx + 422 * Math.cos(rad1)}" y1="${cy + 422 * Math.sin(rad1)}" x2="${cx + 519 * Math.cos(rad1)}" y2="${cy + 519 * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5" pointer-events="none"/>`;
+                svg += `<line x1="${cx + 511 * Math.cos(rad1)}" y1="${cy + 511 * Math.sin(rad1)}" x2="${cx + 608 * Math.cos(rad1)}" y2="${cy + 608 * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5" pointer-events="none"/>`;
             }
             // اسم الشهر في منتصف القوس
+            // اسم الشهر في منتصف القوس
             const midDeg = (arcStart + (arcEnd - arcStart) / 2) % 360;
-            svg += _radialText(gMonthNames[m], midDeg, 497, cx, cy, 22, false);
+            const gNum = lang === 'en' ? String(m + 1) : H.toArabicNumerals(String(m + 1));
+            svg += _radialText(`${gMonthNames[m]} [${gNum}]`, midDeg, 586, cx, cy, 18, false);
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="520" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="609" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 8: الشهور الهجرية (حلقة متغيرة) ───
@@ -5928,11 +6260,11 @@ tr:nth-child(even) { background: #fafafa; }
             }
 
             // أنصاف الأقطار
-            const hTickInner = 524, hTickOuter = 548;
-            const hNumR = 557;
-            const hSepR = 565;
-            const hNameR = 587;
-            const hOuterR = 607;
+            const hTickInner = 613, hTickOuter = 637;
+            const hNumR = 646;
+            const hSepR = 654;
+            const hNameR = 676;
+            const hOuterR = 696;
 
             // خلفية الحلقة
             svg += `<circle cx="${cx}" cy="${cy}" r="${(hTickInner + hOuterR) / 2}" fill="none" stroke="${isDark ? 'rgba(42,64,56,0.3)' : 'rgba(90,138,106,0.12)'}" stroke-width="${hOuterR - hTickInner}"/>`;
@@ -6010,7 +6342,7 @@ tr:nth-child(even) { background: #fafafa; }
                         const dG = H.hijriToGregorian(hm.year, hm.month, d);
                         if (dG.year !== gYear) continue;
                         const angle = _dateToAngle(dG.month, dG.day);
-                        svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, hNumR, cx, cy, 9, false);
+                        svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, hNumR, cx, cy, 10, false);
                     }
                 }
 
@@ -6025,7 +6357,8 @@ tr:nth-child(even) { background: #fafafa; }
                 if (span >= 6) {
                     const midDeg = (arcStart + span / 2) % 360;
                     const yearNum = lang === 'en' ? String(hm.year) : H.toArabicNumerals(String(hm.year));
-                    const label = span >= 10 ? `${mName}  ${yearNum}` : mName;
+                    const hNum = lang === 'en' ? String(hm.month) : H.toArabicNumerals(String(hm.month));
+                    const label = span >= 10 ? `${mName} [${hNum}]  ${yearNum}` : `${mName} [${hNum}]`;
                     svg += _radialText(label, midDeg, hNameR, cx, cy, 18, isCurrent);
                 }
             });
@@ -6039,8 +6372,8 @@ tr:nth-child(even) { background: #fafafa; }
         // ═══════════════════════════════════════════════════
         // ─── الإطار الذهبي الخارجي المزخرف ───
         // ═══════════════════════════════════════════════════
-        const goldInner = 610;
-        const goldOuter = 618;
+        const goldInner = 701;
+        const goldOuter = 709;
         const goldMid = (goldInner + goldOuter) / 2;
         const goldColor1 = isDark ? '#8a7030' : '#c8a040';
         const goldColor2 = isDark ? '#a08838' : '#d4b050';
@@ -6074,7 +6407,7 @@ tr:nth-child(even) { background: #fafafa; }
         // ─── مؤشر اليوم (إبرة فولاذية — قابلة للسحب) ───
         // ═══════════════════════════════════════════════════
         const needleLen = goldOuter + 40;   // تتجاوز الإطار الذهبي بوضوح
-        const tipY = cy - needleLen;        // = 540 - 658 = -118
+        const tipY = cy - needleLen;        // = 540 - 749 = -209
         const baseHW = 3.5;
         const tipHW = 0.8;
         const strkCol = isDark ? '#6a5018' : '#7a6020';
@@ -6139,7 +6472,9 @@ tr:nth-child(even) { background: #fafafa; }
 
         // ─── معلومات التذييل ───
         html += `<div class="dv-credits" style="opacity:0.5">`;
+        html += `<div class="dv-credits-label">${H.t('developedBy')}</div>`;
         html += `<div class="dv-credits-name">${H.t('footer')}</div>`;
+        html += `<div class="dv-credits-email"><a href="mailto:eisa.alshamsi@eim.ae">eisa.alshamsi@eim.ae</a></div>`;
         html += `<div class="dv-credits-version">${H.t('version')}</div>`;
         html += `<div class="dv-credits-tech">${H.t('credit')}</div>`;
         html += `</div>`;
@@ -6272,6 +6607,35 @@ tr:nth-child(even) { background: #fafafa; }
                     const daysStrG = lang === 'en' ? `${numDaysG} days` : `${numDaysG} يوم`;
                     const ringSummaryG = _buildRingSummaryHTML(gm, 1, gm, numDaysG, gy, lang);
                     detail = `<strong>${gMonthNames[idx]} ${gy}</strong><br><span class="durur-info-dates">${h1}</span><br><span class="durur-info-dates">${h2}</span><br><span class="durur-info-desc">${daysStrG}</span><div style="margin-top:8px;border-top:1px solid var(--papyrus-border,#ccc);padding-top:8px;font-size:13px;line-height:1.7">${ringSummaryG}</div>`;
+                } else if (ring === 'palm') {
+                    const palmStages = [...H.PALM_LIFECYCLE, { ar: 'سكون', en: 'Dormancy', from: [11,1], to: [12,31], icon: '🌴', stage: 0 }];
+                    const p = palmStages[idx];
+                    if (p) {
+                        const pName = lang === 'en' ? p.en : p.ar;
+                        detail = `<strong>${p.icon} ${pName}</strong><br><span class="durur-info-dates">${_fmtDateRange(p.from, p.to, lang)}</span>`;
+                        ringFrom = p.from; ringTo = p.to;
+                    }
+                } else if (ring === 'bird') {
+                    const b = H.BIRD_MIGRATION[idx];
+                    if (b) {
+                        const bName = lang === 'en' ? b.en : b.ar;
+                        const dirLabel = { south: lang === 'en' ? 'Southward ↓' : 'جنوباً ↓', north: lang === 'en' ? 'Northward ↑' : 'شمالاً ↑', resident: lang === 'en' ? 'Resident ○' : 'مقيم ○' };
+                        const desc = lang === 'en' ? b.desc_en : b.desc_ar;
+                        detail = `<strong>🦅 ${bName}</strong><br><span class="durur-info-dates">${_fmtDateRange(b.from, b.to, lang)}</span><br><span class="durur-info-desc" style="color:${b.direction === 'south' ? '#5c6bc0' : b.direction === 'north' ? '#66bb6a' : '#ab47bc'}">${dirLabel[b.direction] || ''}</span><br><span class="durur-info-desc">${desc}</span>`;
+                        ringFrom = b.from; ringTo = b.to;
+                    }
+                } else if (ring === 'astro') {
+                    const ev = H.ASTRO_EVENTS[idx];
+                    if (ev) {
+                        const evName = lang === 'en' ? ev.en : ev.ar;
+                        const desc = lang === 'en' ? ev.desc_en : ev.desc_ar;
+                        const mNames = lang === 'en'
+                            ? ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+                            : ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+                        detail = `<strong>${ev.icon} ${evName}</strong><br><span class="durur-info-dates">${ev.date[1]} ${mNames[ev.date[0]]}</span><br><span class="durur-info-desc">${desc}</span>`;
+                        // الأحداث الفلكية نقطة واحدة — نستخدم ±5 أيام كنطاق
+                        ringFrom = ev.date; ringTo = ev.date;
+                    }
                 } else if (ring === 'mia') {
                     // الفصول الأربعة (Ring 0): الربيع، الصيف، الخريف، الشتاء
                     const seasonRanges = [
@@ -6341,6 +6705,16 @@ tr:nth-child(even) { background: #fafafa; }
                     const febDaysM = _isLeapGregorian(_diratYear || new Date().getFullYear()) ? 29 : 28;
                     const mDays = [31, febDaysM, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
                     segFrom = [idx + 1, 1]; segTo = [idx + 1, mDays[idx]];
+                } else if (ring === 'palm') {
+                    const palmAll = [...H.PALM_LIFECYCLE, { from: [11,1], to: [12,31] }];
+                    const ps = palmAll[idx];
+                    if (ps) { segFrom = ps.from; segTo = ps.to; }
+                } else if (ring === 'bird') {
+                    const br = H.BIRD_MIGRATION[idx];
+                    if (br) { segFrom = br.from; segTo = br.to; }
+                } else if (ring === 'astro') {
+                    const ae = H.ASTRO_EVENTS[idx];
+                    if (ae) { segFrom = ae.date; segTo = ae.date; }
                 }
 
                 if (segFrom && segTo) {
@@ -6378,6 +6752,7 @@ tr:nth-child(even) { background: #fafafa; }
             }
         });
 
+
         // ─── إعداد حاسبة طلوع سهيل ───
         const suhailPanel = container.querySelector('#suhail-calc-panel');
         if (suhailPanel) {
@@ -6401,7 +6776,111 @@ tr:nth-child(even) { background: #fafafa; }
                     _reRenderDururCircle(container);
                 });
             }
+            // ─── مشاركة معادلة زايد ───
+            const shareZayedBtn = suhailPanel.querySelector('#suhail-share-zayed-btn');
+            if (shareZayedBtn) {
+                shareZayedBtn.addEventListener('click', async () => {
+                    const region = _suhailRegionInfo;
+                    if (!region) return;
+                    const [sm, sd] = _getSuhailStart();
+                    const isAr = lang !== 'en';
+                    const mNames = isAr ? H.GREGORIAN_MONTH_NAMES : H.GREGORIAN_MONTH_NAMES_EN;
+                    const regionName = isAr ? region.ar : region.en;
+                    const latVal = region.lat.toFixed(1);
+                    const text = isAr
+                        ? `⭐ معادلة زايد لحساب طلوع سهيل\nتطوير: عيسى بن راشد الشامسي\n\nS(φ) = S₀ + k×(φ−φ₀)\n\nالمرجع: ليوا 23°ش — 15 أغسطس\nالموقع: ${regionName} (خط عرض ${latVal}°)\nالنتيجة: ${sd} ${mNames[sm - 1]}\n\n— التقويم الهجري`
+                        : `⭐ Zayed Equation for Suhail Rising\nDeveloped by: Eisa bin Rashid Al Shamsi\n\nS(φ) = S₀ + k×(φ−φ₀)\n\nRef: Liwa 23°N — Aug 15\nLocation: ${regionName} (Lat ${latVal}°)\nResult: ${mNames[sm - 1]} ${sd}\n\n— Hijri Calendar`;
+                    if (navigator.share) {
+                        try { await navigator.share({ title: isAr ? 'معادلة زايد' : 'Zayed Equation', text }); return; } catch (e) {}
+                    }
+                    try { await navigator.clipboard.writeText(text); } catch (e) {}
+                    shareZayedBtn.textContent = isAr ? '✓ تم النسخ' : '✓ Copied';
+                    setTimeout(() => { shareZayedBtn.textContent = isAr ? '📤 مشاركة معادلة زايد' : '📤 Share Zayed Equation'; }, 2000);
+                });
+            }
         }
+
+        // ─── آلية تباعد الرموز الفلكية المتداخلة عند التمرير ───
+        (() => {
+            const astroSegs = Array.from(container.querySelectorAll('.astro-icon'));
+            if (astroSegs.length < 2) return;
+            const CX = 540, CY = 540;
+            const CLUSTER_DEG = 9;   // عتبة التداخل (درجات)
+            const SPREAD_DEG = 7;    // مقدار التباعد لكل عنصر
+
+            // ترتيب حسب الزاوية
+            const items = astroSegs.map(s => ({
+                seg: s,
+                angle: parseFloat(s.dataset.angle) || 0
+            })).sort((a, b) => a.angle - b.angle);
+
+            // كشف المجموعات المتداخلة
+            const clusters = [];
+            let cur = [items[0]];
+            for (let i = 1; i < items.length; i++) {
+                const diff = items[i].angle - cur[cur.length - 1].angle;
+                if (diff < CLUSTER_DEG) {
+                    cur.push(items[i]);
+                } else {
+                    if (cur.length > 1) clusters.push([...cur]);
+                    cur = [items[i]];
+                }
+            }
+            if (cur.length > 1) clusters.push(cur);
+            // التفاف: هل أول وآخر عنصر قريبان؟
+            if (items.length > 1) {
+                const wrapDiff = (items[0].angle + 360) - items[items.length - 1].angle;
+                if (wrapDiff < CLUSTER_DEG) {
+                    // دمج آخر مجموعة مع الأولى (أو إنشاء واحدة جديدة)
+                    const last = clusters.length ? clusters[clusters.length - 1] : null;
+                    const first = clusters.length ? clusters[0] : null;
+                    if (last && last[last.length - 1] === items[items.length - 1]) {
+                        if (first && first[0] === items[0]) {
+                            // دمج المجموعتين
+                            clusters[clusters.length - 1] = [...last, ...first];
+                            clusters.shift();
+                        } else {
+                            last.push(items[0]);
+                        }
+                    } else if (first && first[0] === items[0]) {
+                        first.unshift(items[items.length - 1]);
+                    } else {
+                        clusters.push([items[items.length - 1], items[0]]);
+                    }
+                }
+            }
+
+            clusters.forEach(cluster => {
+                let spreadTimer = null;
+
+                const spread = () => {
+                    if (spreadTimer) clearTimeout(spreadTimer);
+                    cluster.forEach((it, pos) => {
+                        const delta = (pos - (cluster.length - 1) / 2) * SPREAD_DEG;
+                        it.seg.style.transition = 'transform 0.3s ease';
+                        it.seg.style.transformOrigin = `${CX}px ${CY}px`;
+                        it.seg.style.transform = `rotate(${delta}deg)`;
+                    });
+                };
+
+                const collapse = () => {
+                    spreadTimer = setTimeout(() => {
+                        const anyHovered = cluster.some(it => it.seg.matches(':hover'));
+                        if (!anyHovered) {
+                            cluster.forEach(it => {
+                                it.seg.style.transition = 'transform 0.3s ease';
+                                it.seg.style.transform = '';
+                            });
+                        }
+                    }, 200);
+                };
+
+                cluster.forEach(it => {
+                    it.seg.addEventListener('mouseenter', spread);
+                    it.seg.addEventListener('mouseleave', collapse);
+                });
+            });
+        })();
 
         // إعداد سحب الإبرة
         _setupNeedleDrag(container, lang);
@@ -6438,8 +6917,8 @@ tr:nth-child(even) { background: #fafafa; }
         function screenToSVG(clientX, clientY) {
             const rect = svgEl.getBoundingClientRect();
             return {
-                x: -130 + (clientX - rect.left) / rect.width * 1340,
-                y: -130 + (clientY - rect.top) / rect.height * 1340
+                x: -260 + (clientX - rect.left) / rect.width * 1600,
+                y: -260 + (clientY - rect.top) / rect.height * 1600
             };
         }
 
@@ -6509,13 +6988,13 @@ tr:nth-child(even) { background: #fafafa; }
             // موقع التلميح — قرب طرف الإبرة
             if (circleContainer) {
                 const rect = svgEl.getBoundingClientRect();
-                const scale = rect.width / 1340;
+                const scale = rect.width / 1600;
                 const radians = (snappedAngle - 90) * Math.PI / 180;
-                const nLen = parseFloat(needleGroup.dataset.needleLen) || 658;
+                const nLen = parseFloat(needleGroup.dataset.needleLen) || 749;
                 const tipSvgX = cx + nLen * Math.cos(radians);
                 const tipSvgY = cy + nLen * Math.sin(radians);
-                tooltip.style.left = ((tipSvgX + 130) * scale) + 'px';
-                tooltip.style.top = ((tipSvgY + 130) * scale - 28) + 'px';
+                tooltip.style.left = ((tipSvgX + 260) * scale) + 'px';
+                tooltip.style.top = ((tipSvgY + 260) * scale - 28) + 'px';
             }
         }
 
