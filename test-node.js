@@ -174,6 +174,66 @@ const todayTab = H.todayHijri();
 console.log(`    Today (tabular):      ${todayTab.year}-${todayTab.month}-${todayTab.day} (${H.MONTH_NAMES[todayTab.month-1]})`);
 
 // ═══════════════════════════════════════════════════════════
+// 6. معادلة زايد — حساب سهيل بخط العرض
+// ═══════════════════════════════════════════════════════════
+header('6. Zayed Equation — Suhail by Latitude');
+
+// المرجع: ليوا 23°ش → 15 أغسطس
+const z23 = H.calcSuhailByZayed(23);
+assert(z23 && z23[0] === 8 && z23[1] === 15, 'Liwa 23°N → Aug 15 (reference)');
+
+// دبي 25.2° → ~18 أغسطس
+const zDubai = H.calcSuhailByZayed(25.2);
+assert(zDubai && zDubai[0] === 8 && zDubai[1] === 18, 'Dubai 25.2°N → Aug 18');
+
+// الكويت 29.4° → ~23 أغسطس
+const zKuwait = H.calcSuhailByZayed(29.4);
+assert(zKuwait && zKuwait[0] === 8 && zKuwait[1] === 23, 'Kuwait 29.4°N → Aug 23');
+
+// بغداد 33.3° → ~2 سبتمبر (2.67 × 3.3 = 8.8 ≈ 9 أيام → 24 أغسطس + 9 = 2 سبتمبر)
+const zBaghdad = H.calcSuhailByZayed(33.3);
+assert(zBaghdad && zBaghdad[0] === 9 && zBaghdad[1] === 2, 'Baghdad 33.3°N → Sep 2');
+
+// عدن 12.8° → ~27 يوليو
+const zAden = H.calcSuhailByZayed(12.8);
+assert(zAden && zAden[0] === 7 && zAden[1] === 27, 'Aden 12.8°N → Jul 27');
+
+// أبوظبي 24.5° → ~17 أغسطس
+const zAbuDhabi = H.calcSuhailByZayed(24.5);
+assert(zAbuDhabi && zAbuDhabi[0] === 8 && zAbuDhabi[1] === 17, 'Abu Dhabi 24.5°N → Aug 17');
+
+// خارج النطاق
+const zOut = H.calcSuhailByZayed(10);
+assert(zOut === null, 'Lat 10°N → null (outside range)');
+
+// الحد الأقصى 36° → 9 سبتمبر
+const z36 = H.calcSuhailByZayed(36);
+assert(z36 && z36[0] === 9 && z36[1] === 9, 'Lat 36°N → Sep 9 (max)');
+
+header('6b. Schwab Emirates Criterion');
+// 15 أغسطس + 90 = 13 نوفمبر → acceptable (13 خارج نافذة 14-23 لكن في نوفمبر)
+assert(H.verifyEmiratesElderly(8, 15) === 'acceptable', 'Aug 15 + 90d = Nov 13 → acceptable');
+
+// 24 أغسطس + 90 = 22 نوفمبر → exact
+assert(H.verifyEmiratesElderly(8, 24) === 'exact', 'Aug 24 + 90d = Nov 22 → exact');
+
+// 9 سبتمبر + 90 = 8 ديسمبر → outside
+assert(H.verifyEmiratesElderly(9, 9) === 'outside', 'Sep 9 + 90d = Dec 8 → outside');
+
+// 26 يوليو + 90 = 23 أكتوبر → outside
+assert(H.verifyEmiratesElderly(7, 26) === 'outside', 'Jul 26 + 90d = Oct 23 → outside');
+
+// 3 أغسطس + 90 = 1 نوفمبر → acceptable
+assert(H.verifyEmiratesElderly(8, 3) === 'acceptable', 'Aug 3 + 90d = Nov 1 → acceptable');
+
+header('6c. getSuhailRegion with Zayed');
+const rUAE = H.getSuhailRegion(24.5, 54.7);
+assert(rUAE && rUAE.source === 'zayed', 'Abu Dhabi region source = zayed');
+assert(rUAE && rUAE.month === 8 && rUAE.day === 17, 'Abu Dhabi region date = Aug 17');
+assert(rUAE && rUAE.emiratesElderly, 'Abu Dhabi has Schwab Emirates verification');
+assert(rUAE && rUAE.ar === 'أبوظبي', 'Abu Dhabi keeps city name');
+
+// ═══════════════════════════════════════════════════════════
 header('SUMMARY');
 console.log(`  Total: ${passed + failed} tests — \x1b[32m${passed} passed\x1b[0m, \x1b[31m${failed} failed\x1b[0m`);
 if (failed === 0) console.log('  \x1b[32m✓ ALL TESTS PASSED\x1b[0m');

@@ -5191,6 +5191,424 @@ html[dir="ltr"] .anwa-card {
     color: var(--gold, #c49440);
 }
 
+/* ── معادلة زايد — Zayed Equation ── */
+.zayed-eq-panel {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(212,160,23,0.06), rgba(139,90,43,0.06));
+    border: 1px dashed rgba(196,148,64,0.3);
+}
+.zayed-eq-header {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--gold, #c49440);
+    margin-bottom: 6px;
+}
+.zayed-eq-formula {
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: var(--papyrus-text, #3a2f20);
+    background: rgba(255,255,255,0.5);
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 4px;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+.zayed-eq-ref {
+    font-size: 0.68rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    text-align: center;
+    margin-bottom: 6px;
+}
+.emirates-elderly-badge {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+.emirates-elderly-badge.exact {
+    background: rgba(76,175,80,0.12);
+    color: #2e7d32;
+    border: 1px solid rgba(76,175,80,0.3);
+}
+.emirates-elderly-badge.acceptable {
+    background: rgba(255,193,7,0.12);
+    color: #f57f17;
+    border: 1px solid rgba(255,193,7,0.3);
+}
+.emirates-elderly-badge.outside {
+    background: rgba(244,67,54,0.12);
+    color: #c62828;
+    border: 1px solid rgba(244,67,54,0.3);
+}
+[data-theme="dark"] .zayed-eq-panel {
+    background: linear-gradient(135deg, rgba(212,160,23,0.08), rgba(139,90,43,0.08));
+    border-color: rgba(196,148,64,0.2);
+}
+[data-theme="dark"] .zayed-eq-formula {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-primary, #f5edd8);
+}
+[data-theme="dark"] .emirates-elderly-badge.exact {
+    background: rgba(76,175,80,0.15);
+    color: #81c784;
+}
+[data-theme="dark"] .emirates-elderly-badge.acceptable {
+    background: rgba(255,193,7,0.15);
+    color: #ffd54f;
+}
+[data-theme="dark"] .emirates-elderly-badge.outside {
+    background: rgba(244,67,54,0.15);
+    color: #ef9a9a;
+}
+
+/* ── F6: مؤشر خطورة البحر ── */
+.sea-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    margin: 10px 0 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.sea-safe { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.25); color: #2e7d32; }
+.sea-caution { background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.25); color: #f57f17; }
+.sea-danger { background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.25); color: #c62828; animation: sea-pulse 2s ease-in-out infinite; }
+@keyframes sea-pulse { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+.sea-emoji { font-size: 1.1rem; }
+.sea-label { flex: 1; font-weight: 600; }
+.sea-remaining { font-size: 0.7rem; opacity: 0.8; }
+[data-theme="dark"] .sea-safe { background: rgba(76,175,80,0.12); color: #81c784; }
+[data-theme="dark"] .sea-caution { background: rgba(255,193,7,0.12); color: #ffd54f; }
+[data-theme="dark"] .sea-danger { background: rgba(244,67,54,0.12); color: #ef9a9a; }
+
+/* ── F7: شريط طوالع النجوم ── */
+.star-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin: 8px 0;
+    cursor: pointer;
+}
+.star-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 4px;
+    border-radius: 8px;
+    font-size: 0.68rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+.star-item.visible {
+    background: rgba(212,160,23,0.1);
+    border: 1px solid rgba(212,160,23,0.25);
+    box-shadow: 0 0 8px rgba(212,160,23,0.15);
+}
+.star-item.hidden {
+    background: rgba(139,90,43,0.05);
+    border: 1px solid rgba(139,90,43,0.1);
+    opacity: 0.5;
+}
+.star-icon { font-size: 1.2rem; margin-bottom: 2px; }
+.star-name { font-weight: 600; color: var(--papyrus-text, #3a2f20); }
+.star-status { font-size: 0.62rem; color: var(--papyrus-text-secondary, #8a7e6a); margin-top: 2px; }
+[data-theme="dark"] .star-item.visible { background: rgba(212,160,23,0.12); box-shadow: 0 0 12px rgba(212,160,23,0.2); }
+[data-theme="dark"] .star-item.hidden { background: rgba(255,255,255,0.03); }
+[data-theme="dark"] .star-name { color: var(--text-primary, #f5edd8); }
+
+/* ── شارات سريعة ── */
+.anwa-quick-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0;
+}
+.quick-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.quick-badge:active { transform: scale(0.95); }
+.palm-badge {
+    background: rgba(76,175,80,0.1);
+    border: 1px solid rgba(76,175,80,0.2);
+    color: #2e7d32;
+}
+.bird-badge {
+    background: rgba(33,150,243,0.1);
+    border: 1px solid rgba(33,150,243,0.2);
+    color: #1565c0;
+}
+[data-theme="dark"] .palm-badge { background: rgba(76,175,80,0.12); color: #81c784; }
+[data-theme="dark"] .bird-badge { background: rgba(33,150,243,0.12); color: #64b5f6; }
+
+/* ── مثل شعبي ── */
+.anwa-proverb {
+    font-style: italic;
+    font-size: 0.76rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    text-align: center;
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-inline-start: 3px solid var(--gold, #c49440);
+    background: rgba(196,148,64,0.04);
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+}
+[data-theme="dark"] .anwa-proverb { color: var(--text-secondary, #d4c0a0); background: rgba(196,148,64,0.06); }
+
+/* ── F1: بطاقة أحوال اليوم ── */
+.cond-section {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(139,90,43,0.1);
+}
+.cond-section:last-child { border-bottom: none; }
+.cond-section-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--papyrus-text, #3a2f20);
+    margin-bottom: 8px;
+}
+.cond-desc {
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--papyrus-text, #3a2f20);
+    background: rgba(212,160,23,0.06);
+    padding: 10px;
+    border-radius: 8px;
+}
+.cond-wind-item {
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.76rem;
+}
+.cond-wind-item.wind-cold { background: rgba(79,195,247,0.08); border-inline-start: 3px solid #4fc3f7; }
+.cond-wind-item.wind-hot { background: rgba(239,83,80,0.08); border-inline-start: 3px solid #ef5350; }
+.cond-wind-item.wind-moist { background: rgba(102,187,106,0.08); border-inline-start: 3px solid #66bb6a; }
+.cond-wind-name { font-weight: 700; display: block; }
+.cond-wind-desc { font-size: 0.72rem; opacity: 0.8; }
+.cond-crops {
+    font-size: 0.76rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+}
+.cond-proverb {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(196,148,64,0.06);
+    border: 1px solid rgba(196,148,64,0.15);
+}
+.cond-proverb-text {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--papyrus-text, #3a2f20);
+    text-align: center;
+    margin-bottom: 4px;
+}
+[data-theme="dark"] .cond-section-title { color: var(--text-primary, #f5edd8); }
+[data-theme="dark"] .cond-desc { background: rgba(212,160,23,0.08); color: var(--text-primary, #f5edd8); }
+[data-theme="dark"] .cond-proverb-text { color: var(--text-primary, #f5edd8); }
+
+/* ── F3: هجرة الطيور ── */
+.bird-group { margin-bottom: 12px; }
+.bird-group-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--papyrus-text, #3a2f20);
+    margin-bottom: 6px;
+}
+.bird-item {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    margin-bottom: 4px;
+}
+.bird-item.active {
+    background: rgba(33,150,243,0.08);
+    border: 1px solid rgba(33,150,243,0.15);
+    color: var(--papyrus-text, #3a2f20);
+}
+.bird-item.inactive {
+    background: rgba(0,0,0,0.02);
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    opacity: 0.5;
+}
+[data-theme="dark"] .bird-group-title { color: var(--text-primary, #f5edd8); }
+[data-theme="dark"] .bird-item.active { background: rgba(33,150,243,0.1); color: var(--text-primary, #f5edd8); }
+
+/* ── F4+F8: الزراعة والنخيل ── */
+.agri-section { margin-bottom: 16px; }
+.agri-section-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--papyrus-text, #3a2f20);
+    margin-bottom: 8px;
+}
+.palm-timeline {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
+}
+.palm-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    padding: 8px 6px;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    text-align: center;
+    background: rgba(139,90,43,0.04);
+    border: 1px solid rgba(139,90,43,0.1);
+    transition: all 0.3s;
+}
+.palm-stage.active {
+    background: rgba(76,175,80,0.12);
+    border-color: rgba(76,175,80,0.3);
+    box-shadow: 0 2px 8px rgba(76,175,80,0.15);
+    transform: scale(1.05);
+}
+.palm-stage-icon { font-size: 1.3rem; margin-bottom: 4px; }
+.palm-stage-name { font-weight: 600; color: var(--papyrus-text, #3a2f20); }
+.agri-crops-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.agri-crop {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    background: rgba(139,90,43,0.04);
+    border: 1px solid rgba(139,90,43,0.1);
+}
+.agri-crop.active {
+    background: rgba(76,175,80,0.08);
+    border-color: rgba(76,175,80,0.2);
+}
+[data-theme="dark"] .agri-section-title { color: var(--text-primary, #f5edd8); }
+[data-theme="dark"] .palm-stage { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .palm-stage.active { background: rgba(76,175,80,0.15); }
+[data-theme="dark"] .palm-stage-name { color: var(--text-primary, #f5edd8); }
+
+/* ── F5: بوصلة الرياح ── */
+.wind-compass-container { text-align: center; }
+.wind-compass-svg {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+}
+.wind-legend {
+    margin-top: 12px;
+    text-align: start;
+}
+.wind-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+}
+.wind-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.wind-legend-name { font-weight: 600; color: var(--papyrus-text, #3a2f20); }
+.wind-legend-type { font-size: 0.7rem; color: var(--papyrus-text-secondary, #8a7e6a); }
+.wind-legend-desc {
+    font-size: 0.7rem;
+    color: var(--papyrus-text-secondary, #8a7e6a);
+    padding-inline-start: 16px;
+    margin-bottom: 8px;
+}
+[data-theme="dark"] .wind-legend-name { color: var(--text-primary, #f5edd8); }
+
+/* ── F9: السماء الليلية ── */
+.night-sky-panel {
+    background: #0a0a1a;
+    border-radius: 14px;
+    padding: 16px;
+    margin: 10px 0;
+    color: #cc4444;
+    font-size: 0.8rem;
+    border: 1px solid rgba(204,68,68,0.2);
+}
+.night-sky-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #dd6666;
+    margin-bottom: 8px;
+}
+.night-sky-mansion {
+    color: #cc8844;
+    margin-bottom: 4px;
+}
+.night-sky-direction {
+    color: #888;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+}
+.night-sky-stars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.night-star {
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(204,68,68,0.2);
+    font-size: 0.72rem;
+    color: #cc6666;
+}
+
+/* ── F11: مقارنة الأرصاد ── */
+.weather-comparison {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    margin-top: 8px;
+}
+.weather-match {
+    background: rgba(76,175,80,0.08);
+    border: 1px solid rgba(76,175,80,0.2);
+    color: #2e7d32;
+}
+.weather-mismatch {
+    background: rgba(255,193,7,0.08);
+    border: 1px solid rgba(255,193,7,0.2);
+    color: #f57f17;
+}
+.weather-trad-range {
+    font-size: 0.68rem;
+    opacity: 0.8;
+}
+[data-theme="dark"] .weather-match { background: rgba(76,175,80,0.12); color: #81c784; }
+[data-theme="dark"] .weather-mismatch { background: rgba(255,193,7,0.12); color: #ffd54f; }
+
 /* ── Durr System ── */
 .anwa-detail-suhail {
     text-align: center;

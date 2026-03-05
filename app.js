@@ -2963,6 +2963,24 @@ tr:nth-child(even) { background: #fafafa; }
         }
 
         html += '</div>';
+
+        // ─── F11: مقارنة مع التوقعات التقليدية ───
+        const now = new Date();
+        const gM = now.getMonth() + 1, gD = now.getDate();
+        const trad = H.getTraditionalExpectations(gM, gD);
+        if (trad.tempRange && data.current) {
+            const actual = Math.round(data.current.temperature_2m);
+            const inRange = actual >= trad.tempRange.min && actual <= trad.tempRange.max;
+            const isAr = lang !== 'en';
+            const tradLabel = isAr
+                ? `${H.t('traditionalRange')}: ${H.toArabicNumerals(String(trad.tempRange.min))}°–${H.toArabicNumerals(String(trad.tempRange.max))}°`
+                : `${H.t('traditionalRange')}: ${trad.tempRange.min}°–${trad.tempRange.max}°`;
+            html += `<div class="weather-comparison ${inRange ? 'weather-match' : 'weather-mismatch'}">`;
+            html += `<span>${inRange ? '✅' : '⚠️'} ${inRange ? H.t('weatherMatch') : H.t('weatherMismatch')}</span>`;
+            html += `<span class="weather-trad-range">${tradLabel}</span>`;
+            html += `</div>`;
+        }
+
         el.innerHTML = html;
     }
 
@@ -3503,6 +3521,49 @@ tr:nth-child(even) { background: #fafafa; }
 
         anwaHtml += `</div>`; // fc
 
+        // ─── F6: مؤشر خطورة البحر ───
+        const _seaState = H.getSeaState(gMonth, gDay);
+        anwaHtml += `<div class="sea-indicator sea-${_seaState.level} dv-anwa-clickable" data-anwa-type="conditions">`;
+        anwaHtml += `<span class="sea-emoji">${_seaState.emoji}</span>`;
+        anwaHtml += `<span class="sea-label">${_seaState.label}</span>`;
+        if (_seaState.remaining > 0) {
+            const rN = _isAr ? H.toArabicNumerals(String(_seaState.remaining)) : _seaState.remaining;
+            anwaHtml += `<span class="sea-remaining">${H.t('seaStrikeRemaining')}: ${rN} ${H.t('seaDays')}</span>`;
+        }
+        anwaHtml += `</div>`;
+
+        // ─── F7: شريط طوالع النجوم ───
+        const _stars = H.getStarStatus(gMonth, gDay);
+        anwaHtml += `<div class="star-strip dv-anwa-clickable" data-anwa-type="conditions">`;
+        _stars.forEach(s => {
+            anwaHtml += `<div class="star-item ${s.visible ? 'visible' : 'hidden'}">`;
+            anwaHtml += `<span class="star-icon">${s.icon}</span>`;
+            anwaHtml += `<span class="star-name">${s.name}</span>`;
+            anwaHtml += `<span class="star-status">${s.status}</span>`;
+            anwaHtml += `</div>`;
+        });
+        anwaHtml += `</div>`;
+
+        // ─── شارات سريعة: نخلة + طيور + مثل ───
+        const _palm = H.getPalmStage(gMonth, gDay);
+        const _birds = H.getActiveBirdMigration(gMonth, gDay);
+        const _proverbs = H.getSeasonalProverbsEnhanced(gMonth, gDay);
+        const _activeBirds = _birds.filter(b => b.inSeason);
+
+        anwaHtml += `<div class="anwa-quick-badges">`;
+        if (_palm.stage > 0) {
+            anwaHtml += `<span class="quick-badge palm-badge dv-anwa-clickable" data-anwa-type="agriculture">${_palm.icon} ${_palm.name}</span>`;
+        }
+        if (_activeBirds.length > 0) {
+            const bName = _activeBirds[0].name;
+            anwaHtml += `<span class="quick-badge bird-badge dv-anwa-clickable" data-anwa-type="birds">🦅 ${bName}</span>`;
+        }
+        anwaHtml += `</div>`;
+
+        if (_proverbs.length > 0) {
+            anwaHtml += `<div class="anwa-proverb dv-anwa-clickable" data-anwa-type="conditions">« ${_proverbs[0].text} »</div>`;
+        }
+
         // زر ديرة الدرور
         anwaHtml += `<button class="durur-more-btn dv-anwa-clickable" data-anwa-type="durur-circle">${H.t('dururCircleMore')}</button>`;
         if (tale3 && tale3.weather) {
@@ -3521,6 +3582,30 @@ tr:nth-child(even) { background: #fafafa; }
         _setupHelpButtons();
 
         // بطاقات الإثراء انتقلت إلى داخل ديرة الدرور (_renderDururCircle)
+
+        // ─── F9: لوح السماء الليلية (في الوضع الداكن فقط) ───
+        const nightEl = document.getElementById('dv-night-sky');
+        if (nightEl) {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                const nightInfo = H.getNightSkyInfo(gMonth, gDay);
+                let nightHtml = `<div class="night-sky-panel">`;
+                nightHtml += `<div class="night-sky-title">🌙 ${H.t('nightSkyTitle')}</div>`;
+                if (nightInfo.currentMansion) {
+                    nightHtml += `<div class="night-sky-mansion">${H.t('nightMansion')}: ${nightInfo.currentMansion}</div>`;
+                }
+                nightHtml += `<div class="night-sky-direction">${H.t('nightDirection')}: ${nightInfo.direction}</div>`;
+                nightHtml += `<div class="night-sky-stars">`;
+                nightInfo.visibleStars.forEach(s => {
+                    nightHtml += `<span class="night-star">${s.icon} ${s.name}</span>`;
+                });
+                nightHtml += `</div></div>`;
+                nightEl.innerHTML = nightHtml;
+                nightEl.style.display = '';
+            } else {
+                nightEl.style.display = 'none';
+            }
+        }
 
         // AI content
         renderAISection(hijri, gYear, gMonth, gDay, dow);
@@ -3825,6 +3910,18 @@ tr:nth-child(even) { background: #fafafa; }
                 titleEl.innerHTML = H.t('dururCircleTitle') + '  ' + _yearLabel + ' <button class="info-help-btn" id="dirat-help-btn" aria-label="What is this?">?</button>';
             }
             html = _renderDururCircle(gMonth, gDay, gYear, lang);
+        } else if (type === 'conditions') {
+            titleEl.textContent = H.t('conditionsTitle');
+            html = _renderTodayConditionsCard(gMonth, gDay, gYear, lang);
+        } else if (type === 'birds') {
+            titleEl.textContent = H.t('birdMigrationTitle');
+            html = _renderBirdMigrationSection(gMonth, gDay, lang);
+        } else if (type === 'agriculture') {
+            titleEl.textContent = H.t('agriTitle');
+            html = _renderAgriSection(gMonth, gDay, lang);
+        } else if (type === 'wind-compass') {
+            titleEl.textContent = H.t('windCompassTitle');
+            html = _renderWindCompassSVG(gMonth, gDay, lang);
         } else if (type === 'moon-phases') {
             const hijri = H.gregorianToHijri(gYear, gMonth, gDay);
             const monthLabel = H.monthName(hijri.month - 1) + ' ' + (lang === 'en' ? hijri.year : H.toArabicNumerals(String(hijri.year)));
@@ -4960,6 +5057,236 @@ tr:nth-child(even) { background: #fafafa; }
     }
 
     // ═══ حاسبة طلوع سهيل ═══
+    // ═══════════════════════════════════════════════════════════
+    // ─── دوال عرض الميزات الجديدة (F1-F12) ──────────────────
+    // ═══════════════════════════════════════════════════════════
+
+    /** F1: بطاقة أحوال اليوم الشاملة */
+    function _renderTodayConditionsCard(gMonth, gDay, gYear, lang) {
+        const isAr = lang !== 'en';
+        const toN = isAr ? (s => H.toArabicNumerals(String(s))) : (s => s);
+        const cond = H.getTodayConditions(gMonth, gDay, gYear, _getSuhailStart());
+        let html = '';
+
+        // وصف الدر الحالي
+        if (cond.durr) {
+            const desc = isAr ? cond.durr.desc_ar : cond.durr.desc_en;
+            if (desc) {
+                html += `<div class="cond-section">`;
+                html += `<div class="cond-section-title">${cond.durr.mia} — ${cond.durr.durr}</div>`;
+                html += `<div class="cond-desc">${desc}</div>`;
+                html += `</div>`;
+            }
+        }
+
+        // مؤشر البحر
+        html += `<div class="cond-section">`;
+        html += `<div class="cond-section-title">${H.t('seaState')}</div>`;
+        html += `<div class="sea-indicator sea-${cond.sea.level}" style="margin:0">`;
+        html += `<span class="sea-emoji">${cond.sea.emoji}</span>`;
+        html += `<span class="sea-label">${cond.sea.label}</span>`;
+        if (cond.sea.remaining > 0) {
+            html += `<span class="sea-remaining">${H.t('seaStrikeRemaining')}: ${toN(cond.sea.remaining)} ${H.t('seaDays')}</span>`;
+        }
+        html += `</div></div>`;
+
+        // طوالع النجوم
+        html += `<div class="cond-section">`;
+        html += `<div class="cond-section-title">${H.t('starStrip')}</div>`;
+        html += `<div class="star-strip" style="margin:0">`;
+        cond.stars.forEach(s => {
+            html += `<div class="star-item ${s.visible ? 'visible' : 'hidden'}">`;
+            html += `<span class="star-icon">${s.icon}</span>`;
+            html += `<span class="star-name">${s.name}</span>`;
+            html += `<span class="star-status">${s.status}</span>`;
+            html += `</div>`;
+        });
+        html += `</div></div>`;
+
+        // الرياح النشطة
+        if (cond.winds.activeWinds.length > 0) {
+            html += `<div class="cond-section">`;
+            html += `<div class="cond-section-title">${H.t('windCompassTitle')}</div>`;
+            cond.winds.activeWinds.forEach(w => {
+                const typeCls = w.type === 'cold' ? 'wind-cold' : w.type === 'hot' ? 'wind-hot' : w.type === 'moist' ? 'wind-moist' : '';
+                html += `<div class="cond-wind-item ${typeCls}">`;
+                html += `<span class="cond-wind-name">${w.name}</span>`;
+                html += `<span class="cond-wind-desc">${w.desc}</span>`;
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+
+        // الزراعة
+        html += `<div class="cond-section">`;
+        html += `<div class="cond-section-title">${H.t('palmLifecycle')}: ${cond.palm.icon} ${cond.palm.name}</div>`;
+        if (cond.agri.currentCrops.length > 0) {
+            html += `<div class="cond-crops">${H.t('currentCrops')}: `;
+            html += cond.agri.currentCrops.map(c => c.name).join('، ');
+            html += `</div>`;
+        }
+        html += `</div>`;
+
+        // المثل الشعبي
+        if (cond.proverbs.length > 0) {
+            html += `<div class="cond-proverb">`;
+            cond.proverbs.forEach(p => {
+                html += `<div class="cond-proverb-text">« ${p.text} »</div>`;
+            });
+            html += `</div>`;
+        }
+
+        return html;
+    }
+
+    /** F3: قسم هجرة الطيور */
+    function _renderBirdMigrationSection(gMonth, gDay, lang) {
+        const isAr = lang !== 'en';
+        const birds = H.getActiveBirdMigration(gMonth, gDay);
+        let html = '';
+        const southBirds = birds.filter(b => b.inSeason && /ش←ج|south/i.test(b.name));
+        const northBirds = birds.filter(b => b.inSeason && /ج←ش|north/i.test(b.name));
+        const otherBirds = birds.filter(b => b.inSeason && !southBirds.includes(b) && !northBirds.includes(b));
+
+        if (southBirds.length > 0) {
+            html += `<div class="bird-group"><div class="bird-group-title">🔽 ${H.t('birdSouthward')}</div>`;
+            southBirds.forEach(b => {
+                html += `<div class="bird-item active">${b.name}</div>`;
+            });
+            html += `</div>`;
+        }
+        if (northBirds.length > 0) {
+            html += `<div class="bird-group"><div class="bird-group-title">🔼 ${H.t('birdNorthward')}</div>`;
+            northBirds.forEach(b => {
+                html += `<div class="bird-item active">${b.name}</div>`;
+            });
+            html += `</div>`;
+        }
+        if (otherBirds.length > 0) {
+            html += `<div class="bird-group">`;
+            otherBirds.forEach(b => {
+                html += `<div class="bird-item active">${b.name}</div>`;
+            });
+            html += `</div>`;
+        }
+
+        const inactive = birds.filter(b => !b.inSeason);
+        if (inactive.length > 0) {
+            html += `<div class="bird-group"><div class="bird-group-title" style="opacity:0.5">${isAr ? 'غير نشطة حالياً' : 'Currently inactive'}</div>`;
+            inactive.forEach(b => {
+                html += `<div class="bird-item inactive">${b.name}</div>`;
+            });
+            html += `</div>`;
+        }
+        return html;
+    }
+
+    /** F4+F8: قسم الزراعة والنخيل */
+    function _renderAgriSection(gMonth, gDay, lang) {
+        const isAr = lang !== 'en';
+        const agri = H.getAgriCalendar(gMonth, gDay);
+        let html = '';
+
+        // مراحل النخلة
+        html += `<div class="agri-section">`;
+        html += `<div class="agri-section-title">${H.t('palmLifecycle')}</div>`;
+        html += `<div class="palm-timeline">`;
+        H.PALM_LIFECYCLE.forEach(p => {
+            const isActive = agri.palm.stage === p.stage;
+            html += `<div class="palm-stage ${isActive ? 'active' : ''}">`;
+            html += `<span class="palm-stage-icon">${p.icon}</span>`;
+            html += `<span class="palm-stage-name">${isAr ? p.ar : p.en}</span>`;
+            html += `</div>`;
+        });
+        html += `</div></div>`;
+
+        // المحاصيل الحالية
+        html += `<div class="agri-section">`;
+        html += `<div class="agri-section-title">${H.t('currentCrops')}</div>`;
+        const crops = H.getSeasonalCrops(gMonth, gDay);
+        const inSeason = crops.filter(c => c.inSeason);
+        const outSeason = crops.filter(c => !c.inSeason);
+
+        if (inSeason.length > 0) {
+            html += `<div class="agri-crops-list">`;
+            inSeason.forEach(c => {
+                html += `<span class="agri-crop active">🟢 ${c.name}</span>`;
+            });
+            html += `</div>`;
+        }
+        if (outSeason.length > 0) {
+            html += `<div class="agri-crops-list" style="opacity:0.4;margin-top:8px">`;
+            outSeason.forEach(c => {
+                html += `<span class="agri-crop">${c.name}</span>`;
+            });
+            html += `</div>`;
+        }
+        html += `</div>`;
+
+        return html;
+    }
+
+    /** F5: بوصلة الرياح SVG */
+    function _renderWindCompassSVG(gMonth, gDay, lang) {
+        const isAr = lang !== 'en';
+        const data = H.getActiveWindsWithCompass(gMonth, gDay);
+        const cx = 130, cy = 130, r = 105;
+        let html = `<div class="wind-compass-container">`;
+        html += `<svg viewBox="0 0 260 260" class="wind-compass-svg">`;
+
+        // دائرة خارجية
+        html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--papyrus-border,#d4c8a0)" stroke-width="1.5"/>`;
+        html += `<circle cx="${cx}" cy="${cy}" r="${r-25}" fill="none" stroke="var(--papyrus-border,#d4c8a0)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+
+        // 16 اتجاه
+        data.compass.forEach((c, i) => {
+            const angle = (c.degree - 90) * Math.PI / 180;
+            const x1 = cx + (r - 5) * Math.cos(angle);
+            const y1 = cy + (r - 5) * Math.sin(angle);
+            const x2 = cx + (r + 3) * Math.cos(angle);
+            const y2 = cy + (r + 3) * Math.sin(angle);
+            const xt = cx + (r - 18) * Math.cos(angle);
+            const yt = cy + (r - 18) * Math.sin(angle);
+            const isMain = i % 4 === 0;
+            html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--papyrus-text-secondary,#8a7e6a)" stroke-width="${isMain ? 2 : 0.8}"/>`;
+            if (isMain) {
+                html += `<text x="${xt}" y="${yt}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="var(--papyrus-text,#3a2f20)" font-weight="700">${c.name}</text>`;
+            }
+        });
+
+        // أقواس الرياح النشطة
+        data.activeWinds.forEach(w => {
+            const angle = (w.degree - 90) * Math.PI / 180;
+            const arcR = r - 35;
+            const x = cx + arcR * Math.cos(angle);
+            const y = cy + arcR * Math.sin(angle);
+            const color = w.type === 'cold' ? '#4fc3f7' : w.type === 'hot' ? '#ef5350' : w.type === 'moist' ? '#66bb6a' : '#ffa726';
+            // خط من المركز
+            html += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${color}" stroke-width="2.5" opacity="0.7"/>`;
+            html += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" opacity="0.9"/>`;
+        });
+
+        // مركز
+        html += `<circle cx="${cx}" cy="${cy}" r="4" fill="var(--gold,#c49440)"/>`;
+        html += `</svg>`;
+
+        // أسطورة
+        html += `<div class="wind-legend">`;
+        data.activeWinds.forEach(w => {
+            const color = w.type === 'cold' ? '#4fc3f7' : w.type === 'hot' ? '#ef5350' : w.type === 'moist' ? '#66bb6a' : '#ffa726';
+            const typeLabel = w.type === 'cold' ? H.t('windCold') : w.type === 'hot' ? H.t('windHot') : w.type === 'moist' ? H.t('windMoist') : '';
+            html += `<div class="wind-legend-item">`;
+            html += `<span class="wind-legend-dot" style="background:${color}"></span>`;
+            html += `<span class="wind-legend-name">${w.name}</span>`;
+            if (typeLabel) html += `<span class="wind-legend-type">(${typeLabel})</span>`;
+            html += `</div>`;
+            if (w.desc) html += `<div class="wind-legend-desc">${w.desc}</div>`;
+        });
+        html += `</div></div>`;
+
+        return html;
+    }
+
     function _buildSuhailCalculatorHTML(lang) {
         const [sm, sd] = _getSuhailStart();
         const isAr = lang !== 'en';
@@ -5002,6 +5329,19 @@ tr:nth-child(even) { background: #fafafa; }
             html += `<p>${H.t('suhailRegionInfoMethod')}</p>`;
             html += `<p style="margin-top:6px;opacity:0.8;font-size:12px">📍 ${regionName} — ${isAr ? 'خط عرض' : 'Lat'} ${latStr}°</p>`;
             html += `</div>`;
+            // ─── قسم معادلة زايد ───
+            if (region.source === 'zayed') {
+                const elderlyLabel = region.emiratesElderly === 'exact' ? H.t('emiratesElderlyExact')
+                    : region.emiratesElderly === 'acceptable' ? H.t('emiratesElderlyAcceptable')
+                    : H.t('emiratesElderlyOutside');
+                const elderlyCls = region.emiratesElderly === 'exact' ? 'exact' : region.emiratesElderly === 'acceptable' ? 'acceptable' : 'outside';
+                html += `<div class="zayed-eq-panel">`;
+                html += `<div class="zayed-eq-header">🧮 ${H.t('zayedEquation')}</div>`;
+                html += `<div class="zayed-eq-formula">${H.t('zayedFormula')}</div>`;
+                html += `<div class="zayed-eq-ref">${H.t('zayedReference')}</div>`;
+                html += `<div class="emirates-elderly-badge ${elderlyCls}">${H.t('emiratesElderlyVerify')}: ${elderlyLabel}</div>`;
+                html += `</div>`;
+            }
         }
         html += `</div>`;
 

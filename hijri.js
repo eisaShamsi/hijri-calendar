@@ -81,7 +81,7 @@ const HijriCalendar = (() => {
             aboutP3: 'يمكن للمستخدم تصحيح أي شهر بإضافة أو إنقاص يوم. التصحيح يسري تلقائياً على كل الشهور اللاحقة من نقطة التطبيق فصاعداً. التصحيحات تُحفظ في المتصفح.',
             aboutP4: 'تُحسب مواقيت الصلاة بناءً على موقع المستخدم باستخدام معادلات فلكية دقيقة لتحديد زوايا الشمس. يدعم التطبيق <strong>21</strong> طريقة حساب معتمدة من هيئات إسلامية حول العالم، مع إمكانية اختيار مذهب العصر (شافعي أو حنفي) وطريقة حساب العروض العليا.',
             footer: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            version: 'الإصدار 3.5',
+            version: 'الإصدار 4.0',
             credit: 'صُمم بواسطة Claude Code (Opus 4.6)',
             anwaTitle: 'الأنواء والمواسم',
             tale3Label: 'الطالع',
@@ -150,7 +150,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'بسيط', shareThemeIslami: 'إسلامي', shareThemeArabi: 'عربي كلاسيكي',
             shareThemeMashr: 'المشربية', shareThemeQubba: 'القبة', shareThemeMakh: 'المخطوطة',
             creditsName: 'عيسى بن راشد الشامسي - دولة الإمارات العربية المتحدة',
-            creditsVersion: 'الإصدار 3.5', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
+            creditsVersion: 'الإصدار 4.0', creditsTech: 'صُمم بواسطة Claude Code (Opus 4.6)',
             // قوس الشمس
             sunArcDay: 'طول النهار', sunArcNight: 'طول الليل',
             arabicTime: 'الساعة العربية', arabicTimeNow: 'الساعة العربية الآن',
@@ -242,6 +242,60 @@ const HijriCalendar = (() => {
             aiError: 'تعذر تحميل المحتوى',
             aiOffline: 'المحتوى غير متوفر بدون اتصال',
             aiSource: 'المصدر',
+            // معادلة زايد
+            zayedEquation: 'معادلة زايد',
+            zayedSource: 'المصدر: معادلة زايد',
+            zayedLatitude: 'خط العرض',
+            zayedResult: 'تاريخ سهيل المحسوب',
+            zayedFormula: 'S(φ) = S₀ + k×(φ−φ₀)',
+            zayedReference: 'المرجع: ليوا 23°ش — 15 أغسطس',
+            emiratesElderlyVerify: 'معيار شواب الإمارات',
+            emiratesElderlyExact: 'تطابق دقيق ✅',
+            emiratesElderlyAcceptable: 'مقبول ⚠️',
+            emiratesElderlyOutside: 'خارج النطاق ❌',
+            // مؤشر البحر
+            seaState: 'حالة البحر',
+            seaSafe: 'بحر هادئ',
+            seaCaution: 'تحذير',
+            seaDanger: 'خطر',
+            seaStrikeRemaining: 'باقي',
+            seaDays: 'يوم',
+            // طوالع النجوم
+            starStrip: 'طوالع النجوم',
+            starVisible: 'مرئي',
+            starHidden: 'مختفٍ',
+            starDaysUntil: 'يوم حتى الطلوع',
+            // بوصلة الرياح
+            windCompassTitle: 'بوصلة الرياح',
+            windCold: 'بارد',
+            windHot: 'حار',
+            windMoist: 'رطب',
+            // أحوال اليوم
+            conditionsTitle: 'أحوال اليوم',
+            conditionsProverb: 'مثل شعبي',
+            // الطيور
+            birdMigrationTitle: 'هجرة الطيور',
+            birdSouthward: 'جنوباً',
+            birdNorthward: 'شمالاً',
+            birdActive: 'نشطة',
+            // الزراعة
+            agriTitle: 'التقويم الزراعي',
+            palmLifecycle: 'دورة النخلة',
+            currentCrops: 'محاصيل الموسم',
+            // التنبيهات
+            seasonalNotify: 'تنبيهات موسمية',
+            seasonalNotifyDesc: 'إشعارات بالمواسم والأحداث الفلكية القادمة',
+            alertDaysUntil: 'باقي',
+            alertHigh: 'عاجل',
+            // الوضع الليلي
+            nightSkyTitle: 'السماء الليلية',
+            nightDirection: 'اتجاه الرؤية',
+            nightMansion: 'المنزلة الحالية',
+            nightVisibleStars: 'نجوم مرئية',
+            // مقارنة الأرصاد
+            weatherMatch: 'تطابق مع التوقعات التقليدية',
+            weatherMismatch: 'خارج النطاق التقليدي',
+            traditionalRange: 'النطاق التقليدي',
         },
         en: {
             title: 'Hijri Calendar',
@@ -265,7 +319,7 @@ const HijriCalendar = (() => {
             aboutP3: 'Users can correct any month by adding or subtracting a day. Corrections propagate forward automatically. Corrections are saved in the browser.',
             aboutP4: 'Prayer times are calculated based on the user\'s location using precise astronomical equations for solar angles. The app supports <strong>21</strong> calculation methods approved by Islamic authorities worldwide, with options for Asr jurisprudence (Shafi\'i or Hanafi) and high latitude adjustments.',
             footer: 'Eisa Rashid ALSHAMSI - UAE',
-            version: 'Version 3.5',
+            version: 'Version 4.0',
             credit: 'Designed with Claude Code (Opus 4.6)',
             anwaTitle: 'Seasons & Stars',
             tale3Label: 'Star',
@@ -334,7 +388,7 @@ const HijriCalendar = (() => {
             shareThemeBasit: 'Simple', shareThemeIslami: 'Islamic', shareThemeArabi: 'Classic Arabic',
             shareThemeMashr: 'Mashrabiya', shareThemeQubba: 'Dome', shareThemeMakh: 'Manuscript',
             creditsName: 'Eisa Rashid ALSHAMSI - UAE',
-            creditsVersion: 'Version 3.5', creditsTech: 'Designed with Claude Code (Opus 4.6)',
+            creditsVersion: 'Version 4.0', creditsTech: 'Designed with Claude Code (Opus 4.6)',
             // Sun arc
             sunArcDay: 'Day Length', sunArcNight: 'Night Length',
             arabicTime: 'Arabic Hour', arabicTimeNow: 'Arabic Hour Now',
@@ -430,6 +484,60 @@ const HijriCalendar = (() => {
             aiError: 'Could not load content',
             aiOffline: 'Content unavailable offline',
             aiSource: 'Source',
+            // Zayed Equation
+            zayedEquation: 'Zayed Equation',
+            zayedSource: 'Source: Zayed Equation',
+            zayedLatitude: 'Latitude',
+            zayedResult: 'Calculated Suhail Date',
+            zayedFormula: 'S(φ) = S₀ + k×(φ−φ₀)',
+            zayedReference: 'Reference: Liwa 23°N — Aug 15',
+            emiratesElderlyVerify: 'Emirates Elderly Criterion',
+            emiratesElderlyExact: 'Exact match ✅',
+            emiratesElderlyAcceptable: 'Acceptable ⚠️',
+            emiratesElderlyOutside: 'Outside range ❌',
+            // Sea State
+            seaState: 'Sea State',
+            seaSafe: 'Calm Seas',
+            seaCaution: 'Caution',
+            seaDanger: 'Danger',
+            seaStrikeRemaining: 'Remaining',
+            seaDays: 'days',
+            // Star Risings
+            starStrip: 'Star Risings',
+            starVisible: 'Visible',
+            starHidden: 'Hidden',
+            starDaysUntil: 'days until rising',
+            // Wind Compass
+            windCompassTitle: 'Wind Compass',
+            windCold: 'Cold',
+            windHot: 'Hot',
+            windMoist: 'Moist',
+            // Conditions
+            conditionsTitle: "Today's Conditions",
+            conditionsProverb: 'Proverb',
+            // Birds
+            birdMigrationTitle: 'Bird Migration',
+            birdSouthward: 'Southward',
+            birdNorthward: 'Northward',
+            birdActive: 'Active',
+            // Agriculture
+            agriTitle: 'Agricultural Calendar',
+            palmLifecycle: 'Palm Lifecycle',
+            currentCrops: 'Current Crops',
+            // Notifications
+            seasonalNotify: 'Seasonal Alerts',
+            seasonalNotifyDesc: 'Notifications for upcoming seasons and astronomical events',
+            alertDaysUntil: 'in',
+            alertHigh: 'Urgent',
+            // Night Sky
+            nightSkyTitle: 'Night Sky',
+            nightDirection: 'Viewing Direction',
+            nightMansion: 'Current Mansion',
+            nightVisibleStars: 'Visible Stars',
+            // Weather Comparison
+            weatherMatch: 'Matches traditional expectations',
+            weatherMismatch: 'Outside traditional range',
+            traditionalRange: 'Traditional Range',
         }
     };
 
@@ -1259,16 +1367,80 @@ const HijriCalendar = (() => {
         { lat: 33.5, lng: 36.3, ar: 'دمشق',    en: 'Damascus',  month: 9, day: 20 },
     ];
 
-    /** إيجاد أقرب منطقة لإحداثيات معينة */
+    // ─── معادلة زايد — حساب سهيل بخط العرض ────────────────────
+    // المصدر: وثيقة معادلة زايد (مارس 2026)
+    // المعادلة الرئيسية: S(φ) = S_anchor + k × (φ − φ_anchor)
+    // الاستيفاء الخطي المقطّع بين 5 نقاط ارتكاز
+    const ZAYED_ANCHORS = [
+        { lat: 12, month: 7, day: 26, k: 1.60 },  // جنوب اليمن — سواحل عدن
+        { lat: 17, month: 8, day:  3, k: 2.00 },  // شمال اليمن — جازان
+        { lat: 23, month: 8, day: 15, k: 1.29 },  // المرجع — ليوا / أبوظبي الغربي
+        { lat: 30, month: 8, day: 24, k: 2.67 },  // شمال الكويت — جنوب العراق
+        { lat: 36, month: 9, day:  9, k: null },   // الحد الأقصى لرؤية سهيل
+    ];
+
+    /**
+     * معادلة زايد Z-2: حساب تاريخ طلوع سهيل الهلالي حسب خط العرض
+     * يستخدم الاستيفاء الخطي المقطّع (Piecewise Linear Interpolation)
+     * @param {number} lat - خط العرض بالدرجات شمالاً
+     * @returns {[number, number]|null} [شهر, يوم] أو null إذا خارج النطاق
+     */
+    function calcSuhailByZayed(lat) {
+        if (lat < 12 || lat > 36) return null;
+        // الحد الأقصى (36°)
+        if (lat >= 36) return [ZAYED_ANCHORS[4].month, ZAYED_ANCHORS[4].day];
+        // إيجاد النطاق المناسب
+        for (let i = 0; i < ZAYED_ANCHORS.length - 1; i++) {
+            const a = ZAYED_ANCHORS[i];
+            const b = ZAYED_ANCHORS[i + 1];
+            if (lat >= a.lat && lat < b.lat) {
+                const offsetDays = Math.round(a.k * (lat - a.lat));
+                const d = new Date(2025, a.month - 1, a.day + offsetDays);
+                return [d.getMonth() + 1, d.getDate()];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * معيار شواب الإمارات Z-5: التحقق من صحة تاريخ سهيل المحسوب
+     * الشرط: S(φ) + 90 يوماً يجب أن يقع في نافذة 14–23 نوفمبر
+     * @param {number} suhailMonth - شهر طلوع سهيل
+     * @param {number} suhailDay - يوم طلوع سهيل
+     * @returns {'exact'|'acceptable'|'outside'} نتيجة التحقق
+     */
+    function verifyEmiratesElderly(suhailMonth, suhailDay) {
+        const d = new Date(2025, suhailMonth - 1, suhailDay + 90);
+        const m = d.getMonth() + 1, dd = d.getDate();
+        if (m === 11 && dd >= 14 && dd <= 23) return 'exact';
+        if (m === 11) return 'acceptable';
+        return 'outside';
+    }
+
+    /** إيجاد أقرب منطقة لإحداثيات معينة — مُحدّث بمعادلة زايد */
     function getSuhailRegion(lat, lng) {
         if (!lat || lat > 37) return null; // سهيل لا يُرى شمال 37°ش
+
+        // أولاً: البحث عن أقرب مدينة (للاسم والإحداثيات)
         let best = null, bestDist = Infinity;
         for (const r of SUHAIL_REGIONS) {
             const dLat = r.lat - lat, dLng = r.lng - (lng || 0);
             const dist = dLat * dLat + dLng * dLng;
             if (dist < bestDist) { bestDist = dist; best = r; }
         }
-        return best;
+
+        // ثانياً: حساب التاريخ بمعادلة زايد (أدق من جدول المدن)
+        const zayed = calcSuhailByZayed(lat);
+        if (zayed && best) {
+            return {
+                ...best,
+                month: zayed[0],
+                day: zayed[1],
+                source: 'zayed',
+                emiratesElderly: verifyEmiratesElderly(zayed[0], zayed[1])
+            };
+        }
+        return best; // fallback: البحث القديم لخطوط عرض خارج 12–36°
     }
 
     /** إزاحة تاريخ [شهر, يوم] بعدد أيام معيّن */
@@ -1383,6 +1555,356 @@ const HijriCalendar = (() => {
             inSeason: _matchRange(gMonth, gDay, w.from, w.to),
             from: w.from, to: w.to
         }));
+    }
+
+    // ─── F6: مؤشر خطورة البحر ──────────────────────────────────
+    /**
+     * تقييم حالة البحر بناءً على الضربات البحرية والرياح الخطرة
+     * @returns {{level: string, label: string, strikeName: string|null, remaining: number, emoji: string}}
+     */
+    function getSeaState(gMonth, gDay) {
+        const lang = currentLang;
+        // فحص الضربات البحرية
+        for (const s of ANWA_ENRICHMENT.seaStrikes) {
+            if (_matchRange(gMonth, gDay, s.from, s.to)) {
+                const endD = new Date(2025, s.to[0] - 1, s.to[1]);
+                const curD = new Date(2025, gMonth - 1, gDay);
+                if (curD > endD) endD.setFullYear(2026);
+                const remaining = Math.max(0, Math.round((endD - curD) / 86400000));
+                return {
+                    level: 'danger',
+                    label: lang === 'en' ? 'Dangerous — Active Sea Strike' : 'خطر — ضربة بحرية نشطة',
+                    strikeName: lang === 'en' ? s.en : s.ar,
+                    remaining,
+                    emoji: '🔴'
+                };
+            }
+        }
+        // فحص ضربة الأحيمر (ريح خطرة على البحر)
+        if (_matchRange(gMonth, gDay, [11,11], [12,20])) {
+            const endD = new Date(2025, 11, 20);
+            const curD = new Date(2025, gMonth - 1, gDay);
+            const remaining = Math.max(0, Math.round((endD - curD) / 86400000));
+            return {
+                level: 'danger',
+                label: lang === 'en' ? 'Dangerous — Ahimar Storm' : 'خطر — ضربة الأحيمر',
+                strikeName: lang === 'en' ? 'Red Storm (Ahimar)' : 'ضربة الأحيمر',
+                remaining,
+                emoji: '🔴'
+            };
+        }
+        // فحص الرياح الخطرة (البوارح + السموم)
+        const dangerousWinds = ANWA_ENRICHMENT.seasonalWinds.filter(w =>
+            (w.ar === 'البوارح' || w.ar === 'النعشي') && _matchRange(gMonth, gDay, w.from, w.to)
+        );
+        if (dangerousWinds.length > 0) {
+            return {
+                level: 'caution',
+                label: lang === 'en' ? 'Caution — Strong Winds' : 'تحذير — رياح قوية',
+                strikeName: lang === 'en' ? dangerousWinds[0].en : dangerousWinds[0].ar,
+                remaining: 0,
+                emoji: '🟡'
+            };
+        }
+        return {
+            level: 'safe',
+            label: lang === 'en' ? 'Calm Seas' : 'بحر هادئ',
+            strikeName: null,
+            remaining: 0,
+            emoji: '🟢'
+        };
+    }
+
+    // ─── F7: طوالع النجوم الأربعة ──────────────────────────────
+    /** حساب الأيام حتى تاريخ معين */
+    function _daysTillDate(fromMonth, fromDay, toMonth, toDay) {
+        let from = new Date(2025, fromMonth - 1, fromDay);
+        let to = new Date(2025, toMonth - 1, toDay);
+        if (to <= from) to.setFullYear(2026);
+        return Math.round((to - from) / 86400000);
+    }
+
+    /**
+     * حالة النجوم الأربعة الرئيسية (سهيل، الثريا، الأحيمر، الشعرى)
+     * @returns {Array<{name: string, nameEn: string, visible: boolean, status: string, daysUntil: number, icon: string}>}
+     */
+    function getStarStatus(gMonth, gDay) {
+        const lang = currentLang;
+        const stars = [
+            {
+                ar: 'سهيل', en: 'Canopus', icon: '⭐',
+                riseDate: [8,15], setDate: [5,15],
+                hideFrom: [5,15], hideTo: [8,14]
+            },
+            {
+                ar: 'الثريا', en: 'Pleiades', icon: '✨',
+                riseDate: [6,7], setDate: [4,28],
+                hideFrom: [4,28], hideTo: [6,6]
+            },
+            {
+                ar: 'الأحيمر', en: 'Antares', icon: '🔴',
+                riseDate: [12,20], setDate: [11,11],
+                hideFrom: [11,11], hideTo: [12,19]
+            },
+            {
+                ar: 'الشعرى', en: 'Sirius', icon: '💫',
+                riseDate: [7,15], setDate: [5,20],
+                hideFrom: [5,20], hideTo: [7,14]
+            }
+        ];
+        return stars.map(s => {
+            const hidden = _matchRange(gMonth, gDay, s.hideFrom, s.hideTo);
+            const daysUntil = hidden ? _daysTillDate(gMonth, gDay, s.riseDate[0], s.riseDate[1]) : 0;
+            return {
+                name: lang === 'en' ? s.en : s.ar,
+                nameAr: s.ar,
+                nameEn: s.en,
+                visible: !hidden,
+                status: hidden
+                    ? (lang === 'en' ? `Hidden (${daysUntil}d)` : `مختفٍ (${daysUntil} يوم)`)
+                    : (lang === 'en' ? 'Visible' : 'مرئي'),
+                daysUntil,
+                icon: s.icon
+            };
+        });
+    }
+
+    // ─── F5: بوصلة الرياح ──────────────────────────────────────
+    /**
+     * الرياح النشطة مع اتجاهاتها من بوصلة الـ 16 اتجاه
+     */
+    function getActiveWindsWithCompass(gMonth, gDay) {
+        const lang = currentLang;
+        const compass = ANWA_ENRICHMENT.windCompass.map(c => ({
+            name: lang === 'en' ? c.en : c.ar,
+            degree: c.degree
+        }));
+        const activeWinds = ANWA_ENRICHMENT.seasonalWinds
+            .filter(w => _matchRange(gMonth, gDay, w.from, w.to))
+            .map(w => {
+                // تحديد نوع الرياح (بارد/حار/رطب)
+                let type = 'neutral';
+                if (/بارد|شمال|ياهي|نعشي|نعايات/i.test(w.ar)) type = 'cold';
+                else if (/حار|سموم|بوارح|بارح/i.test(w.ar)) type = 'hot';
+                else if (/رطب|كوس|أزيب|عقربي/i.test(w.ar)) type = 'moist';
+                // تحديد الاتجاه التقريبي
+                let degree = 0;
+                if (/شمال.*غرب|طوز/i.test(w.ar) || /NW|Dry NW/i.test(w.en)) degree = 315;
+                else if (/شمال.*شرق|نعشي/i.test(w.ar)) degree = 45;
+                else if (/شمال/i.test(w.ar) || /North/i.test(w.en)) degree = 0;
+                else if (/جنوب/i.test(w.ar) || /South/i.test(w.en)) degree = 180;
+                else if (/شرق|عقربي|صبا/i.test(w.ar) || /East/i.test(w.en)) degree = 90;
+                else if (/غرب/i.test(w.ar) || /West/i.test(w.en)) degree = 270;
+                return {
+                    name: lang === 'en' ? w.en : w.ar,
+                    nameAr: w.ar,
+                    desc: lang === 'en' ? w.desc_en : w.desc_ar,
+                    degree,
+                    type
+                };
+            });
+        return { compass, activeWinds };
+    }
+
+    // ─── F1: الأمثال الشعبية الموسمية ─────────────────────────
+    const SEASONAL_PROVERBS = [
+        { ar: 'المربعانية يا شمس تحرق يا مطر تغرق', en: "Muraba'aniyya: either sun burns or rain floods", from: [12,7], to: [1,14] },
+        { ar: 'الشبط مقرقع البيبان', en: 'Shabat rattles the doors', from: [1,15], to: [2,9] },
+        { ar: 'لا دخلت العقارب.. ترى الخير قارب', en: 'When Aqarib enter, good is near', from: [2,10], to: [3,20] },
+        { ar: 'سعد الخبايا تطلع فيه الحيايا', en: "Sa'd al-Akhbiya: creatures emerge from hiding", from: [3,21], to: [4,2] },
+        { ar: 'بيّاع الخبل عباته', en: 'Sell your cloak — weather is deceiving', from: [3,21], to: [4,15] },
+        { ar: 'إذا طلعت النعائم ابيضت البهائم', en: 'When Naayim rises, livestock turns white from frost', from: [1,15], to: [1,27] },
+        { ar: 'العشر مسويه حشر', en: 'The Tenth causes chaos', from: [8,15], to: [8,24] },
+        { ar: 'سيل الثلاثين مسوي بالدروب حفر', en: 'The Thirtieth floods carve the roads', from: [9,4], to: [9,13] },
+        { ar: 'من ضبب.. خبّب', en: 'Fog on land means rough seas', from: [9,1], to: [11,30] },
+        { ar: 'إذا طلع سهيل، لا تأمن السيل', en: 'When Canopus rises, beware of floods', from: [8,15], to: [9,22] },
+        { ar: 'إذا دخل الوسم يا بشارة المسلم', en: 'When Wasm arrives, good tidings for the faithful', from: [10,16], to: [12,6] },
+        { ar: 'الصفري ما يغدر ولا يخلي', en: 'Safri neither betrays nor forgives', from: [9,14], to: [10,15] },
+    ];
+
+    /** أمثال الموسم الحالي */
+    function getSeasonalProverbsEnhanced(gMonth, gDay) {
+        const lang = currentLang;
+        return SEASONAL_PROVERBS.filter(p => _matchRange(gMonth, gDay, p.from, p.to))
+            .map(p => ({ text: lang === 'en' ? p.en : p.ar, textAr: p.ar, textEn: p.en }));
+    }
+
+    // ─── F4: دورة حياة النخلة ────────────────────────────────
+    const PALM_LIFECYCLE = [
+        { ar: 'طلع الفحّال', en: 'Male Pollen', from: [1,1], to: [1,31], icon: '🌿', stage: 1 },
+        { ar: 'التنبيت (التلقيح)', en: 'Pollination', from: [2,1], to: [3,15], icon: '🌸', stage: 2 },
+        { ar: 'الحبابوك', en: 'Small Fruit', from: [3,16], to: [4,30], icon: '🫒', stage: 3 },
+        { ar: 'الخلال (البسر)', en: 'Unripe (Khalal)', from: [5,1], to: [5,31], icon: '🟡', stage: 4 },
+        { ar: 'الرطب', en: 'Fresh Ripe', from: [6,1], to: [7,31], icon: '🟤', stage: 5 },
+        { ar: 'الخرائف (الجني)', en: 'Harvest', from: [8,1], to: [8,31], icon: '🧺', stage: 6 },
+        { ar: 'التمر (التجفيف)', en: 'Dried Dates', from: [9,1], to: [10,31], icon: '🌴', stage: 7 },
+    ];
+
+    /** المرحلة الحالية من دورة النخلة */
+    function getPalmStage(gMonth, gDay) {
+        const lang = currentLang;
+        for (const p of PALM_LIFECYCLE) {
+            if (_matchRange(gMonth, gDay, p.from, p.to)) {
+                return {
+                    name: lang === 'en' ? p.en : p.ar,
+                    nameAr: p.ar,
+                    nameEn: p.en,
+                    icon: p.icon,
+                    stage: p.stage,
+                    total: PALM_LIFECYCLE.length
+                };
+            }
+        }
+        // فترة السكون (نوفمبر-ديسمبر)
+        return {
+            name: lang === 'en' ? 'Dormancy' : 'سكون',
+            nameAr: 'سكون',
+            nameEn: 'Dormancy',
+            icon: '🌴',
+            stage: 0,
+            total: PALM_LIFECYCLE.length
+        };
+    }
+
+    /** التقويم الزراعي الشامل */
+    function getAgriCalendar(gMonth, gDay) {
+        const lang = currentLang;
+        const palm = getPalmStage(gMonth, gDay);
+        const currentCrops = ANWA_ENRICHMENT.crops
+            .filter(c => _matchRange(gMonth, gDay, c.from, c.to))
+            .map(c => ({ name: lang === 'en' ? c.en : c.ar, nameAr: c.ar }));
+        return { palm, currentCrops };
+    }
+
+    // ─── F1: بطاقة أحوال اليوم الشاملة ───────────────────────
+    /**
+     * تجمع كل بيانات اليوم من مصادر متعددة
+     */
+    function getTodayConditions(gMonth, gDay, gYear, suhailStart) {
+        return {
+            durr: getDurrDetails(gMonth, gDay, gYear, suhailStart),
+            sea: getSeaState(gMonth, gDay),
+            stars: getStarStatus(gMonth, gDay),
+            winds: getActiveWindsWithCompass(gMonth, gDay),
+            proverbs: getSeasonalProverbsEnhanced(gMonth, gDay),
+            palm: getPalmStage(gMonth, gDay),
+            agri: getAgriCalendar(gMonth, gDay),
+            birds: getActiveBirdMigration(gMonth, gDay),
+            seasons: getActiveSeasons(gMonth, gDay),
+        };
+    }
+
+    // ─── F2: تنبيهات موسمية ذكية ──────────────────────────
+    /**
+     * التنبيهات الموسمية القادمة خلال عدد أيام محدد
+     * يفحص المواسم الخاصة + الأحداث الفلكية + هجرة الطيور + الضربات البحرية
+     */
+    function getUpcomingSeasonalAlerts(gMonth, gDay, daysAhead) {
+        daysAhead = daysAhead || 7;
+        const lang = currentLang;
+        const alerts = [];
+
+        // المواسم الخاصة القادمة
+        SPECIAL_SEASONS.forEach(s => {
+            const dTill = _daysTillDate(gMonth, gDay, s.from[0], s.from[1]);
+            if (dTill > 0 && dTill <= daysAhead) {
+                alerts.push({
+                    type: 'season',
+                    title: lang === 'en' ? s.en : s.ar,
+                    desc: lang === 'en' ? (s.desc_en || '') : (s.desc_ar || ''),
+                    icon: '🗓️',
+                    urgency: dTill <= 2 ? 'high' : 'normal',
+                    daysUntil: dTill
+                });
+            }
+        });
+
+        // الأحداث الفلكية القادمة
+        ASTRO_EVENTS.forEach(e => {
+            const dTill = _daysTillDate(gMonth, gDay, e.date[0], e.date[1]);
+            if (dTill > 0 && dTill <= daysAhead) {
+                alerts.push({
+                    type: 'astro',
+                    title: lang === 'en' ? e.en : e.ar,
+                    desc: lang === 'en' ? e.desc_en : e.desc_ar,
+                    icon: e.icon || '🔭',
+                    urgency: dTill <= 2 ? 'high' : 'normal',
+                    daysUntil: dTill
+                });
+            }
+        });
+
+        // الضربات البحرية القادمة
+        ANWA_ENRICHMENT.seaStrikes.forEach(s => {
+            const dTill = _daysTillDate(gMonth, gDay, s.from[0], s.from[1]);
+            if (dTill > 0 && dTill <= daysAhead) {
+                alerts.push({
+                    type: 'sea',
+                    title: lang === 'en' ? s.en : s.ar,
+                    desc: lang === 'en' ? 'Sea strike approaching — avoid sailing' : 'ضربة بحرية قادمة — تجنب الإبحار',
+                    icon: '⚓',
+                    urgency: 'high',
+                    daysUntil: dTill
+                });
+            }
+        });
+
+        return alerts.sort((a, b) => a.daysUntil - b.daysUntil);
+    }
+
+    // ─── F9: معلومات السماء الليلية ─────────────────────────
+    /**
+     * بيانات الوضع الليلي الفلكي
+     */
+    function getNightSkyInfo(gMonth, gDay) {
+        const lang = currentLang;
+        // المنزلة الحالية (من الطوالع)
+        const tale3 = getTale3(gMonth, gDay);
+        // النجوم المرئية
+        const stars = getStarStatus(gMonth, gDay).filter(s => s.visible);
+        // اتجاه الرؤية المُقترح
+        let direction;
+        if (gMonth >= 8 && gMonth <= 12) direction = lang === 'en' ? 'South' : 'الجنوب';
+        else if (gMonth >= 3 && gMonth <= 5) direction = lang === 'en' ? 'East' : 'الشرق';
+        else direction = lang === 'en' ? 'South-East' : 'الجنوب الشرقي';
+
+        return {
+            currentMansion: tale3 ? tale3.name : '',
+            visibleStars: stars,
+            direction,
+            starCount: stars.length
+        };
+    }
+
+    // ─── F11: التوقعات التقليدية ─────────────────────────
+    /**
+     * التوقعات التقليدية من بيانات الدرور (للمقارنة مع الأرصاد الحقيقية)
+     */
+    function getTraditionalExpectations(gMonth, gDay) {
+        const lang = currentLang;
+        const climate = getClimateData(gMonth, gDay);
+        const seasons = getActiveSeasons(gMonth, gDay);
+        const winds = getActiveWindsWithCompass(gMonth, gDay);
+
+        // استخراج نطاق الحرارة من بيانات المناخ
+        let tempRange = null;
+        if (climate && climate.temp) {
+            tempRange = { min: climate.temp.aMin, max: climate.temp.aMax };
+        }
+
+        // توقع المطر من المواسم النشطة
+        let rainLikely = false;
+        seasons.forEach(s => {
+            const name = s.nameAr || s.ar || '';
+            if (/وسم|مربعاني|عقارب|سراي/i.test(name)) rainLikely = true;
+        });
+
+        // نوع الرياح السائد
+        const windType = winds.activeWinds.length > 0
+            ? winds.activeWinds[0].type
+            : 'neutral';
+
+        return { tempRange, rainLikely, windType };
     }
 
     /** الحصول على تفاصيل الدر الحالي */
@@ -2962,6 +3484,11 @@ const HijriCalendar = (() => {
         TAWALIE, SEASONS, DUROR_LABELS, DUROR_MIA, DUROR_ALIASES, ANWA_ENRICHMENT, ZODIAC,
         getSeasonalWinds, getSeasonalFish, getSeasonalCrops, getSeasonalWildlife,
         _matchRange, _suhailDay, _rangeDays, _dayInRange, getDialData, shiftDate, SUHAIL_REGIONS, getSuhailRegion,
+        ZAYED_ANCHORS, calcSuhailByZayed, verifyEmiratesElderly,
+        getSeaState, getStarStatus, _daysTillDate, getActiveWindsWithCompass,
+        SEASONAL_PROVERBS, getSeasonalProverbsEnhanced,
+        PALM_LIFECYCLE, getPalmStage, getAgriCalendar, getTodayConditions,
+        getUpcomingSeasonalAlerts, getNightSkyInfo, getTraditionalExpectations,
 
         // بيانات كتاب الدرور والطوالع
         DURR_DETAILS, SPECIAL_SEASONS, ASTRO_EVENTS, FOLK_PROVERBS,
