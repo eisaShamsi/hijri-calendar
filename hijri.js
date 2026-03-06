@@ -913,12 +913,14 @@ const HijriCalendar = (() => {
         ],
         // ضربات بحرية — اضطرابات جوية يتجنبها البحارة
         seaStrikes: [
-            { ar: 'ضربة الأكيذب', en: 'Akidhib strike', from: [10,10], to: [10,20] },
+            { ar: 'ضربة الأكيذب', en: 'Akidhib strike', from: [10,10], to: [10,20], danger: 3 },
             // ضربة الأحيمر (11/1-11/10) نُقلت إلى حلقة الرياح بجانب ضربة الأحيمر الريح
-            { ar: 'ضربة الكوي', en: 'Kawi strike', from: [12,10], to: [12,20] },
-            { ar: 'ضربة الإكليل', en: 'Iklil strike', from: [5,10], to: [5,20] },
-            { ar: 'ضربة الثريا', en: 'Thuraya strike', from: [6,1], to: [6,10] },
-            { ar: 'ضربة الشلي', en: 'Shali strike', from: [6,11], to: [6,20] },
+            { ar: 'ضربة الكوي', en: 'Kawi strike', from: [12,10], to: [12,20], danger: 4 },
+            { ar: 'ضربة الإكليل', en: 'Iklil strike', from: [5,10], to: [5,20], danger: 3 },
+            { ar: 'ضربة الثريا', en: 'Thuraya strike', from: [6,1], to: [6,10], danger: 3 },
+            { ar: 'ضربة الشلي', en: 'Shali strike', from: [6,11], to: [6,20], danger: 3 },
+            { ar: 'ضربة السرايات', en: 'Sarayat storm strike', from: [4,9], to: [5,13], danger: 4, desc_ar: 'عواصف رعدية عنيفة مع برق وأمواج عالية', desc_en: 'Violent thunderstorms with lightning and high waves' },
+            { ar: 'ثمانين الشتاء', en: 'Winter Eighty storm', from: [12,7], to: [2,25], danger: 4, desc_ar: '80 يوماً من البحر الهائج — أخطر فترة للملاحة', desc_en: '80 days of rough seas — most dangerous sailing period' },
         ],
         // أسماك موسمية — من ملخص الدرور في كتاب الدرور والطوالع
         fish: [
@@ -1192,6 +1194,29 @@ const HijriCalendar = (() => {
         { ar: 'موسم القنص', en: 'Falconry Season', from: [11,1], to: [2,28], desc_ar: 'موسم الصيد بالصقور — صيد الحبارى والقطا', desc_en: 'Falconry season — hunting Houbara and sandgrouse', icon: '🦅' },
         { ar: 'موسم غلق البحر', en: 'Sea Closure', from: [6,20], to: [9,15], desc_ar: 'منع الإبحار في المحيط الهندي بسبب عواصف الرياح الموسمية', desc_en: 'No sailing in Indian Ocean due to monsoon storms', icon: '⛵' },
         { ar: 'أمطار البلي', en: 'Bali Rains', from: [1,2], to: [3,2], desc_ar: 'أمطار المنخفضات الجوية الشتوية', desc_en: 'Winter depression rains', icon: '🌦️' },
+        // ─── الوُغرات الأربع — موجات حر مسماة بأسماء نجوم ───
+        { ar: 'وغرة الثريا', en: 'Thuraya Heat Wave', from: [6,7], to: [6,19], desc_ar: 'أولى موجات القيظ — مع طلوع الثريا', desc_en: 'First heat wave — at Pleiades rising', icon: '🔥', region: 'gulf' },
+        { ar: 'وغرة الجوزاء', en: 'Jawza Heat Wave', from: [6,20], to: [7,2], desc_ar: 'موجة حر الجوزاء — تشتد الرطوبة', desc_en: 'Gemini heat wave — humidity intensifies', icon: '🔥', region: 'gulf' },
+        { ar: 'وغرة المرزم', en: 'Mirzam Heat Wave', from: [7,3], to: [7,15], desc_ar: 'موجة حر المرزم — ذروة السموم', desc_en: 'Mirzam heat wave — peak Simoom winds', icon: '🔥', region: 'gulf' },
+        { ar: 'وغرة سهيل', en: 'Suhail Heat Wave', from: [7,16], to: [8,14], desc_ar: 'آخر موجات القيظ — تنتهي بطلوع سهيل', desc_en: 'Last heat wave — ends with Canopus rising', icon: '🔥', region: 'gulf' },
+        // ─── العقارب الثلاثة — تقسيم نجدي فريد ───
+        { ar: 'عقرب السم', en: 'Poison Scorpion', from: [2,10], to: [2,22], desc_ar: 'أشد أيام البرد لسعاً — كالسم من شدته (تقليد نجدي)', desc_en: 'Coldest days, biting like poison (Najdi tradition)', icon: '🦂', region: 'najd' },
+        { ar: 'عقرب الدم', en: 'Blood Scorpion', from: [2,23], to: [3,7], desc_ar: 'يعود الدفء — يسري الدم في العروق مجدداً', desc_en: 'Warmth returns — blood flows again', icon: '🩸', region: 'najd' },
+        { ar: 'عقرب الدسم', en: 'Fat Scorpion', from: [3,8], to: [3,20], desc_ar: 'تسمن المواشي — يكثر الحليب والسمن', desc_en: 'Livestock fatten — milk and ghee abound', icon: '🐑', region: 'najd' },
+        // ─── خريف ظفار — الموسم المعكوس ───
+        { ar: 'خريف ظفار', en: 'Dhofar Khareef', from: [6,21], to: [9,21], desc_ar: 'الموسم الفريد: أمطار موسمية صيفية من المحيط الهندي — تتحول الصحراء إلى واحة خضراء. ينبت نبات القمبع النادر.', desc_en: 'Unique inverted season: summer monsoon rains from the Indian Ocean transform desert into green oasis. Rare Qamba\' plant blooms.', icon: '🌿', region: 'dhofar' },
+        // ─── موسم العِلّان اليمني ───
+        { ar: 'العِلّان (حصاد الذرة)', en: 'Allan (Sorghum Harvest)', from: [9,15], to: [10,31], desc_ar: 'موسم حصاد الذرة الرفيعة — يرتبط باقتران الثريا بالقمر في التقويم الزراعي اليمني', desc_en: 'Sorghum harvest season — linked to Pleiades-Moon conjunction in Yemeni agricultural calendar', icon: '🌾', region: 'yemen' },
+        // ─── رحلتا الشتاء والصيف — الحجاز ───
+        { ar: 'رحلة الشتاء إلى اليمن', en: 'Winter Caravan to Yemen', from: [11,23], to: [1,27], desc_ar: 'رحلة قريش التجارية إلى اليمن — منازل الإكليل إلى البلدة. «لإيلاف قريش إيلافهم رحلة الشتاء والصيف»', desc_en: 'Quraysh trade caravan to Yemen — mansions Iklil to Balda. Quran: Surat Quraysh', icon: '🐪', region: 'hijaz' },
+        { ar: 'رحلة الصيف إلى الشام', en: 'Summer Caravan to Levant', from: [4,22], to: [8,14], desc_ar: 'رحلة قريش التجارية إلى الشام — منازل المقدم إلى البطين. طريق البخور والتوابل', desc_en: 'Quraysh trade caravan to the Levant — mansions Muqaddam to Butain. Incense and spice route', icon: '🏜️', region: 'hijaz' },
+        // ─── مراحل الغوص عن اللؤلؤ — تقويم تاريخي ───
+        { ar: 'الخنجية (استعداد الغوص)', en: 'Khanajiya (Dive Prep)', from: [4,4], to: [4,30], desc_ar: 'تجهيز السفن والمعدات — أولى رحلات الغوص القصيرة', desc_en: 'Ship preparation and equipment — first short diving trips', icon: '⚓', region: 'gulf' },
+        { ar: 'الدشة (بداية الغوص)', en: 'Dasha (Dive Start)', from: [5,1], to: [5,31], desc_ar: 'بداية موسم الغوص الكبير — 812 سفينة في ذروة العام 1912', desc_en: 'Start of main diving season — 812 ships at peak in 1912', icon: '🤿', region: 'gulf' },
+        { ar: 'الغوص الكبير (الركبة)', en: 'Great Dive (Rakba)', from: [6,1], to: [9,10], desc_ar: 'أطول فترة غوص — يعيش البحارة على السفن لأشهر', desc_en: 'Longest diving period — sailors live aboard for months', icon: '🚢', region: 'gulf' },
+        { ar: 'القفال (نهاية الغوص)', en: 'Qafal (Dive End)', from: [9,11], to: [9,30], desc_ar: 'عودة سفن الغوص — احتفالات الاستقبال على الشاطئ', desc_en: 'Diving ships return — welcoming celebrations on shore', icon: '🎉', region: 'gulf' },
+        { ar: 'الردة', en: 'Ridda (Late Dive)', from: [10,1], to: [10,31], desc_ar: 'رحلات غوص قصيرة إضافية للهيرات القريبة', desc_en: 'Short supplementary dives to nearby oyster beds', icon: '🦪', region: 'gulf' },
+        { ar: 'الرديدة', en: 'Rididda (Final Dive)', from: [11,1], to: [11,20], desc_ar: 'آخر محاولات الغوص قبل برد الشتاء', desc_en: 'Final dive attempts before winter cold', icon: '❄️', region: 'gulf' },
     ];
 
     // ─── الأحداث الفلكية السنوية ───────────────────────────────────
@@ -1753,6 +1778,18 @@ const HijriCalendar = (() => {
         { ar: 'التمر (التجفيف)', en: 'Dried Dates', from: [9,1], to: [10,31], icon: '🌴', stage: 7 },
     ];
 
+    // ─── أصناف التمور الإماراتية — تنضج في أوقات مختلفة ───
+    const DATE_VARIETIES = [
+        { ar: 'خلاص', en: 'Khalas', ripens: [6,15], desc_ar: 'أشهر تمور الإمارات — ذهبي اللون، حلو المذاق', desc_en: 'Most famous UAE date — golden, sweet', icon: '🏆' },
+        { ar: 'برحي', en: 'Barhi', ripens: [7,1], desc_ar: 'يُؤكل خلالاً (بسراً) أصفر — مقرمش وحلو', desc_en: 'Eaten yellow and crunchy — sweet', icon: '🟡' },
+        { ar: 'خنيزي', en: 'Khanizi', ripens: [6,1], desc_ar: 'من أوائل الأصناف نضجاً — أحمر داكن', desc_en: 'Among earliest to ripen — dark red', icon: '🔴' },
+        { ar: 'لولو', en: 'Lulu', ripens: [7,15], desc_ar: 'صنف إماراتي مميز — بني فاتح', desc_en: 'Distinctive UAE variety — light brown', icon: '🤎' },
+        { ar: 'بومعان', en: 'Bu Ma\'an', ripens: [7,1], desc_ar: 'تمر كبير الحجم — من أصناف العين', desc_en: 'Large date — Al Ain specialty', icon: '🌴' },
+        { ar: 'نغال', en: 'Naghal', ripens: [6,20], desc_ar: 'صنف منتشر — ينضج سريعاً', desc_en: 'Common variety — ripens quickly', icon: '⚡' },
+        { ar: 'شيشي', en: 'Shishi', ripens: [8,1], desc_ar: 'صنف متأخر النضج — حلو جداً', desc_en: 'Late ripening — very sweet', icon: '🍯' },
+        { ar: 'خصب', en: 'Khasab', ripens: [7,10], desc_ar: 'من أصناف رأس الخيمة — مرتبط باسم المدينة', desc_en: 'Ras Al Khaimah variety — named after the city', icon: '🏔️' },
+    ];
+
     /** المرحلة الحالية من دورة النخلة */
     function getPalmStage(gMonth, gDay) {
         const lang = currentLang;
@@ -1777,6 +1814,23 @@ const HijriCalendar = (() => {
             stage: 0,
             total: PALM_LIFECYCLE.length
         };
+    }
+
+    /** أصناف التمور التي تنضج في الفترة الحالية */
+    function getDateVarieties(gMonth, gDay) {
+        const lang = currentLang;
+        // نطاق النضج: من تاريخ الانضاج + 45 يوماً
+        return DATE_VARIETIES.filter(v => {
+            const [rm, rd] = v.ripens;
+            const endDate = new Date(2026, rm - 1, rd + 45);
+            const endM = endDate.getMonth() + 1, endD = endDate.getDate();
+            return _matchRange(gMonth, gDay, [rm, rd], [endM, endD]);
+        }).map(v => ({
+            name: lang === 'en' ? v.en : v.ar,
+            ar: v.ar, en: v.en,
+            desc: lang === 'en' ? v.desc_en : v.desc_ar,
+            icon: v.icon
+        }));
     }
 
     /** التقويم الزراعي الشامل */
@@ -2888,6 +2942,207 @@ const HijriCalendar = (() => {
         return dirs[idx];
     }
 
+    // ─── المنازل القمرية — حساب موقع القمر الفعلي في المنازل الـ28 ───
+
+    /** استخراج خط الطول المسارية للقمر (tropical ecliptic longitude) */
+    function _getMoonEclipticLon(jde) {
+        const T = (jde - 2451545.0) / 36525;
+        const Lp = (218.3165 + 481267.8813 * T) % 360;
+        const Mp = (134.9634 + 477198.8676 * T) % 360;
+        const M = (357.5291 + 35999.0503 * T) % 360;
+        const F = (93.2720 + 483202.0175 * T) % 360;
+        const D = (297.8502 + 445267.1115 * T) % 360;
+        const toRad = Math.PI / 180;
+        const MpR = Mp * toRad, MR = M * toRad, FR = F * toRad, DR = D * toRad;
+        let dLon = 6.289 * Math.sin(MpR)
+            + 1.274 * Math.sin(2 * DR - MpR)
+            + 0.658 * Math.sin(2 * DR)
+            + 0.214 * Math.sin(2 * MpR)
+            - 0.186 * Math.sin(MR)
+            - 0.114 * Math.sin(2 * FR);
+        return ((Lp + dLon) % 360 + 360) % 360;
+    }
+
+    /** استخراج خط الطول المسارية للشمس (tropical ecliptic longitude) */
+    function _getSunEclipticLon(jde) {
+        const T = (jde - 2451545.0) / 36525;
+        const L0 = (280.46646 + 36000.76983 * T) % 360;
+        const M = (357.52911 + 35999.05029 * T) % 360;
+        const MR = M * Math.PI / 180;
+        const C = (1.914602 - 0.004817 * T) * Math.sin(MR)
+            + 0.019993 * Math.sin(2 * MR);
+        return ((L0 + C) % 360 + 360) % 360;
+    }
+
+    /** حساب الأيانامسا (Lahiri) — الفرق بين الفلكي والمداري */
+    function _ayanamsa(jde) {
+        const T = (jde - 2451545.0) / 36525;
+        return 23.85 + 0.0137 * (T * 100);
+    }
+
+    /**
+     * ترتيب المنازل الفلكي (من 0° الحمل):
+     * الشرطين(0)→البطين(1)→الثريا(2)→...→الرشاء(27)
+     * ربطها بترتيب TAWALIE (التي تبدأ بالنثرة):
+     * eclipticIdx → tawalieIdx = (eclipticIdx + 7) % 28
+     */
+    const MANSION_NAMES_ECLIPTIC = [
+        'الشرطين', 'البطين', 'الثريا', 'الدبران',
+        'الهقعة', 'الهنعة', 'المرزم', 'النثرة',
+        'الطرف', 'الجبهة', 'الزبرة', 'الصرفة',
+        'العوى', 'السماك', 'الغفر', 'الزبانا',
+        'الإكليل', 'القلب', 'الشولة', 'النعائم',
+        'البلدة', 'سعد الذابح', 'سعد بلع', 'سعد السعود',
+        'سعد الأخبية', 'المقدم', 'المؤخر', 'الرشاء'
+    ];
+
+    /** أمثال شعبية مرتبطة بالمنازل — من وثائق نجد والخليج وظفار */
+    const MANSION_PROVERBS = {
+        'الصرفة':  { ar: 'إذا طلعت الصرفة، احتال كل ذي حرفة', region: 'نجد', context_ar: 'انتهاء الحر وبداية الاستعداد للشتاء', context_en: 'Heat ends, preparations for winter begin' },
+        'الدبران':  { ar: 'إذا طلع الدبران، توقّدت الحِزّان وكُرهت النيران', region: 'نجد', context_ar: 'شدة الحر تغني عن الحطب والنار', context_en: 'Extreme heat makes fires unnecessary' },
+        'الثريا':   { ar: 'إذا طلع النجم، فاحرّ في حَدَم والعشب في حَطَم', region: 'نجد', context_ar: 'موسم جفاف النباتات وخطر الحريق', context_en: 'Plants dry out and fire risk rises' },
+        'الطرف':    { ar: 'الطرف لا تخلّي معوك ظرف', region: 'ظفار', context_ar: 'شدة الحر تستنزف كل الموارد', context_en: 'Extreme heat depletes all resources' },
+        'البلدة':   { ar: 'البلدة تخيّس الجلد', region: 'ظفار', context_ar: 'برد شديد يتلف الجلود المدبوغة', context_en: 'Severe cold damages cured leather' },
+        'العوى':    { ar: 'أول الوسم الماطر — ينبت الفقع ويسِم الأرض بالخضرة', region: 'نجد', context_ar: 'بداية موسم المطر الأفضل والكمأة', context_en: 'Best rain season begins, truffles grow' },
+        'الإكليل':  { ar: 'إذا طلع الإكليل، هاجت الفحول وشُمّرت الذيول وتُخوّفت السيول', region: 'الخليج', context_ar: 'موسم تكاثر الإبل وخطر الفيضانات', context_en: 'Camel breeding season and flood risk' },
+        'النعائم':  { ar: 'إذا طلعت النعائم، ابيضّت البهائم من الصقيع الدائم', region: 'نجد', context_ar: 'أشد البرد — يغطي الصقيع الحيوانات', context_en: 'Extreme cold, frost covers animals' },
+        'الهقعة':   { ar: 'جمرة القيظ — أشد فترات السنة حرارة', region: 'الخليج', context_ar: 'ذروة الحرارة وموجة السموم', context_en: 'Peak heat and Simoom wind' },
+        'الجبهة':   { ar: 'لولا الجبهة ما كان للعرب إبل', region: 'الخليج', context_ar: 'أمطار الجبهة تحيي المراعي', context_en: 'Jabha rains revive pastures' },
+        'الزبرة':   { ar: 'إذا طلعت الزبرة، طاب الزمان وجُني البسر في كل مكان', region: 'الخليج', context_ar: 'بداية جني البسر (التمر غير الناضج)', context_en: 'Start of unripe date harvest' },
+        'السماك':   { ar: 'إذا طلع السماك، ذهبت العكاك وقلّ على الماء اللكاك', region: 'نجد', context_ar: 'ذهاب الحر وقلة التزاحم على الماء', context_en: 'Heat gone, no crowding at water' },
+        'الزبانا':  { ar: 'إذا طلعت الزبانا، أحدثت لكل ذي عيال شأنا', region: 'نجد', context_ar: 'اقتراب البرد — وقت التحضير', context_en: 'Cold approaching — time to prepare' },
+        'القلب':    { ar: 'إذا طلع قلب العقرب، بردت المياه وصوّحت الأعشاب', region: 'الخليج', context_ar: 'بداية الشتاء الفعلي', context_en: 'Actual winter begins' },
+        'الشولة':   { ar: 'قران تاسع، برد لاسع', region: 'الخليج', context_ar: 'القران التاسع للثريا — برد قارس', context_en: '9th Pleiades conjunction — biting cold' },
+        'سعد الذابح': { ar: 'إذا طلع سعد الذابح، حمى أهله النابح', region: 'نجد', context_ar: 'الكلاب تحرس بيقظة من شدة البرد', context_en: 'Dogs guard vigilantly due to cold' },
+        'سعد بلع':  { ar: 'إذا طلع سعد بلع، اقتحم الربع وصار في الأرض لمع', region: 'نجد', context_ar: 'نمو الإبل الصغيرة وظهور الخضرة', context_en: 'Young camels grow, greenery appears' },
+        'المرزم':   { ar: 'إذا طلع المرزم، مُلئ المحزم', region: 'الخليج', context_ar: 'وفرة التمر — تمتلئ الأحزمة والسلال', context_en: 'Date abundance — baskets overflow' },
+        'الشرطين':  { ar: 'إذا طلعت الشرطين، استوى العود واخضرت البساتين', region: 'الخليج', context_ar: 'نهاية الحر — بداية اعتدال الطقس', context_en: 'Heat ends — weather moderates' },
+        'النثرة':   { ar: 'إذا طلعت النثرة، قصُرت الفترة، وطابت البُكرة', region: 'الخليج', context_ar: 'أول طالع — بداية السنة السهيلية', context_en: 'First mansion — start of Suhaili year' },
+    };
+
+    /**
+     * حساب المنزلة القمرية الفعلية (أين القمر الآن في المنازل الـ28)
+     * @returns {{ index: number, tawalieIndex: number, ar: string, en: string, longitude: number, siderealLon: number, progress: number, daysLeft: number, proverb: object|null }}
+     */
+    function getMoonMansion(gYear, gMonth, gDay) {
+        const jde = gregorianToJDN(gYear, gMonth, gDay) + 0.5; // ظهيرة
+        const moonLon = _getMoonEclipticLon(jde);
+        const ayanamsa = _ayanamsa(jde);
+        const sidereal = ((moonLon - ayanamsa) % 360 + 360) % 360;
+        const mansionSize = 360 / 28; // ≈ 12.857°
+        const eclipticIdx = Math.floor(sidereal / mansionSize);
+        const progress = (sidereal % mansionSize) / mansionSize;
+        const tawalieIdx = (eclipticIdx + 7) % 28;
+        const mansion = TAWALIE[tawalieIdx];
+        const daysLeft = ((1 - progress) * (360 / 28) / (360 / 27.3217)); // ~يوم لكل منزلة
+
+        // البحث عن المنزلة السابقة والتالية
+        const prevIdx = (eclipticIdx - 1 + 28) % 28;
+        const nextIdx = (eclipticIdx + 1) % 28;
+        const prevTawalieIdx = (prevIdx + 7) % 28;
+        const nextTawalieIdx = (nextIdx + 7) % 28;
+
+        const lang = currentLang;
+        const name = lang === 'en' ? mansion.en : mansion.ar;
+        const prevName = lang === 'en' ? TAWALIE[prevTawalieIdx].en : TAWALIE[prevTawalieIdx].ar;
+        const nextName = lang === 'en' ? TAWALIE[nextTawalieIdx].en : TAWALIE[nextTawalieIdx].ar;
+
+        // مثل شعبي مرتبط
+        const shortName = mansion.ar.split('(')[0].replace(/[()]/g, '').trim();
+        const proverb = MANSION_PROVERBS[shortName] || null;
+
+        return {
+            index: eclipticIdx + 1, // 1-28
+            tawalieIndex: tawalieIdx,
+            ar: mansion.ar, en: mansion.en,
+            name,
+            longitude: moonLon,
+            siderealLon: sidereal,
+            progress,
+            daysLeft: Math.max(0.1, daysLeft),
+            prev: prevName,
+            next: nextName,
+            proverb,
+            // هل القمر قرب الثريا؟ (اقتران الثريا — من التقويم اليمني)
+            nearThuraya: MANSION_NAMES_ECLIPTIC[eclipticIdx] === 'الثريا'
+                || MANSION_NAMES_ECLIPTIC[(eclipticIdx + 1) % 28] === 'الثريا'
+                || MANSION_NAMES_ECLIPTIC[(eclipticIdx - 1 + 28) % 28] === 'الثريا'
+        };
+    }
+
+    /**
+     * فحص التقاء الطالع الشمسي بالمنزلة القمرية
+     * التقاء = نفس المنزلة (conjunction) أو متقابلان (opposition)
+     */
+    function checkMansionAlignment(gYear, gMonth, gDay) {
+        const moonM = getMoonMansion(gYear, gMonth, gDay);
+        const tale3 = getTale3(gMonth, gDay);
+        if (!tale3) return { aligned: false };
+
+        // إيجاد فهرس الطالع الشمسي في TAWALIE
+        let solarTawalieIdx = -1;
+        for (let i = 0; i < TAWALIE.length; i++) {
+            if (TAWALIE[i].ar === tale3.nameAr) { solarTawalieIdx = i; break; }
+        }
+        if (solarTawalieIdx < 0) return { aligned: false };
+
+        const lunarTawalieIdx = moonM.tawalieIndex;
+        const diff = Math.abs(lunarTawalieIdx - solarTawalieIdx);
+        const lang = currentLang;
+
+        if (diff === 0) {
+            return {
+                aligned: true,
+                type: 'conjunction',
+                mansion: lang === 'en' ? tale3.nameEn : tale3.nameAr,
+                label: lang === 'en' ? 'Moon & Sun in the same mansion' : 'القمر والطالع في منزلة واحدة'
+            };
+        }
+        if (diff === 14) {
+            return {
+                aligned: true,
+                type: 'opposition',
+                mansion: lang === 'en' ? tale3.nameEn : tale3.nameAr,
+                label: lang === 'en' ? 'Moon opposite the solar mansion' : 'القمر يقابل الطالع الشمسي'
+            };
+        }
+        return { aligned: false };
+    }
+
+    /**
+     * المنزلة الطالعة والغاربة فجراً
+     * الغاربة = المنزلة التي تقع فيها الشمس (تختفي تحتها)
+     * الطالعة = المنزلة المقابلة (180° = 14 منزلة بعيداً)
+     */
+    function getRisingSettingMansions(gYear, gMonth, gDay) {
+        const jde = gregorianToJDN(gYear, gMonth, gDay) + 0.5;
+        const sunLon = _getSunEclipticLon(jde);
+        const ayanamsa = _ayanamsa(jde);
+        const sidereal = ((sunLon - ayanamsa) % 360 + 360) % 360;
+        const mansionSize = 360 / 28;
+        const settingIdx = Math.floor(sidereal / mansionSize);
+        const risingIdx = (settingIdx + 14) % 28;
+
+        const settingTawalie = (settingIdx + 7) % 28;
+        const risingTawalie = (risingIdx + 7) % 28;
+
+        const lang = currentLang;
+        return {
+            rising: {
+                ar: TAWALIE[risingTawalie].ar,
+                en: TAWALIE[risingTawalie].en,
+                name: lang === 'en' ? TAWALIE[risingTawalie].en : TAWALIE[risingTawalie].ar,
+                tawalieIndex: risingTawalie
+            },
+            setting: {
+                ar: TAWALIE[settingTawalie].ar,
+                en: TAWALIE[settingTawalie].en,
+                name: lang === 'en' ? TAWALIE[settingTawalie].en : TAWALIE[settingTawalie].ar,
+                tawalieIndex: settingTawalie
+            }
+        };
+    }
+
     // تصحيحات المستخدم: { "1447-9": +1, "1447-10": -1 }
     // المفتاح = "سنة-شهر"، القيمة = عدد أيام الإزاحة
     let userCorrections = {};
@@ -3509,7 +3764,7 @@ const HijriCalendar = (() => {
         ZAYED_ANCHORS, calcSuhailByZayed, verifyEmiratesElderly,
         getSeaState, getStarStatus, _daysTillDate, getActiveWindsWithCompass,
         SEASONAL_PROVERBS, getSeasonalProverbsEnhanced,
-        PALM_LIFECYCLE, getPalmStage, getAgriCalendar, getTodayConditions,
+        PALM_LIFECYCLE, DATE_VARIETIES, getPalmStage, getDateVarieties, getAgriCalendar, getTodayConditions,
         getUpcomingSeasonalAlerts, getNightSkyInfo, getTraditionalExpectations,
 
         // بيانات كتاب الدرور والطوالع
@@ -3517,6 +3772,10 @@ const HijriCalendar = (() => {
         THURAYA_CONJUNCTIONS, CLIMATE_DATA, BIRD_MIGRATION, HERITAGE_GLOSSARY,
         getDurrDetails, getActiveSeasons, getUpcomingAstroEvents, getNearbyAstroEvents, getSeasonalProverbs,
         getNextThurayaConjunction, getClimateData, getActiveBirdMigration, getGlossaryTerm,
+
+        // المنازل القمرية
+        getMoonMansion, checkMansionAlignment, getRisingSettingMansions,
+        _getMoonEclipticLon, MANSION_PROVERBS,
 
         // الأزمنة العربية
         getArabicTimeName, ARAB_DAY_TIMES, ARAB_NIGHT_TIMES,

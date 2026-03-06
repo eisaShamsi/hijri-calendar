@@ -3622,6 +3622,185 @@ html[dir="ltr"] .anwa-card {
 }
 [data-theme="dark"] .anwa-dial-suhail { color: var(--text-secondary); }
 
+/* ─── بطاقة منزلة القمر ─────────────────────────────────── */
+.moon-mansion-card {
+    background: var(--papyrus-section);
+    border: 1px solid var(--papyrus-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 0.78rem;
+}
+.moon-mansion-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.moon-mansion-icon { font-size: 1.1rem; }
+.moon-mansion-title {
+    flex: 1;
+    color: var(--papyrus-text);
+    font-size: 0.82rem;
+}
+.moon-mansion-title strong { color: var(--gold-600); }
+.moon-mansion-num {
+    font-size: 0.68rem;
+    color: var(--gray-500);
+    background: rgba(0,0,0,0.06);
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+.moon-mansion-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.moon-mansion-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.moon-mansion-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-500), var(--gold-600));
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+.moon-mansion-pct {
+    font-size: 0.65rem;
+    color: var(--gray-500);
+    min-width: 28px;
+    text-align: left;
+}
+.moon-mansion-nav {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+}
+.moon-mansion-riseset {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--papyrus-text-secondary);
+    padding-top: 4px;
+    border-top: 1px solid var(--papyrus-border);
+}
+.moon-rising { color: #4caf50; }
+.moon-setting { color: #e57373; }
+.moon-thuraya-alert {
+    font-size: 0.72rem;
+    color: var(--gold-600);
+    background: rgba(212,160,23,0.1);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    margin-top: 6px;
+    text-align: center;
+}
+.mansion-alignment-badge {
+    font-size: 0.72rem;
+    color: var(--gold-600);
+    background: rgba(212,160,23,0.12);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    margin-top: 4px;
+    text-align: center;
+    font-weight: 600;
+}
+.moon-mansion-proverb {
+    font-family: Calibri, sans-serif;
+    font-size: 0.7rem;
+    color: var(--papyrus-text-secondary);
+    font-style: italic;
+    margin-top: 6px;
+    text-align: center;
+    line-height: 1.5;
+}
+.proverb-region {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    font-style: normal;
+}
+/* الوضع الداكن */
+[data-theme="dark"] .moon-mansion-card {
+    background: rgba(30,24,14,0.5);
+    border-color: rgba(139,90,43,0.2);
+}
+[data-theme="dark"] .moon-mansion-title { color: var(--text-primary); }
+[data-theme="dark"] .moon-mansion-title strong { color: #f0d890; }
+[data-theme="dark"] .moon-mansion-num {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-secondary);
+}
+[data-theme="dark"] .moon-mansion-bar { background: rgba(255,255,255,0.08); }
+[data-theme="dark"] .moon-mansion-fill { background: linear-gradient(90deg, #c49440, #f0d890); }
+[data-theme="dark"] .moon-mansion-pct { color: var(--text-secondary); }
+[data-theme="dark"] .moon-mansion-nav { color: var(--text-secondary); }
+[data-theme="dark"] .moon-mansion-riseset { border-top-color: rgba(139,90,43,0.2); }
+[data-theme="dark"] .moon-rising { color: #66bb6a; }
+[data-theme="dark"] .moon-setting { color: #ef5350; }
+[data-theme="dark"] .moon-thuraya-alert {
+    color: #f0d890;
+    background: rgba(240,216,144,0.1);
+}
+[data-theme="dark"] .mansion-alignment-badge {
+    color: #f0d890;
+    background: rgba(240,216,144,0.1);
+}
+[data-theme="dark"] .moon-mansion-proverb { color: var(--text-secondary); }
+
+/* ─── صفحة تفاصيل المنازل القمرية ─── */
+.moon-mansion-detail { max-width: 600px; margin: 0 auto; }
+.mmd-current { text-align: center; padding: 20px 16px; margin-bottom: 16px; background: var(--card-bg, #faf6ee); border-radius: 12px; border: 1px solid var(--papyrus-border, #d4c8a8); }
+.mmd-crescent { font-size: 40px; margin-bottom: 8px; }
+.mmd-name { font-size: 24px; font-weight: bold; color: var(--primary-gold, #8b5a2b); margin-bottom: 4px; }
+.mmd-index { font-size: 14px; color: var(--text-secondary, #8a7a60); margin-bottom: 12px; }
+.mmd-progress-bar { height: 8px; background: var(--papyrus-border, #d4c8a8); border-radius: 4px; overflow: hidden; margin: 0 40px 6px; }
+.mmd-progress-fill { height: 100%; background: linear-gradient(90deg, #8b5a2b, #d4a020); border-radius: 4px; transition: width 0.3s; }
+.mmd-progress-label { font-size: 13px; color: var(--text-secondary, #8a7a60); }
+.mmd-section { margin-bottom: 16px; padding: 14px 16px; background: var(--card-bg, #faf6ee); border-radius: 10px; border: 1px solid var(--papyrus-border, #d4c8a8); }
+.mmd-section-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; color: var(--primary-gold, #8b5a2b); }
+.mmd-riseset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mmd-rising-box, .mmd-setting-box { padding: 10px; border-radius: 8px; text-align: center; line-height: 1.6; }
+.mmd-rising-box { background: rgba(46,125,50,0.08); border: 1px solid rgba(46,125,50,0.2); }
+.mmd-setting-box { background: rgba(198,40,40,0.08); border: 1px solid rgba(198,40,40,0.2); }
+.mmd-arrow-up { color: #2e7d32; font-size: 18px; display: block; margin-bottom: 4px; }
+.mmd-arrow-down { color: #c62828; font-size: 18px; display: block; margin-bottom: 4px; }
+.mmd-rising-box small, .mmd-setting-box small { font-size: 12px; color: var(--text-secondary, #8a7a60); }
+.mmd-alignment { background: linear-gradient(135deg, rgba(240,216,144,0.1), rgba(212,160,32,0.08)); border-color: rgba(212,160,32,0.3); }
+.mmd-thuraya { background: linear-gradient(135deg, rgba(180,140,255,0.08), rgba(200,160,255,0.05)); border-color: rgba(180,140,255,0.25); }
+.mmd-proverb-box { text-align: center; font-style: italic; font-family: Calibri, sans-serif; }
+.mmd-proverb-text { font-size: 18px; color: var(--primary-gold, #8b5a2b); margin-bottom: 6px; }
+.mmd-proverb-source { font-size: 13px; color: var(--text-secondary, #8a7a60); font-style: normal; }
+.mmd-table { max-height: 420px; overflow-y: auto; }
+.mmd-row { display: grid; grid-template-columns: 30px 1fr 90px; align-items: center; padding: 6px 8px; border-bottom: 1px solid var(--papyrus-border, #d4c8a8); font-size: 14px; }
+.mmd-row-active { background: linear-gradient(90deg, rgba(240,216,144,0.2), rgba(212,160,32,0.1)); font-weight: bold; }
+.mmd-row-num { color: var(--text-secondary, #8a7a60); font-size: 12px; text-align: center; }
+.mmd-row-name { }
+.mmd-row-date { font-size: 12px; color: var(--text-secondary, #8a7a60); text-align: left; direction: ltr; }
+.mmd-row-proverb { font-family: Calibri, sans-serif; font-size: 12px; font-style: italic; color: var(--text-secondary, #8a7a60); padding: 2px 8px 6px 38px; border-bottom: 1px solid var(--papyrus-border, #d4c8a8); }
+.mmd-concepts { line-height: 1.7; }
+.mmd-concept { margin-bottom: 10px; font-size: 14px; }
+
+/* dark mode */
+[data-theme="dark"] .mmd-current { background: var(--card-bg-dark, #1a1816); border-color: var(--border-dark, #3a3428); }
+[data-theme="dark"] .mmd-name { color: #f0d890; }
+[data-theme="dark"] .mmd-section { background: var(--card-bg-dark, #1a1816); border-color: var(--border-dark, #3a3428); }
+[data-theme="dark"] .mmd-section-title { color: #f0d890; }
+[data-theme="dark"] .mmd-rising-box { background: rgba(102,187,106,0.1); border-color: rgba(102,187,106,0.2); }
+[data-theme="dark"] .mmd-setting-box { background: rgba(239,83,80,0.1); border-color: rgba(239,83,80,0.2); }
+[data-theme="dark"] .mmd-arrow-up { color: #66bb6a; }
+[data-theme="dark"] .mmd-arrow-down { color: #ef5350; }
+[data-theme="dark"] .mmd-proverb-text { color: #f0d890; }
+[data-theme="dark"] .mmd-row { border-color: var(--border-dark, #3a3428); }
+[data-theme="dark"] .mmd-row-active { background: rgba(240,216,144,0.1); }
+[data-theme="dark"] .mmd-row-proverb { border-color: var(--border-dark, #3a3428); }
+
 /* الحاوية الرئيسية */
 .anwa-fc {
     position: relative;
@@ -5540,6 +5719,7 @@ html[dir="ltr"] .anwa-card {
 
 /* ── مثل شعبي ── */
 .anwa-proverb {
+    font-family: Calibri, sans-serif;
     font-style: italic;
     font-size: 0.76rem;
     color: var(--papyrus-text-secondary, #8a7e6a);
@@ -5597,6 +5777,7 @@ html[dir="ltr"] .anwa-card {
     border: 1px solid rgba(196,148,64,0.15);
 }
 .cond-proverb-text {
+    font-family: Calibri, sans-serif;
     font-style: italic;
     font-size: 0.82rem;
     color: var(--papyrus-text, #3a2f20);
@@ -5690,6 +5871,42 @@ html[dir="ltr"] .anwa-card {
 [data-theme="dark"] .palm-stage { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
 [data-theme="dark"] .palm-stage.active { background: rgba(76,175,80,0.15); }
 [data-theme="dark"] .palm-stage-name { color: var(--text-primary, #f5edd8); }
+
+/* ── أصناف التمور ── */
+.date-varieties-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.date-variety-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(139,90,43,0.06);
+    border-radius: 8px;
+    border: 1px solid rgba(139,90,43,0.1);
+}
+.date-variety-icon {
+    font-size: 1.2rem;
+}
+.date-variety-name {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--papyrus-text, #4a3520);
+    white-space: nowrap;
+}
+.date-variety-desc {
+    font-size: 0.75rem;
+    color: var(--papyrus-text-secondary, #7a6e5a);
+    flex: 1;
+}
+[data-theme="dark"] .date-variety-item {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .date-variety-name { color: var(--text-primary, #f5edd8); }
+[data-theme="dark"] .date-variety-desc { color: var(--text-secondary, #b0a890); }
 
 /* ── F5: بوصلة الرياح ── */
 .wind-compass-container { text-align: center; }
@@ -6170,7 +6387,7 @@ html[dir="ltr"] .anwa-card {
 
 /* ── المثل ── */
 .dv-enrich-quote {
-    font-family: var(--font-display, var(--font-arabic));
+    font-family: Calibri, sans-serif;
     font-size: 1rem;
     font-weight: 600;
     color: var(--gold, #c49440);
@@ -6187,6 +6404,7 @@ html[dir="ltr"] .anwa-card {
 }
 
 .dv-enrich-quote-sub {
+    font-family: Calibri, sans-serif;
     font-size: 0.78rem;
     color: var(--papyrus-text-secondary, #7a6e5a);
     font-style: italic;
@@ -6215,6 +6433,53 @@ html[dir="ltr"] .anwa-card {
 
 .dv-enrich-season-icon {
     margin-inline-end: 4px;
+}
+
+/* ── شارات المناطق ── */
+.region-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 8px;
+    vertical-align: middle;
+    margin-inline-end: 4px;
+    letter-spacing: 0.3px;
+}
+.region-gulf {
+    background: linear-gradient(135deg, #1a73a7, #1e88c8);
+    color: #fff;
+}
+.region-najd {
+    background: linear-gradient(135deg, #8b6914, #a07d2a);
+    color: #fff;
+}
+.region-yemen {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: #fff;
+}
+.region-dhofar {
+    background: linear-gradient(135deg, #00695c, #00897b);
+    color: #fff;
+}
+.region-hijaz {
+    background: linear-gradient(135deg, #6a1b9a, #8e24aa);
+    color: #fff;
+}
+[data-theme="dark"] .region-gulf {
+    background: linear-gradient(135deg, #0d3d5c, #145a80);
+}
+[data-theme="dark"] .region-najd {
+    background: linear-gradient(135deg, #5a4410, #6b5218);
+}
+[data-theme="dark"] .region-yemen {
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+}
+[data-theme="dark"] .region-dhofar {
+    background: linear-gradient(135deg, #004d40, #00695c);
+}
+[data-theme="dark"] .region-hijaz {
+    background: linear-gradient(135deg, #4a148c, #6a1b9a);
 }
 
 /* ── الأحداث الفلكية ── */

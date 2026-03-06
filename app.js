@@ -3524,6 +3524,64 @@ tr:nth-child(even) { background: #fafafa; }
         const _shRegionTag = _shRegion ? ` <span class="anwa-dial-suhail-region">(${_shRegion})</span>` : '';
         anwaHtml += `<div class="anwa-dial-suhail">⭐ ${_shLabel}: ${_shDate}${_shRegionTag}</div>`;
 
+        // ─── بطاقة منزلة القمر الفعلية ──────────────────────────
+        {
+            const _mm = H.getMoonMansion(gYear, gMonth, gDay);
+            const _align = H.checkMansionAlignment(gYear, gMonth, gDay);
+            const _rs = H.getRisingSettingMansions(gYear, gMonth, gDay);
+            const _pct = Math.round(_mm.progress * 100);
+            const _dLeft = _mm.daysLeft < 1 ? `${Math.round(_mm.daysLeft * 24)}h` : `${_mm.daysLeft.toFixed(1)}d`;
+            const _mansionLabel = lang === 'en' ? 'Moon mansion' : 'منزلة القمر';
+            const _risingLabel = lang === 'en' ? 'Rising' : 'الطالعة';
+            const _settingLabel = lang === 'en' ? 'Setting' : 'الغاربة';
+
+            anwaHtml += `<div class="moon-mansion-card dv-anwa-clickable" data-anwa-type="moon-mansion">`;
+            anwaHtml += `<div class="moon-mansion-header">`;
+            anwaHtml += `<span class="moon-mansion-icon">🌙</span>`;
+            anwaHtml += `<span class="moon-mansion-title">${_mansionLabel}: <strong>${_mm.name}</strong></span>`;
+            anwaHtml += `<span class="moon-mansion-num">${_mm.index}/28</span>`;
+            anwaHtml += `</div>`;
+
+            // شريط التقدم
+            anwaHtml += `<div class="moon-mansion-progress">`;
+            anwaHtml += `<div class="moon-mansion-bar"><div class="moon-mansion-fill" style="width:${_pct}%"></div></div>`;
+            anwaHtml += `<span class="moon-mansion-pct">${_pct}%</span>`;
+            anwaHtml += `</div>`;
+
+            // السابقة والتالية
+            anwaHtml += `<div class="moon-mansion-nav">`;
+            anwaHtml += `<span class="moon-mansion-prev">◄ ${_mm.prev}</span>`;
+            anwaHtml += `<span class="moon-mansion-next">${_mm.next} ►</span>`;
+            anwaHtml += `</div>`;
+
+            // الطالعة والغاربة فجراً
+            anwaHtml += `<div class="moon-mansion-riseset">`;
+            anwaHtml += `<span class="moon-rising">▲ ${_risingLabel}: ${_rs.rising.name}</span>`;
+            anwaHtml += `<span class="moon-setting">▼ ${_settingLabel}: ${_rs.setting.name}</span>`;
+            anwaHtml += `</div>`;
+
+            // تنبيه اقتران الثريا (من التقويم اليمني)
+            if (_mm.nearThuraya) {
+                const _thurayaLabel = lang === 'en'
+                    ? '✨ Moon near Pleiades — a special conjunction in Yemeni tradition'
+                    : '✨ القمر قرب الثريا — اقتران مميز في التقويم اليمني';
+                anwaHtml += `<div class="moon-thuraya-alert">${_thurayaLabel}</div>`;
+            }
+
+            // شارة التقاء الطالع بالمنزلة
+            if (_align.aligned) {
+                const _icon = _align.type === 'conjunction' ? '⭐' : '🌕';
+                anwaHtml += `<div class="mansion-alignment-badge">${_icon} ${_align.label}</div>`;
+            }
+
+            // مثل شعبي مرتبط
+            if (_mm.proverb) {
+                anwaHtml += `<div class="moon-mansion-proverb">« ${_mm.proverb.ar} » <span class="proverb-region">(${_mm.proverb.region})</span></div>`;
+            }
+
+            anwaHtml += `</div>`;
+        }
+
         // بناء أشرطة الإبرة الثابتة — ألوان ديرة الدرور
         const dialItems = H.getDialData(gMonth, gDay, gYear, _sh);
         const _durrRef = dialItems.find(d => d.type === 'durr');
@@ -3830,6 +3888,115 @@ tr:nth-child(even) { background: #fafafa; }
         });
     }
 
+    // ── عرض صفحة تفصيلية للمنازل القمرية ──
+    function _renderMoonMansionDetail(gYear, gMonth, gDay, lang) {
+        const mm = H.getMoonMansion(gYear, gMonth, gDay);
+        const align = H.checkMansionAlignment(gYear, gMonth, gDay);
+        const rs = H.getRisingSettingMansions(gYear, gMonth, gDay);
+        const isAr = lang !== 'en';
+
+        let html = '<div class="moon-mansion-detail">';
+
+        // ─── 1. المنزلة الحالية ───
+        html += `<div class="mmd-current">`;
+        html += `<div class="mmd-crescent">🌙</div>`;
+        html += `<div class="mmd-name">${mm.name}</div>`;
+        html += `<div class="mmd-index">${mm.index} / 28</div>`;
+        html += `<div class="mmd-progress-bar"><div class="mmd-progress-fill" style="width:${Math.round(mm.progress * 100)}%"></div></div>`;
+        html += `<div class="mmd-progress-label">${Math.round(mm.progress * 100)}% — ${isAr ? 'متبقي' : 'remaining'}: ${mm.daysLeft.toFixed(1)} ${isAr ? 'يوم' : 'days'}</div>`;
+        html += `</div>`;
+
+        // ─── 2. الطالعة والغاربة ───
+        html += `<div class="mmd-section">`;
+        html += `<div class="mmd-section-title">${isAr ? 'الطالعة والغاربة فجراً' : 'Rising & Setting at Dawn'}</div>`;
+        html += `<div class="mmd-riseset-grid">`;
+        html += `<div class="mmd-rising-box"><span class="mmd-arrow-up">▲</span><strong>${rs.rising.name}</strong><br><small>${isAr ? 'تطلع من المشرق فجراً — تُرى طوال الليل' : 'Rises in the east at dawn — visible all night'}</small></div>`;
+        html += `<div class="mmd-setting-box"><span class="mmd-arrow-down">▼</span><strong>${rs.setting.name}</strong><br><small>${isAr ? 'تغرب في المغرب فجراً — هذا هو النَّوء' : 'Sets in the west at dawn — this is the Naw\''}</small></div>`;
+        html += `</div></div>`;
+
+        // ─── 3. التقاء الطالع بالمنزلة ───
+        if (align.aligned) {
+            html += `<div class="mmd-section mmd-alignment">`;
+            html += `<div class="mmd-section-title">${align.type === 'conjunction' ? '⭐' : '🌕'} ${align.label}</div>`;
+            html += `<small>${isAr ? 'حدث فلكي: الطالع الشمسي والمنزلة القمرية في نفس الموقع' : 'Astronomical event: solar mansion and lunar mansion aligned'}</small>`;
+            html += `</div>`;
+        }
+
+        // ─── 4. اقتران الثريا ───
+        if (mm.nearThuraya) {
+            html += `<div class="mmd-section mmd-thuraya">`;
+            html += `<div class="mmd-section-title">✨ ${isAr ? 'القمر قرب الثريا' : 'Moon near Pleiades'}</div>`;
+            html += `<small>${isAr ? 'اقتران الثريا بالقمر يحدث كل ~27 يوماً. في التقويم اليمني، يرتبط بموسم «علّان» (حصاد الذرة). وعند أهل الخليج، الثريا من أهم النجوم لتحديد مواسم الغوص والزراعة.' : 'The Pleiades-Moon conjunction occurs every ~27 days. In Yemen it marks the \'Allan harvest season. In the Gulf, Pleiades is key for diving and farming seasons.'}</small>`;
+            html += `</div>`;
+        }
+
+        // ─── 5. مثل شعبي ───
+        if (mm.proverb) {
+            html += `<div class="mmd-section mmd-proverb-box">`;
+            html += `<div class="mmd-proverb-text">« ${mm.proverb.ar} »</div>`;
+            html += `<div class="mmd-proverb-source">${mm.proverb.region}</div>`;
+            html += `</div>`;
+        }
+
+        // ─── 6. جدول المنازل الـ28 ───
+        html += `<div class="mmd-section">`;
+        html += `<div class="mmd-section-title">${isAr ? 'المنازل القمرية الـ 28' : 'The 28 Lunar Mansions'}</div>`;
+        html += `<div class="mmd-table">`;
+
+        const ECLIPTIC_NAMES = [
+            'الشرطين', 'البطين', 'الثريا', 'الدبران', 'الهقعة', 'الهنعة', 'المرزم', 'النثرة',
+            'الطرف', 'الجبهة', 'الزبرة', 'الصرفة', 'العوى', 'السماك', 'الغفر', 'الزبانا',
+            'الإكليل', 'القلب', 'الشولة', 'النعائم', 'البلدة', 'سعد الذابح', 'سعد بلع',
+            'سعد السعود', 'سعد الأخبية', 'المقدم', 'المؤخر', 'الرشاء'
+        ];
+
+        for (let i = 0; i < 28; i++) {
+            const tawalieIdx = (i + 7) % 28;
+            const star = H.TAWALIE[tawalieIdx];
+            const nameAr = ECLIPTIC_NAMES[i];
+            const nameEn = star ? star.en : '';
+            const name = isAr ? nameAr : nameEn;
+            const isMoon = (mm.index - 1) === i;
+            const isRising = rs.rising.tawalieIndex === tawalieIdx;
+            const isSetting = rs.setting.tawalieIndex === tawalieIdx;
+
+            let marker = '';
+            if (isMoon) marker = ' 🌙';
+            if (isRising) marker += ' <span style="color:#2e7d32">▲</span>';
+            if (isSetting) marker += ' <span style="color:#c62828">▼</span>';
+
+            const cls = isMoon ? 'mmd-row mmd-row-active' : 'mmd-row';
+            const dateRange = star ? `${star.from[1]}/${star.from[0]} — ${star.to[1]}/${star.to[0]}` : '';
+
+            // مثل شعبي
+            const shortN = nameAr.split('(')[0].replace(/[()]/g, '').trim();
+            const prov = H.MANSION_PROVERBS[shortN];
+
+            html += `<div class="${cls}">`;
+            html += `<span class="mmd-row-num">${i + 1}</span>`;
+            html += `<span class="mmd-row-name">${name}${marker}</span>`;
+            html += `<span class="mmd-row-date">${dateRange}</span>`;
+            html += `</div>`;
+            if (prov) {
+                html += `<div class="mmd-row-proverb">« ${prov.ar} » <small>(${prov.region})</small></div>`;
+            }
+        }
+
+        html += `</div></div>`;
+
+        // ─── 7. شرح المفاهيم ───
+        html += `<div class="mmd-section mmd-concepts">`;
+        html += `<div class="mmd-section-title">${isAr ? 'المفاهيم' : 'Concepts'}</div>`;
+        html += `<div class="mmd-concept"><strong>🌙 ${isAr ? 'منزلة القمر' : 'Moon Mansion'}:</strong> ${isAr ? 'المكان الفعلي للقمر في السماء. القمر يقطع منزلة كل يوم تقريباً ويكمل الدورة في ~27.3 يوماً.' : 'The actual position of the Moon. It crosses one mansion per day, completing the cycle in ~27.3 days.'}</div>`;
+        html += `<div class="mmd-concept"><strong><span style="color:#2e7d32">▲</span> ${isAr ? 'الطالعة' : 'Rising'}:</strong> ${isAr ? 'المنزلة المقابلة للشمس (180°) — تطلع من المشرق عند الفجر وتُرى طوال الليل.' : 'The mansion opposite the Sun (180°) — rises at dawn and is visible all night.'}</div>`;
+        html += `<div class="mmd-concept"><strong><span style="color:#c62828">▼</span> ${isAr ? 'الغاربة (النوء)' : 'Setting (Naw\')'}:</strong> ${isAr ? 'المنزلة القريبة من الشمس — تغرب عند الفجر. سقوط النجم في الغرب = "النوء" عند العرب، وهو مرتبط بتغير الطقس.' : 'The mansion near the Sun — sets at dawn. Its setting is the "Naw\'" (weather change marker) in Arab tradition.'}</div>`;
+        html += `<div class="mmd-concept"><strong>⭐ ${isAr ? 'التقاء' : 'Alignment'}:</strong> ${isAr ? 'عندما يكون القمر في نفس المنزلة التي تطلع فيها الشمس (اقتران) أو في المنزلة المقابلة تماماً (تقابل).' : 'When the Moon is in the same mansion as the Sun (conjunction) or directly opposite (opposition).'}</div>`;
+        html += `</div>`;
+
+        html += '</div>';
+        return html;
+    }
+
     // ── عرض صفحة أطوار القمر — يوم بيوم ──
     function _renderMoonPhasesDetail(hijriYear, hijriMonth, currentGYear, currentGMonth, currentGDay, lang) {
         const totalDays = H.daysInMonth(hijriYear, hijriMonth);
@@ -4029,6 +4196,9 @@ tr:nth-child(even) { background: #fafafa; }
             const monthLabel = H.monthName(hijri.month - 1) + ' ' + (lang === 'en' ? hijri.year : H.toArabicNumerals(String(hijri.year)));
             titleEl.textContent = H.t('moonPhasesTitle') + ' — ' + monthLabel;
             html = _renderMoonPhasesDetail(hijri.year, hijri.month, gYear, gMonth, gDay, lang);
+        } else if (type === 'moon-mansion') {
+            titleEl.textContent = lang === 'en' ? 'Moon Mansions — Lunar Stations' : 'المنازل القمرية — مواقع القمر في البروج';
+            html = _renderMoonMansionDetail(gYear, gMonth, gDay, lang);
         }
 
         // توسيط وتكبير عنوان ديرة الدرور
@@ -4718,6 +4888,19 @@ tr:nth-child(even) { background: #fafafa; }
             const nearAstro = H.getNearbyAstroEvents(midM, midD, Math.max(Math.floor((d2 - d1) / 2) + 5, 15));
             if (nearAstro.length > 0) html += section('✨', lang === 'en' ? 'Astronomy' : 'أحداث فلكية', nearAstro.map(ev => `${ev.icon} ${lang === 'en' ? ev.en : ev.ar}`));
         }
+        // منزلة القمر عند منتصف الفترة
+        {
+            const midDoy2 = Math.floor((d1 + d2) / 2);
+            const [mM2, mD2] = fromDOY(midDoy2 > 365 ? midDoy2 - 365 : midDoy2);
+            try {
+                const mm2 = H.getMoonMansion(gYear, mM2, mD2);
+                if (mm2) {
+                    const mLabel = lang === 'en' ? mm2.en : mm2.ar;
+                    const pct = Math.round(mm2.progress * 100);
+                    html += section('🌙', lang === 'en' ? 'Moon Mansion' : 'منزلة القمر', [`${mLabel} (${pct}%)`]);
+                }
+            } catch (e) {}
+        }
 
         return html;
     }
@@ -4818,6 +5001,8 @@ tr:nth-child(even) { background: #fafafa; }
         }
 
         // المواسم
+        const _regionLabels = { gulf: 'الخليج', najd: 'نجد', yemen: 'اليمن', dhofar: 'ظفار', hijaz: 'الحجاز' };
+        const _regionLabelsEn = { gulf: 'Gulf', najd: 'Najd', yemen: 'Yemen', dhofar: 'Dhofar', hijaz: 'Hijaz' };
         const activeSeasons = [...seasonsSet.values()];
         if (activeSeasons.length > 0) {
             html += `<div class="dv-enrich-card dv-enrich-seasons">`;
@@ -4827,7 +5012,8 @@ tr:nth-child(even) { background: #fafafa; }
             activeSeasons.forEach(s => {
                 const sName = lang === 'en' ? s.en : s.ar;
                 const sDesc = lang === 'en' ? s.desc_en : s.desc_ar;
-                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> <strong>${sName}</strong>: ${sDesc}</div>`;
+                const regionBadge = s.region ? `<span class="region-badge region-${s.region}">${lang === 'en' ? _regionLabelsEn[s.region] : _regionLabels[s.region]}</span> ` : '';
+                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> ${regionBadge}<strong>${sName}</strong>: ${sDesc}</div>`;
             });
             html += `</div></div>`;
         }
@@ -4944,6 +5130,8 @@ tr:nth-child(even) { background: #fafafa; }
         }
 
         // 2. المواسم الخاصة النشطة
+        const _regionLabels2 = { gulf: 'الخليج', najd: 'نجد', yemen: 'اليمن', dhofar: 'ظفار', hijaz: 'الحجاز' };
+        const _regionLabelsEn2 = { gulf: 'Gulf', najd: 'Najd', yemen: 'Yemen', dhofar: 'Dhofar', hijaz: 'Hijaz' };
         const activeSeasons = H.getActiveSeasons(gMonth, gDay);
         if (activeSeasons.length > 0) {
             html += `<div class="dv-enrich-card dv-enrich-seasons">`;
@@ -4953,7 +5141,8 @@ tr:nth-child(even) { background: #fafafa; }
             activeSeasons.forEach(s => {
                 const sName = lang === 'en' ? s.en : s.ar;
                 const sDesc = lang === 'en' ? s.desc_en : s.desc_ar;
-                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> <strong>${sName}</strong>: ${sDesc}</div>`;
+                const regionBadge = s.region ? `<span class="region-badge region-${s.region}">${lang === 'en' ? _regionLabelsEn2[s.region] : _regionLabels2[s.region]}</span> ` : '';
+                html += `<div class="dv-enrich-season-item"><span class="dv-enrich-season-icon">${s.icon}</span> ${regionBadge}<strong>${sName}</strong>: ${sDesc}</div>`;
             });
             html += `</div></div>`;
         }
@@ -5324,6 +5513,26 @@ tr:nth-child(even) { background: #fafafa; }
         });
         html += `</div></div>`;
 
+        // أصناف التمور في الموسم
+        if (H.DATE_VARIETIES && H.getDateVarieties) {
+            const dateVars = H.getDateVarieties(gMonth, gDay);
+            if (dateVars.length > 0) {
+                html += `<div class="agri-section">`;
+                html += `<div class="agri-section-title">${isAr ? 'أصناف التمور في الموسم' : 'Date Varieties in Season'} 🏆</div>`;
+                html += `<div class="date-varieties-list">`;
+                dateVars.forEach(v => {
+                    const vName = isAr ? v.ar : v.en;
+                    const vDesc = isAr ? v.desc_ar : v.desc_en;
+                    html += `<div class="date-variety-item">`;
+                    html += `<span class="date-variety-icon">${v.icon}</span>`;
+                    html += `<span class="date-variety-name">${vName}</span>`;
+                    html += `<span class="date-variety-desc">${vDesc}</span>`;
+                    html += `</div>`;
+                });
+                html += `</div></div>`;
+            }
+        }
+
         // المحاصيل الحالية
         html += `<div class="agri-section">`;
         html += `<div class="agri-section-title">${H.t('currentCrops')}</div>`;
@@ -5545,7 +5754,7 @@ tr:nth-child(even) { background: #fafafa; }
         const RC = _RING_COLORS;
         const todayAngle = _dateToAngle(gMonth, gDay);
 
-        let svg = `<svg viewBox="-260 -260 1600 1600" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
+        let svg = `<svg viewBox="-310 -310 1700 1700" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
         // جعل كل العناصر غير التفاعلية شفافة للنقر، فقط .durur-segment تستقبل الأحداث
         svg += `<style>
             .durur-circle-svg circle, .durur-circle-svg line, .durur-circle-svg polygon, .durur-circle-svg text,
@@ -5589,16 +5798,27 @@ tr:nth-child(even) { background: #fafafa; }
         svg += _bgRing(82, 140, isDark ? '#2a2218' : '#e0d0a8');
         // Ring 2: Stars
         svg += _bgRing(142, 220, isDark ? RC.starDark : RC.star);
+        // ─── تخطيط بالحارات — كل حارة 22px (رياح×5 + ضربات×2 + مواسم×2 + نخيل×1 + طيور×3 + فلك×1 = 14 حارة) ───
+        const LW = 22, RG = 2;            // Lane Width, Ring Gap
+        const RL = {};
+        RL.durrI = 222;                    RL.durrO = 272;                        // 222-272 (50px — حلقة مستقلة)
+        RL.windI = RL.durrO + RG;          RL.windO = RL.windI + 5 * LW;         // 274-384 (5 حارات)
+        RL.strikeI = RL.windO + RG;        RL.strikeO = RL.strikeI + 2 * LW;     // 386-430 (حارتان)
+        RL.seasonI = RL.strikeO + RG;      RL.seasonO = RL.seasonI + 2 * LW;     // 432-476 (حارتان)
+        RL.palmI = RL.seasonO + RG;        RL.palmO = RL.palmI + 1 * LW;         // 478-500 (حارة واحدة)
+        RL.birdI = RL.palmO + RG;          RL.birdO = RL.birdI + 3 * LW;         // 502-568 (3 حارات)
+        RL.astroI = RL.birdO + RG;         RL.astroO = RL.astroI + 1 * LW;       // 570-592 (حارة واحدة)
+        // ─── حلقات مستثناة — تحتفظ بأبعادها الأصلية ───
+        RL.gregI = RL.astroO + RG;         RL.gregO = RL.gregI + 98;              // 594-692
+        RL.hijriI = RL.gregO + 4;          RL.hijriO = RL.hijriI + 83;            // 696-779
+        RL.goldI = RL.hijriO + 5;          RL.goldO = RL.goldI + 8;               // 784-792
+
         // Ring 3: Durr
-        svg += _bgRing(222, 280, isDark ? '#28221a' : '#e8dcc0');
-        // Ring 4: Winds (5 lanes)
-        svg += _bgRing(282, 360, isDark ? RC.windDark : RC.wind);
-        // Ring 5a: Day tick marks (inner)
-        svg += _bgRing(362, 388, isDark ? '#1e1c18' : '#f5f0e8');
-        // Ring 5b: Day numbers (outer)
-        svg += _bgRing(390, 412, isDark ? '#252218' : '#efe8d8');
-        // Ring 6: Months
-        svg += _bgRing(414, 470, isDark ? RC.outerDark : RC.outer);
+        svg += _bgRing(RL.durrI, RL.durrO, isDark ? '#28221a' : '#e8dcc0');
+
+        // Ring 4: Winds
+        svg += _bgRing(RL.windI, RL.windO, isDark ? RC.windDark : RC.wind);
+        // (الضربات، المواسم، النخلة، الطيور، الفلك — كلٌّ يرسم خلفيته)
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 0: الفصول الأربعة — أرباع ثابتة في المركز ───
@@ -5674,6 +5894,100 @@ tr:nth-child(even) { background: #fafafa; }
         });
         svg += `<circle cx="${cx}" cy="${cy}" r="221" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
 
+        // ─── مؤشرات المنازل القمرية على Ring 2 ───
+        // هلال ذهبي = القمر الفعلي، ▲ أخضر = الطالعة فجراً، ▼ أحمر = الغاربة فجراً
+        {
+            const _mm = H.getMoonMansion(gYear, gMonth, gDay);
+            const _align = H.checkMansionAlignment(gYear, gMonth, gDay);
+            const _rs = H.getRisingSettingMansions(gYear, gMonth, gDay);
+            const moonR = 181; // وسط Ring 2 (142–220)
+
+            // ── حساب زاوية القمر ──
+            const moonStar = stars[_mm.tawalieIndex];
+            const _mFrom = _dateToAngle(moonStar.from[0], moonStar.from[1]);
+            const _mTo = _dateToAngleEnd(moonStar.to[0], moonStar.to[1]);
+            let _mArcS = _mTo, _mArcE = _mFrom;
+            if (_mArcE < _mArcS) _mArcE += 360;
+            // progress=0 → arcEnd (بداية المنزلة)، progress=1 → arcStart (نهاية المنزلة)
+            const moonAngle = (_mArcE - _mm.progress * (_mArcE - _mArcS)) % 360;
+            const moonRad = (90 - moonAngle) * Math.PI / 180;
+            const moonX = cx + moonR * Math.cos(moonRad);
+            const moonY = cy - moonR * Math.sin(moonRad);
+
+            // ── توهج التقاء (إن وُجد) ──
+            if (_align.aligned) {
+                const glowR = 181;
+                svg += `<circle cx="${moonX}" cy="${moonY}" r="18" fill="none" stroke="${isDark ? '#f0d890' : '#d4a020'}" stroke-width="2" opacity="0.5">`;
+                svg += `<animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>`;
+                svg += `</circle>`;
+            }
+
+            // ── فلتر التوهج الذهبي ──
+            svg += `<defs><filter id="moon-glow" x="-80%" y="-80%" width="260%" height="260%">`;
+            svg += `<feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>`;
+            svg += `<feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.2  0 0.8 0 0 0.1  0 0 0 0 0  0 0 0 1 0" result="gold"/>`;
+            svg += `<feMerge><feMergeNode in="gold"/><feMergeNode in="SourceGraphic"/></feMerge>`;
+            svg += `</filter></defs>`;
+
+            // ── رمز الهلال الذهبي مع هالة ──
+            const crescentSize = 14;
+            svg += `<g id="dirat-moon-marker" transform="translate(${moonX}, ${moonY})">`;
+            // هالة خارجية نابضة
+            svg += `<circle r="${crescentSize + 8}" fill="none" stroke="${isDark ? '#f0d890' : '#d4a020'}" stroke-width="1.5" opacity="0.4">`;
+            svg += `<animate attributeName="r" values="${crescentSize + 6};${crescentSize + 12};${crescentSize + 6}" dur="3s" repeatCount="indefinite"/>`;
+            svg += `<animate attributeName="opacity" values="0.5;0.15;0.5" dur="3s" repeatCount="indefinite"/>`;
+            svg += `</circle>`;
+            // هالة داخلية ثابتة
+            svg += `<circle r="${crescentSize + 4}" fill="${isDark ? 'rgba(240,216,144,0.12)' : 'rgba(232,192,80,0.15)'}" stroke="${isDark ? '#f0d890' : '#d4a020'}" stroke-width="0.8" opacity="0.6"/>`;
+            // الهلال: قوسان متداخلان
+            svg += `<g filter="url(#moon-glow)">`;
+            svg += `<circle r="${crescentSize}" fill="${isDark ? '#f0d890' : '#e8c050'}" opacity="0.95"/>`;
+            svg += `<circle cx="${crescentSize * 0.35}" cy="${-crescentSize * 0.15}" r="${crescentSize * 0.72}" fill="${isDark ? '#1a1816' : '#f5f0e0'}"/>`;
+            svg += `</g>`;
+            svg += `<title>${lang === 'en' ? 'Moon: ' + _mm.en : 'القمر: ' + _mm.ar}</title>`;
+            svg += `</g>`;
+
+            // ── علامة الطالعة (▲ أخضر) ──
+            const risingIdx = _rs.rising.tawalieIndex;
+            if (risingIdx !== undefined) {
+                const rStar = stars[risingIdx];
+                const rFrom = _dateToAngle(rStar.from[0], rStar.from[1]);
+                const rTo = _dateToAngleEnd(rStar.to[0], rStar.to[1]);
+                let rArcS = rTo, rArcE = rFrom;
+                if (rArcE < rArcS) rArcE += 360;
+                const risingAngle = ((rArcS + rArcE) / 2) % 360;
+                const rRad = (90 - risingAngle) * Math.PI / 180;
+                const rMarkR = 225; // خارج Ring 2
+                const rX = cx + rMarkR * Math.cos(rRad);
+                const rY = cy - rMarkR * Math.sin(rRad);
+                svg += `<g id="dirat-rising-mark" transform="translate(${rX}, ${rY})">`;
+                svg += `<polygon points="0,-12 10,6 -10,6" fill="${isDark ? '#66bb6a' : '#2e7d32'}" opacity="0.9" stroke="${isDark ? '#2a4a2a' : '#1b5e20'}" stroke-width="1"/>`;
+                svg += `<text y="1" text-anchor="middle" fill="white" font-size="8" font-weight="bold" style="pointer-events:none">▲</text>`;
+                svg += `<title>${lang === 'en' ? 'Rising at dawn: ' + _rs.rising.en : 'الطالعة فجراً: ' + _rs.rising.ar}</title>`;
+                svg += `</g>`;
+            }
+
+            // ── علامة الغاربة (▼ أحمر) ──
+            const settingIdx = _rs.setting.tawalieIndex;
+            if (settingIdx !== undefined) {
+                const sStar = stars[settingIdx];
+                const sFrom = _dateToAngle(sStar.from[0], sStar.from[1]);
+                const sTo = _dateToAngleEnd(sStar.to[0], sStar.to[1]);
+                let sArcS = sTo, sArcE = sFrom;
+                if (sArcE < sArcS) sArcE += 360;
+                const settingAngle = ((sArcS + sArcE) / 2) % 360;
+                const sRad = (90 - settingAngle) * Math.PI / 180;
+                const sMarkR = 225;
+                const sX = cx + sMarkR * Math.cos(sRad);
+                const sY = cy - sMarkR * Math.sin(sRad);
+                svg += `<g id="dirat-setting-mark" transform="translate(${sX}, ${sY})">`;
+                svg += `<polygon points="0,12 10,-6 -10,-6" fill="${isDark ? '#ef5350' : '#c62828'}" opacity="0.9" stroke="${isDark ? '#5a1a1a' : '#8e0000'}" stroke-width="1"/>`;
+                svg += `<text y="4" text-anchor="middle" fill="white" font-size="8" font-weight="bold" style="pointer-events:none">▼</text>`;
+                svg += `<title>${lang === 'en' ? 'Setting at dawn: ' + _rs.setting.en : 'الغاربة فجراً: ' + _rs.setting.ar}</title>`;
+                svg += `</g>`;
+            }
+        }
+
         // ═══════════════════════════════════════════════════
         // ─── Ring 3: الدرور (37 در) — نص طولي + ألوان الفصول ───
         // ═══════════════════════════════════════════════════
@@ -5712,7 +6026,7 @@ tr:nth-child(even) { background: #fafafa; }
                 const fill = isDurrCurrent
                     ? (isDark ? RC.durrCurrentDark : RC.durrCurrent)
                     : (isDark ? RC.durrMiaDark[mia][d] : RC.durrMia[mia][d]);
-                svg += `<path d="${_arcPath(arcS, arcE, 222, 280, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="durr" data-index="${mia * 10 + d}" data-name="${label}" data-mia="${mia}"/>`;
+                svg += `<path d="${_arcPath(arcS, arcE, RL.durrI, RL.durrO, cx, cy)}" fill="${fill}" stroke="${_darkenColor(fill)}" stroke-width="0.5" class="durur-segment" data-ring="durr" data-index="${mia * 10 + d}" data-name="${label}" data-mia="${mia}"/>`;
                 const midDeg = (arcS + (arcE - arcS) / 2) % 360;
                 // رقم الدر مع حرف علوي للمئة — المساريق يبقى باسمه النصي
                 const hasAlias = H.DUROR_ALIASES && H.DUROR_ALIASES[lang] && H.DUROR_ALIASES[lang][aliasKey];
@@ -5724,11 +6038,11 @@ tr:nth-child(even) { background: #fafafa; }
                     const numStr = lang === 'en' ? String(durrNum) : H.toArabicNumerals(String(durrNum));
                     durrDisplayLabel = _SUPERSCRIPTS[mia] + numStr;
                 }
-                svg += _radialTextVertical(durrDisplayLabel, midDeg, 226, 276, cx, cy, 14, isDurrCurrent);
+                svg += _radialTextVertical(durrDisplayLabel, midDeg, RL.durrI + 4, RL.durrO - 4, cx, cy, 14, isDurrCurrent);
                 durrDayStart = endDay;
             }
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="281" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${RL.durrO + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 4: الرياح الموسمية (5 حلقات فرعية) ───
@@ -5747,7 +6061,7 @@ tr:nth-child(even) { background: #fafafa; }
         const currentWindNames = _shiftedWindCurrentNames;
         const laneAssignment = _assignWindLanes(winds);
         const NUM_WIND_LANES = 5;
-        const windInnerR = 282, windOuterR = 360;
+        const windInnerR = RL.windI, windOuterR = RL.windO;
         const laneW = (windOuterR - windInnerR) / NUM_WIND_LANES;
         const laneRadii = [];
         for (let l = 0; l < NUM_WIND_LANES; l++) {
@@ -5807,12 +6121,11 @@ tr:nth-child(even) { background: #fafafa; }
                 // الدوران المماسي
                 let rot = midDeg;
                 if (midDeg > 90 && midDeg < 270) rot += 180;
-                const fontSize = span >= 40 ? 14 : span >= 25 ? 12 : 10;
                 const shortName = name.length > 16 ? name.split(' ').slice(0, 2).join(' ') : name;
                 const foW = Math.max(arcLen * 0.85, 50);
                 const foH = laneH;
                 svg += `<foreignObject x="${mx - foW / 2}" y="${my - foH / 2}" width="${foW}" height="${foH}" transform="rotate(${rot},${mx},${my})">` +
-                       `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:${fontSize}px;${isCurrent ? 'font-weight:700;' : ''}color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:visible;line-height:1;pointer-events:none;">${shortName}</div>` +
+                       `<div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Calibri,sans-serif;font-size:10px;color:var(--papyrus-text);direction:rtl;text-align:center;white-space:nowrap;overflow:visible;line-height:1;pointer-events:none;">${shortName}</div>` +
                        `</foreignObject>`;
             }
         });
@@ -5857,13 +6170,19 @@ tr:nth-child(even) { background: #fafafa; }
             }
         }
 
-        svg += `<circle cx="${cx}" cy="${cy}" r="361" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${RL.windO + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="1.5"/>`;
 
         // ═══════════════════════════════════════════════════
-        // ─── Ring 4b: الضربات البحرية ───
+        // ─── Ring 4b: الضربات البحرية (مسارات لمعالجة التداخل) ───
         // ═══════════════════════════════════════════════════
-        const strikeInner = 362, strikeOuter = 374;
+        const strikeInner = RL.strikeI, strikeOuter = RL.strikeO;
         const seaStrikes = H.ANWA_ENRICHMENT.seaStrikes;
+        // Lane 0 (خارجية): الضربات الرئيسية والطويلة
+        // Lane 1 (داخلية): الضربات التي تتداخل زمنياً مع Lane 0
+        // الأكيذب→0, الكوي→1(تداخل مع ثمانين), الإكليل→1(تداخل مع السرايات), الثريا→0, الشلي→0, السرايات→0, ثمانين→0
+        const STRIKE_LANES = [0, 1, 1, 0, 0, 0, 0];
+        const NUM_STRIKE_LANES = 2;
+        const strikeLaneW = (strikeOuter - strikeInner) / NUM_STRIKE_LANES;
 
         // خلفية حلقة الضربات
         svg += `<circle cx="${cx}" cy="${cy}" r="${(strikeInner + strikeOuter) / 2}" fill="none" stroke="${isDark ? '#2a1818' : '#f5ebe0'}" stroke-width="${strikeOuter - strikeInner}"/>`;
@@ -5876,15 +6195,29 @@ tr:nth-child(even) { background: #fafafa; }
             let a1 = aTo, a2 = aFrom;
             if (a2 < a1) a2 += 360;
 
-            const strikeFill = isDark ? '#6a2020' : '#e0a0a0';
-            svg += `<path d="${_arcPath(a1, a2, strikeInner, strikeOuter, cx, cy)}" fill="${strikeFill}" fill-opacity="0.8" stroke="${_darkenColor(strikeFill)}" stroke-width="0.5" stroke-opacity="0.8" class="durur-segment" data-ring="sea-strike" data-index="${i}" data-name="${lang === 'en' ? s.en : s.ar}" cursor="pointer"/>`;
+            // حساب نصف قطر المسار
+            const lane = STRIKE_LANES[i] || 0;
+            const laneIR = strikeInner + lane * strikeLaneW;
+            const laneOR = laneIR + strikeLaneW;
+
+            // تدرج اللون حسب درجة الخطورة
+            const danger = s.danger || 3;
+            const dangerColors = {
+                3: { light: '#e0a0a0', dark: '#6a2020' },
+                4: { light: '#d07070', dark: '#8a2020' },
+                5: { light: '#c04040', dark: '#a02020' },
+            };
+            const dc = dangerColors[Math.min(danger, 5)] || dangerColors[3];
+            const strikeFill = isDark ? dc.dark : dc.light;
+
+            svg += `<path d="${_arcPath(a1, a2, laneIR, laneOR, cx, cy)}" fill="${strikeFill}" fill-opacity="0.85" stroke="${_darkenColor(strikeFill)}" stroke-width="0.5" stroke-opacity="0.85" class="durur-segment" data-ring="sea-strike" data-index="${i}" data-name="${lang === 'en' ? s.en : s.ar}" cursor="pointer"/>`;
 
             // اسم الضربة
             const span = a2 - a1;
             if (span >= 5) {
                 const midDeg = (a1 + span / 2) % 360;
-                const midR = (strikeInner + strikeOuter) / 2;
-                svg += _radialText(lang === 'en' ? s.en : s.ar, midDeg, midR, cx, cy, 12, false);
+                const midR = (laneIR + laneOR) / 2;
+                svg += _radialText(lang === 'en' ? s.en : s.ar, midDeg, midR, cx, cy, 10, false);
             }
         });
         svg += `<circle cx="${cx}" cy="${cy}" r="${strikeOuter + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
@@ -5893,14 +6226,13 @@ tr:nth-child(even) { background: #fafafa; }
         // ─── Ring 5: المواسم الكبرى (حلقتان لمعالجة التداخل) ───
         // ═══════════════════════════════════════════════════
         const seasons = H.SEASONS;
-        // Lane 0 (كامل العرض): المواسم العادية
-        // Lane 1 (خارجية): كنة الثريا (تتداخل مع الذراعين)
-        // Lane 2 (داخلية): الذراعين (أسفل الكنة)
-        // ترتيب الحارات — المرجع: DIRAT_DUROR_SPEC.md
-        const SEASON_LANES = [0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0];
-        const seasonLane0Inner = 376, seasonLane0Outer = 398;
-        const seasonLane1Inner = 398, seasonLane1Outer = 420;
-        const seasonOutermost = 420;
+        // Lane 0 (داخلية) / Lane 1 (خارجية) — تتناوب للتمييز البصري
+        // الذراعين=0(داخلية)، الكنة=1(خارجية) — لمعالجة التداخل الزمني
+        const SEASON_LANES = [0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0];
+        const seasonMid = (RL.seasonI + RL.seasonO) / 2;
+        const seasonLane0Inner = RL.seasonI, seasonLane0Outer = seasonMid;
+        const seasonLane1Inner = seasonMid, seasonLane1Outer = RL.seasonO;
+        const seasonOutermost = RL.seasonO;
 
         // الأسماء المختصرة
         const _shortSeasonName = (ar) => {
@@ -5948,8 +6280,7 @@ tr:nth-child(even) { background: #fafafa; }
         // خلفية حلقة المواسم (حلقة واحدة كاملة)
         svg += `<circle cx="${cx}" cy="${cy}" r="${(seasonLane0Inner + seasonOutermost) / 2}" fill="none" stroke="${isDark ? '#2a2418' : '#f5edd5'}" stroke-width="${seasonOutermost - seasonLane0Inner}"/>`;
 
-        // المواسم العادية (Lane 0) تمتد على كامل عرض الحلقة
-        // كنة الثريا (Lane 1) تُرسم فوقها في النصف الخارجي فقط
+        // كل موسم يشغل حارة واحدة (22px) — تتناوب بين الداخلية والخارجية
         seasons.forEach((s, i) => {
             const sFrom = suhailOffset ? H.shiftDate(s.from, suhailOffset, gYear) : s.from;
             const sTo = suhailOffset ? H.shiftDate(s.to, suhailOffset, gYear) : s.to;
@@ -5959,9 +6290,9 @@ tr:nth-child(even) { background: #fafafa; }
             if (arcEnd < arcStart) arcEnd += 360;
 
             const lane = SEASON_LANES[i];
-            // Lane 0: كامل العرض (376→420) — Lane 1: النصف الخارجي (398→420) — Lane 2: النصف الداخلي (376→398)
+            // كل حارة 22px — Lane 0/2: داخلية — Lane 1: خارجية
             const innerR = lane === 1 ? seasonLane1Inner : seasonLane0Inner;
-            const outerR = lane === 2 ? seasonLane0Outer : seasonOutermost;
+            const outerR = lane === 1 ? seasonLane1Outer : seasonLane0Outer;
 
             const isCurrent = _isSeasonCurrent(s);
             const color = _seasonColor(s, isCurrent);
@@ -5974,8 +6305,7 @@ tr:nth-child(even) { background: #fafafa; }
             if (span >= 8) {
                 const midDeg = (arcStart + span / 2) % 360;
                 const midR = (innerR + outerR) / 2;
-                const fontSize = span >= 30 ? 14 : span >= 18 ? 12 : 10;
-                svg += _radialText(shortName, midDeg, midR, cx, cy, fontSize, isCurrent);
+                svg += _radialText(shortName, midDeg, midR, cx, cy, 10, false);
             }
         });
         svg += `<circle cx="${cx}" cy="${cy}" r="${seasonOutermost + 1}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
@@ -5984,8 +6314,10 @@ tr:nth-child(even) { background: #fafafa; }
         // ─── حلقة دورة حياة النخلة 🌴 ───
         // ═══════════════════════════════════════════════════
         {
-            const palmIR = 423, palmOR = 447;
+            const palmIR = RL.palmI, palmOR = RL.palmO;
             const palmNameR = (palmIR + palmOR) / 2;
+            // خلفية حلقة النخلة
+            svg += `<circle cx="${cx}" cy="${cy}" r="${(palmIR + palmOR) / 2}" fill="none" stroke="${isDark ? '#1e1c18' : '#f5f0e8'}" stroke-width="${palmOR - palmIR}"/>`;
             const palmColors = [
                 ['#8bc34a', '#4a6a28'],  // طلع الفحّال
                 ['#e91e63', '#7a1838'],  // التنبيت
@@ -6011,7 +6343,7 @@ tr:nth-child(even) { background: #fafafa; }
                 const span = arcEnd - arcStart;
                 if (span >= 12) {
                     const midDeg = (arcStart + span / 2) % 360;
-                    svg += _radialText(`${p.icon} ${label}`, midDeg, palmNameR, cx, cy, 12, isCurrent);
+                    svg += _radialText(`${p.icon} ${label}`, midDeg, palmNameR, cx, cy, 10, false);
                 }
             });
 
@@ -6028,7 +6360,7 @@ tr:nth-child(even) { background: #fafafa; }
 
                 const span = arcEnd - arcStart;
                 const midDeg = (arcStart + span / 2) % 360;
-                svg += _radialText(`🌴 ${dormLabel}`, midDeg, palmNameR, cx, cy, 12, isCurrent);
+                svg += _radialText(`🌴 ${dormLabel}`, midDeg, palmNameR, cx, cy, 10, false);
             }
 
             svg += `<circle cx="${cx}" cy="${cy}" r="${palmIR}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
@@ -6039,7 +6371,7 @@ tr:nth-child(even) { background: #fafafa; }
         // ─── حلقة هجرة الطيور 🦅 (مسارات متعددة) ───
         // ═══════════════════════════════════════════════════
         {
-            const birdIR = 450, birdOR = 486;
+            const birdIR = RL.birdI, birdOR = RL.birdO;
             const NUM_BIRD_LANES = 3;
             const birdLaneW = (birdOR - birdIR) / NUM_BIRD_LANES;
             const dirColors = {
@@ -6090,7 +6422,7 @@ tr:nth-child(even) { background: #fafafa; }
                 if (span >= 10) {
                     const midDeg = (it.a1 + span / 2) % 360;
                     const midR = (lrInner + lrOuter) / 2;
-                    svg += _radialText(label, midDeg, midR, cx, cy, 12, isCurrent);
+                    svg += _radialText(label, midDeg, midR, cx, cy, 10, false);
                 }
             });
 
@@ -6102,10 +6434,10 @@ tr:nth-child(even) { background: #fafafa; }
         // ─── حلقة الأحداث الفلكية ✨ ───
         // ═══════════════════════════════════════════════════
         {
-            const astroIR = 489, astroOR = 503;
+            const astroIR = RL.astroI, astroOR = RL.astroO;
             const astroMidR = (astroIR + astroOR) / 2;
-            // خلفية الحلقة — بيضاء/داكنة
-            svg += `<circle cx="${cx}" cy="${cy}" r="${astroMidR}" fill="none" stroke="${isDark ? '#1e1c18' : '#ffffff'}" stroke-width="${astroOR - astroIR}"/>`;
+            // خلفية الحلقة — كريمية متناسقة مع الحلقات المجاورة
+            svg += `<circle cx="${cx}" cy="${cy}" r="${astroMidR}" fill="none" stroke="${isDark ? '#1e1c18' : '#f5f0e8'}" stroke-width="${astroOR - astroIR}"/>`;
             // إطارات الحلقة
             svg += `<circle cx="${cx}" cy="${cy}" r="${astroIR}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
             svg += `<circle cx="${cx}" cy="${cy}" r="${astroOR}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
@@ -6170,7 +6502,13 @@ tr:nth-child(even) { background: #fafafa; }
         const monthDays = [31, febDays, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const tickColor = isDark ? '#a09080' : '#4a3520';
         const tickColorLight = isDark ? '#807060' : '#6a5540';
-        // ─── Ring 6a: الخطوط (أشرطة الأيام) ───
+        // ─── Ring 6a: الخطوط (أشرطة الأيام) — أبعاد مشتقة من RL.gregI ───
+        const dtI = RL.gregI, dtFullO = RL.gregI + 25;
+        const dtFiveI = RL.gregI + 2, dtFiveO = RL.gregI + 24;
+        const dtRegI = RL.gregI + 8, dtRegO = RL.gregI + 22;
+        const dtBorder = RL.gregI + 27;
+        const dtNumR = RL.gregI + 38, dtNumBorder = RL.gregI + 49;
+        const gMonthArcO = RL.gregO - 1, gMonthNameR = RL.gregI + 75;
         const _suhailS = _getSuhailStart(); // [month, day] لتمييز يوم بدء الدرور
         for (let m = 1; m <= 12; m++) {
             for (let d = 1; d <= monthDays[m - 1]; d++) {
@@ -6180,28 +6518,28 @@ tr:nth-child(even) { background: #fafafa; }
                 const isSuhailStart = (m === _suhailS[0] && d === _suhailS[1]);
                 if (isSuhailStart) {
                     // خط يوم بدء الدرور — أحمر وأغلظ يمتد عبر كل الحلقات
-                    svg += `<line x1="${cx + 511 * Math.cos(rad)}" y1="${cy + 511 * Math.sin(rad)}" x2="${cx + 536 * Math.cos(rad)}" y2="${cy + 536 * Math.sin(rad)}" stroke="${isDark ? '#e04040' : '#cc2020'}" stroke-width="3.5"/>`;
+                    svg += `<line x1="${cx + dtI * Math.cos(rad)}" y1="${cy + dtI * Math.sin(rad)}" x2="${cx + dtFullO * Math.cos(rad)}" y2="${cy + dtFullO * Math.sin(rad)}" stroke="${isDark ? '#e04040' : '#cc2020'}" stroke-width="3.5"/>`;
                 } else if (d === 1) {
-                    svg += `<line x1="${cx + 511 * Math.cos(rad)}" y1="${cy + 511 * Math.sin(rad)}" x2="${cx + 536 * Math.cos(rad)}" y2="${cy + 536 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="2"/>`;
+                    svg += `<line x1="${cx + dtI * Math.cos(rad)}" y1="${cy + dtI * Math.sin(rad)}" x2="${cx + dtFullO * Math.cos(rad)}" y2="${cy + dtFullO * Math.sin(rad)}" stroke="${tickColor}" stroke-width="2"/>`;
                 } else if (isFive) {
-                    svg += `<line x1="${cx + 513 * Math.cos(rad)}" y1="${cy + 513 * Math.sin(rad)}" x2="${cx + 535 * Math.cos(rad)}" y2="${cy + 535 * Math.sin(rad)}" stroke="${tickColor}" stroke-width="1.2"/>`;
+                    svg += `<line x1="${cx + dtFiveI * Math.cos(rad)}" y1="${cy + dtFiveI * Math.sin(rad)}" x2="${cx + dtFiveO * Math.cos(rad)}" y2="${cy + dtFiveO * Math.sin(rad)}" stroke="${tickColor}" stroke-width="1.2"/>`;
                 } else {
-                    svg += `<line x1="${cx + 519 * Math.cos(rad)}" y1="${cy + 519 * Math.sin(rad)}" x2="${cx + 533 * Math.cos(rad)}" y2="${cy + 533 * Math.sin(rad)}" stroke="${tickColorLight}" stroke-width="0.6" opacity="0.7"/>`;
+                    svg += `<line x1="${cx + dtRegI * Math.cos(rad)}" y1="${cy + dtRegI * Math.sin(rad)}" x2="${cx + dtRegO * Math.cos(rad)}" y2="${cy + dtRegO * Math.sin(rad)}" stroke="${tickColorLight}" stroke-width="0.6" opacity="0.7"/>`;
                 }
             }
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="538" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${dtBorder}" fill="none" stroke="var(--papyrus-border)" stroke-width="0.8"/>`;
 
         // ─── Ring 6b: الأرقام الخمسية ───
         for (let m = 1; m <= 12; m++) {
             for (let d = 1; d <= monthDays[m - 1]; d++) {
                 if (d % 5 === 0) {
                     const angle = _dateToAngle(m, d);
-                    svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, 549, cx, cy, 10, false);
+                    svg += _radialText(lang === 'en' ? String(d) : H.toArabicNumerals(String(d)), angle, dtNumR, cx, cy, 10, false);
                 }
             }
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="560" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${dtNumBorder}" fill="none" stroke="var(--papyrus-border)" stroke-width="1"/>`;
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 7: الأشهر الميلادية ───
@@ -6214,19 +6552,18 @@ tr:nth-child(even) { background: #fafafa; }
             let arcStart = aLast, arcEnd = aFirst;
             if (arcEnd < arcStart) arcEnd += 360;
             // قطاع شفاف قابل للنقر
-            svg += `<path d="${_arcPath(arcStart, arcEnd, 511, 608, cx, cy)}" fill="transparent" stroke="none" class="durur-segment" data-ring="month" data-index="${m}" data-name="${gMonthNames[m]}" style="cursor:pointer"/>`;
+            svg += `<path d="${_arcPath(arcStart, arcEnd, RL.gregI, gMonthArcO, cx, cy)}" fill="transparent" stroke="none" class="durur-segment" data-ring="month" data-index="${m}" data-name="${gMonthNames[m]}" style="cursor:pointer"/>`;
             // خط شعاعي عند بداية كل شهر
             {
                 const rad1 = (aFirst - 90) * Math.PI / 180;
-                svg += `<line x1="${cx + 511 * Math.cos(rad1)}" y1="${cy + 511 * Math.sin(rad1)}" x2="${cx + 608 * Math.cos(rad1)}" y2="${cy + 608 * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5" pointer-events="none"/>`;
+                svg += `<line x1="${cx + RL.gregI * Math.cos(rad1)}" y1="${cy + RL.gregI * Math.sin(rad1)}" x2="${cx + gMonthArcO * Math.cos(rad1)}" y2="${cy + gMonthArcO * Math.sin(rad1)}" stroke="${monthLineColor}" stroke-width="1.5" pointer-events="none"/>`;
             }
-            // اسم الشهر في منتصف القوس
             // اسم الشهر في منتصف القوس
             const midDeg = (arcStart + (arcEnd - arcStart) / 2) % 360;
             const gNum = lang === 'en' ? String(m + 1) : H.toArabicNumerals(String(m + 1));
-            svg += _radialText(`${gMonthNames[m]} [${gNum}]`, midDeg, 586, cx, cy, 18, false);
+            svg += _radialText(`${gMonthNames[m]} [${gNum}]`, midDeg, gMonthNameR, cx, cy, 18, false);
         }
-        svg += `<circle cx="${cx}" cy="${cy}" r="609" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${RL.gregO}" fill="none" stroke="var(--papyrus-border)" stroke-width="2"/>`;
 
         // ═══════════════════════════════════════════════════
         // ─── Ring 8: الشهور الهجرية (حلقة متغيرة) ───
@@ -6259,12 +6596,12 @@ tr:nth-child(even) { background: #fafafa; }
                 if (hM > 12) { hM = 1; hY++; }
             }
 
-            // أنصاف الأقطار
-            const hTickInner = 613, hTickOuter = 637;
-            const hNumR = 646;
-            const hSepR = 654;
-            const hNameR = 676;
-            const hOuterR = 696;
+            // أنصاف الأقطار (مشتقة من RL.hijriI — العرض الأصلي 83px)
+            const hTickInner = RL.hijriI, hTickOuter = RL.hijriI + 24;
+            const hNumR = RL.hijriI + 33;
+            const hSepR = RL.hijriI + 41;
+            const hNameR = RL.hijriI + 63;
+            const hOuterR = RL.hijriO;
 
             // خلفية الحلقة
             svg += `<circle cx="${cx}" cy="${cy}" r="${(hTickInner + hOuterR) / 2}" fill="none" stroke="${isDark ? 'rgba(42,64,56,0.3)' : 'rgba(90,138,106,0.12)'}" stroke-width="${hOuterR - hTickInner}"/>`;
@@ -6372,8 +6709,8 @@ tr:nth-child(even) { background: #fafafa; }
         // ═══════════════════════════════════════════════════
         // ─── الإطار الذهبي الخارجي المزخرف ───
         // ═══════════════════════════════════════════════════
-        const goldInner = 701;
-        const goldOuter = 709;
+        const goldInner = RL.goldI;
+        const goldOuter = RL.goldO;
         const goldMid = (goldInner + goldOuter) / 2;
         const goldColor1 = isDark ? '#8a7030' : '#c8a040';
         const goldColor2 = isDark ? '#a08838' : '#d4b050';
@@ -6572,7 +6909,10 @@ tr:nth-child(even) { background: #fafafa; }
                         const _so = _getSuhailOffset(_gy);
                         const ssf = _so ? H.shiftDate(ss.from, _so, _gy) : ss.from;
                         const sst = _so ? H.shiftDate(ss.to, _so, _gy) : ss.to;
-                        detail = `<strong>${ssName}</strong><br><span class="durur-info-dates">${_fmtDateRange(ssf, sst, lang)}</span><br><span class="durur-info-desc" style="margin-top:4px;display:block;font-size:13px;line-height:1.5;opacity:0.9;color:#c06060">${lang === 'en' ? 'Dangerous sea storm period — fishing and sailing not recommended' : 'فترة عواصف بحرية خطرة — لا يُنصح بالصيد أو الإبحار'}</span>`;
+                        const dangerStars = ss.danger ? '⚠️'.repeat(Math.min(ss.danger, 5)) : '';
+                        const dangerLabel = ss.danger ? `<br><span style="color:#c06060;font-size:13px">${lang === 'en' ? 'Danger: ' : 'الخطورة: '}${dangerStars} (${ss.danger}/5)</span>` : '';
+                        const descLine = ss.desc_ar ? `<br><span class="durur-info-desc" style="margin-top:4px;display:block;font-size:13px;line-height:1.5;opacity:0.9">${lang === 'en' ? ss.desc_en : ss.desc_ar}</span>` : '';
+                        detail = `<strong>${ssName}</strong><br><span class="durur-info-dates">${_fmtDateRange(ssf, sst, lang)}</span>${dangerLabel}${descLine}<br><span class="durur-info-desc" style="margin-top:4px;display:block;font-size:13px;line-height:1.5;opacity:0.9;color:#c06060">${lang === 'en' ? 'Dangerous sea storm period — fishing and sailing not recommended' : 'فترة عواصف بحرية خطرة — لا يُنصح بالصيد أو الإبحار'}</span>`;
                         ringFrom = ssf; ringTo = sst;
                     }
                 } else if (ring === 'hijri-month') {
@@ -6886,6 +7226,54 @@ tr:nth-child(even) { background: #fafafa; }
         _setupNeedleDrag(container, lang);
     }
 
+    // ─── تحديث مؤشرات القمر على ديرة الدرور (أثناء سحب الإبرة) ───
+    function _updateDiratMoonMarker(container, gMonth, gDay, gYear) {
+        const moonMarker = container.querySelector('#dirat-moon-marker');
+        if (!moonMarker) return;
+        const cx = 540, cy = 540, moonR = 181;
+        const stars = H.TAWALIE;
+        try {
+            const mm = H.getMoonMansion(gYear, gMonth, gDay);
+            const rs = H.getRisingSettingMansions(gYear, gMonth, gDay);
+            const moonStar = stars[mm.tawalieIndex];
+            const mFrom = _dateToAngle(moonStar.from[0], moonStar.from[1]);
+            const mTo = _dateToAngleEnd(moonStar.to[0], moonStar.to[1]);
+            let mArcS = mTo, mArcE = mFrom;
+            if (mArcE < mArcS) mArcE += 360;
+            const moonAngle = (mArcE - mm.progress * (mArcE - mArcS)) % 360;
+            const moonRad = (90 - moonAngle) * Math.PI / 180;
+            const moonX = cx + moonR * Math.cos(moonRad);
+            const moonY = cy - moonR * Math.sin(moonRad);
+            moonMarker.setAttribute('transform', `translate(${moonX}, ${moonY})`);
+
+            // تحديث علامتي الطالعة والغاربة
+            const risingMark = container.querySelector('#dirat-rising-mark');
+            const settingMark = container.querySelector('#dirat-setting-mark');
+            if (risingMark && rs.rising.tawalieIndex !== undefined) {
+                const rStar = stars[rs.rising.tawalieIndex];
+                const rFrom = _dateToAngle(rStar.from[0], rStar.from[1]);
+                const rTo = _dateToAngleEnd(rStar.to[0], rStar.to[1]);
+                let rArcS = rTo, rArcE = rFrom;
+                if (rArcE < rArcS) rArcE += 360;
+                const rAngle = ((rArcS + rArcE) / 2) % 360;
+                const rRad = (90 - rAngle) * Math.PI / 180;
+                const rMarkR = 225;
+                risingMark.setAttribute('transform', `translate(${cx + rMarkR * Math.cos(rRad)}, ${cy - rMarkR * Math.sin(rRad)})`);
+            }
+            if (settingMark && rs.setting.tawalieIndex !== undefined) {
+                const sStar = stars[rs.setting.tawalieIndex];
+                const sFrom = _dateToAngle(sStar.from[0], sStar.from[1]);
+                const sTo = _dateToAngleEnd(sStar.to[0], sStar.to[1]);
+                let sArcS = sTo, sArcE = sFrom;
+                if (sArcE < sArcS) sArcE += 360;
+                const sAngle = ((sArcS + sArcE) / 2) % 360;
+                const sRad = (90 - sAngle) * Math.PI / 180;
+                const sMarkR = 225;
+                settingMark.setAttribute('transform', `translate(${cx + sMarkR * Math.cos(sRad)}, ${cy - sMarkR * Math.sin(sRad)})`);
+            }
+        } catch (e) { /* تجاهل أخطاء الحساب أثناء السحب */ }
+    }
+
     // ─── سحب إبرة الديرة ───
     function _setupNeedleDrag(container, lang) {
         // تنظيف الأحداث السابقة
@@ -6981,6 +7369,9 @@ tr:nth-child(even) { background: #fafafa; }
             // تدوير الإبرة
             needleGroup.setAttribute('transform', `rotate(${snappedAngle}, ${cx}, ${cy})`);
             needleGroup.dataset.currentAngle = snappedAngle;
+
+            // تحديث مؤشر القمر على Ring 2 أثناء السحب
+            _updateDiratMoonMarker(container, dateInfo.month, dateInfo.day, _diratYear);
 
             // تحديث التلميح
             tooltip.textContent = `${dateInfo.day} ${mNames[dateInfo.month - 1]}`;
