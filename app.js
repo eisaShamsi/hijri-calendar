@@ -5754,7 +5754,7 @@ tr:nth-child(even) { background: #fafafa; }
         const RC = _RING_COLORS;
         const todayAngle = _dateToAngle(gMonth, gDay);
 
-        let svg = `<svg viewBox="-310 -310 1700 1700" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
+        let svg = `<svg viewBox="-360 -360 1800 1800" class="durur-circle-svg" xmlns="http://www.w3.org/2000/svg">`;
         // جعل كل العناصر غير التفاعلية شفافة للنقر، فقط .durur-segment تستقبل الأحداث
         svg += `<style>
             .durur-circle-svg circle, .durur-circle-svg line, .durur-circle-svg polygon, .durur-circle-svg text,
@@ -5812,6 +5812,9 @@ tr:nth-child(even) { background: #fafafa; }
         RL.gregI = RL.astroO + RG;         RL.gregO = RL.gregI + 98;              // 594-692
         RL.hijriI = RL.gregO + 4;          RL.hijriO = RL.hijriI + 83;            // 696-779
         RL.goldI = RL.hijriO + 5;          RL.goldO = RL.goldI + 8;               // 784-792
+
+        // ─── خلفية كاملة (تغطي الإبرة + رأس الحصان عند أي اتجاه) ───
+        svg += `<circle cx="${cx}" cy="${cy}" r="${RL.goldO + 100}" fill="${isDark ? '#1a1610' : '#f5edd8'}"/>`;
 
         // Ring 3: Durr
         svg += _bgRing(RL.durrI, RL.durrO, isDark ? '#28221a' : '#e8dcc0');
